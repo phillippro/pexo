@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -48,11 +48,11 @@ or just install them manually using install.packages('xxx') in R console.
 
 # Usage
 ## Command Line
-PEXO can be run through command lines such as 
+To use PEXO, one needs to go to the directory `pexo/code/` and run command lines such as
 ```
 Rscript pexo.R -m emulate -c TR -t file.tim -p file.par
 ```
-The following seven global arguments which could be given through command lines. 
+The commandline arguments are listed as follows. 
 
  Short name | Full name | Meaning
 --------- | ---------- | ----------------------------------------------
