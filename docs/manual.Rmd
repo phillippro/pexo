@@ -62,7 +62,7 @@ The following seven global arguments which could be given through command lines.
 -c | \-\-component | PEXO model component: timing (`T`), astrometry (`A`), radial velocity (`R`) and their combinations [optional; default=`TAR`]
 -t | \-\-time | Two options are possible. 1. Timing file: epochs or times could be in 1-part or 2-part JD[UTC] format; 2. Format of `"Start End By"` [mandatory if mode=emulate]
 -p | \-\-par | Parameter file: parameters for models, observatory, for Keplerian/binary motion [mandatory]
--v | \-\-var | Output variables [optional; default= default=`NULL`]
+-v | \-\-var | Output variables [optional; default=`NULL`]
 -o | \-\-out | Output file name: relative or absolute path [optional; default=`out.txt`]
 -f | \-\-figure | Output figure and verbose: FALSE or TRUE [optional; default= `TRUE`]
 
@@ -438,12 +438,12 @@ Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by 
 `Rscript pexo.R -c T -t '2456640.5 2458462.5 0.5' -p ../input/PSR_J0740+6620.par`
 The output pdf `../results/PSRJ0740+6620_shapiro.pdf` will predict a Shapiro delay matching the one shown in the paper. 
 <center>
-![](../results/shapiro.png)
+![](shapiro.png)
 Fig 2. Shapiro delay of PSR J0740+6620 measured through pulsar timing by Cromarti et al. 2019
 </center>
 
 <center>
-![](../results/PSRJ0740+6620_shapiro.png)
+![](PSRJ0740+6620_shapiro.png)
 Fig 3. Shapiro delay of PSR J0740+6620 simulated by PEXO using parameters from Cromarti et al. 2019
 </center>
 
@@ -454,8 +454,8 @@ $\delta$ Del has a well-determiend orbit based on astrometric and RV data from [
 Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf` reproduces figure 3 in the original paper. 
 
 <center>
-![](../results/HD197461_orbit.png){width=350px}
-![](../results/HD197461_P8.png){width=250px}
+![](HD197461_orbit.png){width=350px}
+![](HD197461_P8.png){width=250px}
 
 Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO based on the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
 </center>
