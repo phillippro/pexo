@@ -1731,7 +1731,7 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 </div>
 <div id="comparison-of-jpl-ephemerides" class="section level2">
 <h2><span class="header-section-number">4.2</span> Comparison of JPL ephemerides</h2>
-<p>The following commandline will compare various ephemerides and recover Figure 9 in the paper.</p>
+<p>The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. One can download a JPL ephemerides using <code>source download_ephemerides.sh XXX</code> where <code>XXX</code> could be any JPL ephemerides such as 438, 438t, 414, … . The ephemerides would be downloaded into the <code>pexo/data/</code> directory.</p>
 <pre><code>Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par</code></pre>
 <ul>
 <li><code>../results/ephemeris_comparison_BJDtdb_tttdbFB01_FALSE.pdf</code>

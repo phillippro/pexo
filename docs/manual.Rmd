@@ -397,7 +397,8 @@ The output pdf file  `../results/paper_pexo_vs_T2_TauCeti_tempoFB90_DE430_ttt2td
 will show a few $\mu$m/s numerical radial velocity difference between PEXO and TEMPO2. 
 
 ## Comparison of JPL ephemerides
-The following commandline will compare various ephemerides and recover Figure 9 in the paper. 
+The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. One can download a JPL ephemerides using 
+`source download_ephemerides.sh XXX` where `XXX` could be any JPL ephemerides such as 438, 438t, 414, ... . The ephemerides would be downloaded into the `pexo/data/` directory. 
 ```
 Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
 ```
