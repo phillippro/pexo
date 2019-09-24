@@ -10,8 +10,7 @@ source('rv_function.R')
 
 Tstart <- proc.time()
 ####Read parameter files
-#des <- c(405,414,421,430,435,436,438)
-des <- c(405,430)
+des <- c(405,414,421,430,435,436,438)
 source('read_input.R')
 for(DE in des){
     Par$DE <- DE
