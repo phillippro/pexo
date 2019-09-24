@@ -7,7 +7,7 @@ PEXO is able to model timing to a precision of 1 ns, astrometry to a precision o
 The relevant paper will be published by ApJS, please cite the paper if you use PEXO in your work. 
 ```
 @ARTICLE{pexo,
-   author = {{Feng}, F. and {Lisogorskyi}, M. and {Jones}, H.~R.~A. and {Kopeikin}, S.M. and {Butler}, R.P. and {Anglada-Escude\e}, G. and {Boss}, A.},
+   author = {{Feng}, F. and {Tuomi}, M. and {Jones}, H.~R.~A.},
     title = "{PEXO: a global modeling framework for ns timing, μas astrometry, and μm/s radial velocities}",
   journal = {\apjs},
 archivePrefix = "arXiv",
