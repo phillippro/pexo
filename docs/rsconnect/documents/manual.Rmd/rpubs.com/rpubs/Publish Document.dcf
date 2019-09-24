@@ -1,0 +1,10 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+hostUrl: rpubs.com
+appId: https://api.rpubs.com/api/v1/document/531795/9aea07c6c4e44874ae945e86f8a2e9f7
+bundleId: https://api.rpubs.com/api/v1/document/531795/9aea07c6c4e44874ae945e86f8a2e9f7
+url: http://rpubs.com/Fabo/531795/edit
+when: 1569342602.82458

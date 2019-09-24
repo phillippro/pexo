@@ -1,0 +1,37 @@
+name 'PSR J0740+6620'
+RefType none
+EopType 2006
+TaiType instant
+TTtype BIPM
+unit TCB
+DE 430
+TtTdbMethod eph
+SBscaling TRUE
+PlanetShapiro TRUE
+CompareT2 TRUE
+g 1
+BinaryModel DDGR
+ellipsoid WGS84
+observatory 'Green Bank'
+tdk 278
+pmb 1013.25
+rh 0.1
+wl 0.5
+tlr 0.0065
+epoch 2457551.5
+mT 2.14
+mC 0.26
+ra 115.190812905791
+dec 66.34265339757732
+plx 0.5
+pmra -10.31858578039857
+pmdec -30.86736443812443
+rv 0
+aTC  0.007970978
+P 0.01305118
+e 5.1e-6
+I  87.38
+omegaT 244.4
+Omega 0
+Tp 2457551.043
+Tasc 2457552.58324415
