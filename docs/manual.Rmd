@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -44,9 +44,7 @@ Install missing R libraries by running
 Rscript install_dependencies.R
 ```
 (might require su privileges to be installed):
-
-sudo Rscript install_dependencies.R
-or just install the libraries manually: gmp, orthopolynom, pracma, cubature, HyperbolicDist, magicaxis, numDeriv.
+or just install them manually using install.packages('xxx') in R console.
 
 # Usage
 ## Command Line
@@ -80,7 +78,7 @@ The other mandatory argument is the parameter file which provides the values of 
 
 parameter | unit | options or examples | meaning
 -------------- | ---------- |  --------------------------- | ----------------------------------------------
-name | -| **First five character of parameter file name**, any string | name of the target
+name | -| **First five characters of parameter file name**, any string | name of the target
 RefType | -| **none**, refro, refco, refcoq | computation method for atmospheric refraction 
 EopType | -|**2006**, 2000B | type of Earth rotation model and corresponding Earth orientation parameters
 TaiType |-|**instant**, scale| UTC to TAI method
