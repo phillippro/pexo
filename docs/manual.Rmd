@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -450,12 +450,13 @@ Fig 3. Shapiro delay of PSR J0740+6620 simulated by PEXO using parameters from C
 
 ## $\delta$ Del (HD197461)
 $\delta$ Del has a well-determiend orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following commandline, one can reproduce the binary orbit. 
+
 `Rscript pexo.R -c T -t '38300 57600 100' -p ../input/HD197461.par`
 
 Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf` reproduces figure 3 in the original paper. 
 
 <center>
-![](HD197461_orbit.png){width=350px}
+![](HD197461_orbit.png){width=320px}
 ![](HD197461_P8.png){width=250px}
 
 Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO based on the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
