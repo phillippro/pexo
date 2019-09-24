@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -436,7 +436,9 @@ The file `../results/paper_alphaCenA_RV_DDGR_dt10day_Ntime2923_refro.pdf` is the
 ## PSR J0740+6620
 
 Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by  [Cromarti et al. 2019](https://www.nature.com/articles/s41550-019-0880-2). PEXO can produce their results by using the reported orbital parameters in the following commandline. 
+
 `Rscript pexo.R -c T -t '2456640.5 2458462.5 0.5' -p ../input/PSR_J0740+6620.par`
+
 The output pdf `../results/PSRJ0740+6620_shapiro.pdf` will predict a Shapiro delay matching the one shown in the paper. 
 <center>
 ![](shapiro.png)
@@ -449,7 +451,7 @@ Fig 3. Shapiro delay of PSR J0740+6620 simulated by PEXO using parameters from C
 </center>
 
 ## $\delta$ Del (HD197461)
-$\delta$ Del has a well-determiend orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following commandline, one can reproduce the binary orbit. 
+$\delta$ Del has a well-determined orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following commandline, one can reproduce the binary orbit. 
 
 `Rscript pexo.R -c T -t '38300 57600 100' -p ../input/HD197461.par`
 
@@ -459,7 +461,7 @@ Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100d
 ![](HD197461_orbit.png){width=320px}
 ![](HD197461_P8.png){width=250px}
 
-Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO based on the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
+Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO using the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
 </center>
 
 # Future development
