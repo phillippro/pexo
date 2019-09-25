@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">PEXO v0.1.0</h1>
 <h4 class="author">Fabo Feng</h4>
-<h4 class="date">24 September, 2019</h4>
+<h4 class="date">25 September, 2019</h4>
 
 </div>
 
@@ -396,13 +396,12 @@ summary {
 
 <div id="introduction" class="section level1">
 <h1><span class="header-section-number">1</span> Introduction</h1>
-<p>Compared with previous models and packages, PEXO is general enough to account for binary motion and stellar reflex motions induced by planetary companions. PEXO is precise enough to treat various relativistic effects both in the Solar System and in the target system (Roemer, Shapiro, and Einstein delays).</p>
-<p>PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 microarcsecond, and radial velocity to a precision of 1 cm/s. PEXO was bechmarked with the pulsar timing package TEMPO2 and some errors from TEMPO2 were corrected.</p>
-<p>The inner workings of the code are described in Feng et al (2019).</p>
+<p>PEXO is a package for making precise exoplanetology. As compared with previous models and packages, PEXO is significantly advanced and accounts for the orbital dynamics of binary motion and stellar reflex motions induced by planetary companions. PEXO treats both classic and relativistic effects such as the Roemer, Shapiro, and Einstein time delays both in the Solar System and in the target system</p>
+<p>PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 microarcsecond, and radial velocity to a theoretical precision of 1 <span class="math inline">\(\mu\)</span>m/s and a realistic precision of 1 m/s. PEXO was bechmarked with the pulsar timing package TEMPO2. Theoretical and computational details of the code are described in the paper by Feng et al (2019).</p>
 </div>
 <div id="installation" class="section level1">
 <h1><span class="header-section-number">2</span> Installation</h1>
-<p>The code is written in R and depends on several libraries. To install R on Linux, download it here or, in Ubuntu:</p>
+<p>The code is written in R and depends on several libraries. To install R on Linux, download it <a href="https://cran.r-project.org/mirrors.html">here</a> or, in Ubuntu:</p>
 <pre><code>sudo apt-get install r-base</code></pre>
 <p>in MacOS:</p>
 <pre><code>brew install r</code></pre>
