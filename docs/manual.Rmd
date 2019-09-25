@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -454,8 +454,8 @@ $\delta$ Del has a well-determined orbit based on astrometric and RV data from [
 Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf` reproduces figure 3 in the original paper. 
 
 <center>
-![](HD197461_orbit.png){width=320px}
-![](HD197461_P8.png){width=250px}
+![](HD197461_orbit.png){width=350px}
+![](HD197461_P8.png){width=280px}
 
 Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO using the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
 </center>
