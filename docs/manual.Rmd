@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -123,8 +123,7 @@ In the above table, from `name`  to `observatory` are non-fitable parameters whi
 
 ### Observatory data
 
-PEXO will first look for observatory data by finding `xtel`, `ytel`, and `ztel` from the parameter file. If it does not find these parameters, it will look for `elong` (longitude in degree), `phi` (latitude in degree) and `alt` (altitude in km). If these parameters are not given, PEXO will look for the observatory name (`observatory`) and code (`ObsCode`). It will look for the observatory data in `observatories/observatory_MPC.csv` or in `observatories/satellite_list.csv`. 
-
+PEXO will first look for observatory data by finding `xtel`, `ytel`, and `ztel` from the parameter file. If it does not find these parameters, it will look for `elong` (longitude in degree), `phi` (latitude in degree) and `height` (altitude in km). If these parameters are not given, PEXO will look for the observatory name (`observatory`) and code (`ObsCode`). It will look for the observatory data in `observatories/observatory_MPC.csv` or in `observatories/satellite_list.csv`. 
 For space-based observatory, the atmospheric refraction and delay are zero and would not be implemented by PEXO. For ground-based telescope, the `RefType` parameter should be `refro` (recommended), `refco`, or `refcoq` for the calculation of refraction in astrometry modeling. If `RefType` is `none`, the atmospheric refraction is zero. The tropospheric delay and its time derivative are automatically implemented for ground-based observatories and thus do not depend on the choice of `RefType`. 
 
 ### Binary or Keplerian model parameters
