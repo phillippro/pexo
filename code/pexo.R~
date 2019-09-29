@@ -1,3 +1,4 @@
+###This file is to test the code against the state-of-the-art customerized softwares such as TEMPO2 and EXOFAST.
 #library("Rmpfr")
 #library("magicaxis")
 library(orthopolynom)
