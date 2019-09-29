@@ -84,7 +84,7 @@ if(nrow(utc)==nrow(tempo2)){
     dt.pexo2 <- time_T2mT2(OutTime$BJDtdb,utc)
 
 ###load E10 output
-    app <- read.table('../results/TC_E10.txt')[,1]
+    app <- read.table('../data/TC_E10.txt')[,1]
     ddt.app <- ((app-bjd.tdb.t2[,1])-bjd.tdb.t2[,2])*DAYSEC#second
                                         #
     if(Npar==4){

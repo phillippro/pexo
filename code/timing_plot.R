@@ -4,7 +4,6 @@ plot.type <- 'useful'
 jd.utc <- rowSums(utc)
 Ntime <- nrow(utc)
 source('compare_with_T2.R')
-source('example_star_timing.R')
 
 dt <- diff(rowSums(utc))[1]
 tS <- OutTime$tS
