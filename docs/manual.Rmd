@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -89,7 +89,7 @@ PlanetShapiro |-|**TRUE**, FALSE| planetary shapiro delay
 CompareT2|-|**FALSE**, TRUE| calculate uSB using TEMPO2 method for comparison
 RVmethod|-|**analytical**, numerical | the method used for RV modeling, numerical is used only for comparison
 LenRVmethod | - | **T2**, PEXO | the method used to derive RV lensing, T2 is used by default to be consistent with shapiro delay model in PEXO
-BinaryModel|-|**DDGR**, kepler| binary model
+BinaryModel|-|**none**, DDGR, kepler| binary model
 ellipsoid |-|**WGS84**, GRS80, WGS72| ellipsoidal (normal) Earth Gravitational Model  
 epoch |JD or MJD|2448349.06250|epoch when the astrometry and position of the target is measured
 observeatory|-|CTIO|observatory name

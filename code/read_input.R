@@ -32,13 +32,14 @@ if(!is.null(opt$time)){
 #    opt$time <- '../input/time_gaia80yrby10day.txt'
 #    opt$time <- '../input/time1.txt'
 #    opt$time <- '../input/hubble.tim'
+    opt$time <- '../input/TCpfs.tim'
 ###hip80yrby10day corresponds to Fig. 17 in the paper
 #    opt$time <- '../input/hip80yrby10day.tim'
 #    opt$time <- '../input/gaia80yrby10day.tim'
 #    opt$time <- '../input/mjd42000to52000by10day.tim'
 #    opt$time <- '2456640.5 2458462.5 0.5'
 #    opt$time <- '48620 58850 100'
-    opt$time <- '38300 57600 100'
+#    opt$time <- '38300 57600 100'
 ##low zenith (or high elevation) version of ../input/time_hip80yrby10day.txt
 #    opt$time <- '../input/time_hip80yrby10day_LowZ.txt'
 #    opt$time <- '../input/time_hip80yrby10day.txt'
@@ -50,9 +51,10 @@ if(!is.null(opt$time)){
 #    opt$par <- '../input/PSR_J0740+6620.par'
 #    opt$par <- '../input/S2_gravity.par'
 #    opt$par <- '../input/S2_E03.par'
-    opt$par <- '../input/HD197461.par'
+#    opt$par <- '../input/HD197461.par'
+    opt$par <- '../input/TCpfs.par'
 #    opt$var <- c('JDtai','JDut1','JDtt','JDtdb','JDtcb','BJDtdb','BJDtcb','tE','tS','RoemerSolar','RoemerTarget','EinsteinTarget','EinsteinIS','EinsteinTarget','elevation','TropoDelay','TargetDelay','VacuumIS','ShapiroSolar','ShapiroTarget')
-    opt$var <- c('JDtai','JDut1','JDtt','JDtdb')
+    opt$var <- c('BJDtcb','BJDtdb','RvTot')
 }
 ###Example:
 ##Rscript pexo.R -m emulate -t ../input/time1.txt -p ../input/model_ACAhip.par -v 'JDtai JDut1 JDtt JDtdb' -o out1.txt
@@ -148,7 +150,7 @@ if(any(cn=='TtTdbMethod')){
     if(pars['TtTdbMethod']!='eph' & pars['TtTdbMethod']!='FB01' & pars['TtTdbMethod']!='FBgeo' & pars['TtTdbMethod']!='FB90') stop(paste0('In',opt$par,', TtTdbMethod value is not valid, it should be eph or FB01 or FBsofa or FBgeo or FB90 or analytic!'),call. = FALSE)
     Par$TtTdbMethod <- pars['TtTdbMethod']
 }else{
-    Par$TtTdbMethod <- 'ephemeris'
+    Par$TtTdbMethod <- 'eph'
 }
 
 ## SBscaling - Whether or not transform the coordinate time at the SSB (tS) to the coordinate time at the TSB (tB). Since it is a linear transformation, it could be absorbed into the fit of orbital period or other time-scale parameters. So we follow TEMPO2 not to do this transformation/scaling by using scaling=FALSE as default.
@@ -267,26 +269,24 @@ GetObsInd <- function(target,ObsList){
 }
 
 ###If GPS location is specified, using the given ones instead of the ones from the observatory data file
-if(any(cn=='xtel')){
-    if(any(cn=='xtel') & any(cn=='ytel') & any(cn=='ztel')){
-        Par$xtel <- as.numeric(pars['xtel'])/1e3#km
-        Par$ytel <- as.numeric(pars['ytel'])/1e3
-        Par$ztel <- as.numeric(pars['ztel'])/1e3
-        if(is.na(Par$xtel) | is.na(Par$ytel) | is.na(Par$ztel)) stop('Error: xtel, ytel or ztel value is not numerical!',call.=FALSE)
-        eph <- sofa_Gc2gd(2,xyz=as.numeric(pars[c('xtel','ytel','ztel')]))
-        Par$elong <- eph['elong']#rad
-        Par$phi <- eph['phi']#rad
-        Par$height <- eph['height']/1e3#km
-    }else if(any(cn=='phi') & any(cn=='lat') & any(cn=='alt')){
-        Par$height <- as.numeric(pars['height'])#km
-        Par$elong <- as.numeric(pars['elong'])*pi/180#rad
-        Par$phi <- as.numeric(pars['phi'])*pi/180#rad
-        if(is.na(Par$height) | is.na(Par$elong) | is.na(Par$phi)) stop('Error: height, elong or phi value is not numerical!',call.=FALSE)
-        xyz <- as.numeric(sofa_Gd2gc(Par$n,elong=Par$elong,phi=Par$phi,height=Par$height*1e3))
-        Par$xtel <- xyz[1]/1e3#km
-        Par$ytel <- xyz[2]/1e3#
-        Par$ztel <- xyz[3]/1e3
-    }
+if(any(cn=='xtel') & any(cn=='ytel') & any(cn=='ztel')){
+    Par$xtel <- as.numeric(pars['xtel'])/1e3#km
+    Par$ytel <- as.numeric(pars['ytel'])/1e3
+    Par$ztel <- as.numeric(pars['ztel'])/1e3
+    if(is.na(Par$xtel) | is.na(Par$ytel) | is.na(Par$ztel)) stop('Error: xtel, ytel or ztel value is not numerical!',call.=FALSE)
+    eph <- sofa_Gc2gd(2,xyz=as.numeric(pars[c('xtel','ytel','ztel')]))
+    Par$elong <- eph['elong']#rad
+    Par$phi <- eph['phi']#rad
+    Par$height <- eph['height']/1e3#km
+}else if(any(cn=='phi') & any(cn=='elong') & any(cn=='height')){
+    Par$height <- as.numeric(pars['height'])#km
+    Par$elong <- as.numeric(pars['elong'])*pi/180#rad
+    Par$phi <- as.numeric(pars['phi'])*pi/180#rad
+    if(is.na(Par$height) | is.na(Par$elong) | is.na(Par$phi)) stop('Error: height, elong or phi value is not numerical!',call.=FALSE)
+    xyz <- as.numeric(sofa_Gd2gc(Par$n,elong=Par$elong,phi=Par$phi,height=Par$height*1e3))
+    Par$xtel <- xyz[1]/1e3#km
+    Par$ytel <- xyz[2]/1e3#
+    Par$ztel <- xyz[3]/1e3
 }
 Par$ObsType <- 'ground'#Observatory type: ground (default) or space
 
@@ -367,8 +367,6 @@ if(!any(names(Par)=='xtel') | !any(names(Par)=='ytel') | !any(names(Par)=='ztel'
         }
 ###warning if no observatory name is found
         if(!MatchObs) cat('Warning: observatory name or code is not found in the MPC and JPL space observatory file. You may update ../observatories/spacecraft_code.txt or ../observatories/observatory_MPC.txt by adding new observatorie!\n')
-    }else{
-        if(length(ind)==0) cat('Warning: observatory name is not given!\n')
     }
 }
 if(!any(names(Par)=='xtel') & !exists('SpaceObs')) stop('Error: Observatory data is not given!')

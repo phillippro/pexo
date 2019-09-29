@@ -38,8 +38,8 @@ if(Par$RVmethod=='analytical'){
         cat('warning: more outliers occur in the comparison of the RVs simulated by PEXO and TEMPO2!\n')
     }
     plot(jd.utc[inds],drv[inds],xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
-                                        #plot(jd.utc,drv,xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
-                                        #plot(jd.utc[ind1],tf[ind]-OutRv$zcomb$B[ind1]*CMPS,xlab=expression(JD[UTC]),ylab=expression(RV[bary]*'mm/s'),pch=20,cex=0.2)
+    ##plot(jd.utc,drv,xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
+    ##plot(jd.utc[ind1],tf[ind]-OutRv$zcomb$B[ind1]*CMPS,xlab=expression(JD[UTC]),ylab=expression(RV[bary]*'mm/s'),pch=20,cex=0.2)
     abline(h=0,lty=2)
     dev.off()
 }

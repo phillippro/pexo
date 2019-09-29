@@ -1,0 +1,8 @@
+lb1 <- xyz2lb.vec(timing$uOB)
+lb2 <- xyz2lb.vec(uOT)
+theta <- sqrt(rowSums((lb1-lb2)^2))
+pdf('transit_timing.pdf',8,8)
+par(mfrow=c(2,2))
+plot(t1,theta,xlab='t',ylab='theta',type='l',xlim=c(0,10))
+plot(lb2[,1]-lb1[,1],lb2[,2]-lb1[,2],xlab='lb1',ylab='lb2',pch='.')
+dev.off()
