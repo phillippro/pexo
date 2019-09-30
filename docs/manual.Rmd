@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -16,14 +16,12 @@ library(dplyr)
 ```
 
 # Introduction
-Compared with previous models and packages, PEXO is general enough to account for binary motion and stellar reflex motions induced by planetary companions. PEXO is precise enough to treat various relativistic effects both in the Solar System and in the target system (Roemer, Shapiro, and Einstein delays).
+PEXO is a package for making precise exoplanetology. As compared with previous models and packages, PEXO is significantly advanced and accounts for the orbital dynamics of binary motion and stellar reflex motions induced by planetary companions. PEXO treats both classic and relativistic effects such as the Roemer, Shapiro, and Einstein time delays both in the Solar System and in the target system
 
-PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 microarcsecond, and radial velocity to a precision of 1 cm/s. PEXO was bechmarked with the pulsar timing package TEMPO2 and some errors from TEMPO2 were corrected.
-
-The inner workings of the code are described in Feng et al (2019).
+PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 microarcsecond, and radial velocity to a theoretical precision of 1 $\mu$m/s and a realistic precision of 1 cm/s. PEXO was bechmarked with the pulsar timing package TEMPO2. Theoretical and computational details of the code are described in the paper by Feng et al (2019). 
 
 # Installation
-The code is written in R and depends on several libraries. To install R on Linux, download it here or, in Ubuntu:
+The code is written in R and depends on several libraries. To install R on Linux, download it [here](https://cran.r-project.org/mirrors.html) or, in Ubuntu:
 
 ```
 sudo apt-get install r-base
@@ -91,7 +89,7 @@ PlanetShapiro |-|**TRUE**, FALSE| planetary shapiro delay
 CompareT2|-|**FALSE**, TRUE| calculate uSB using TEMPO2 method for comparison
 RVmethod|-|**analytical**, numerical | the method used for RV modeling, numerical is used only for comparison
 LenRVmethod | - | **T2**, PEXO | the method used to derive RV lensing, T2 is used by default to be consistent with shapiro delay model in PEXO
-BinaryModel|-|**DDGR**, kepler| binary model
+BinaryModel|-|**none**, DDGR, kepler| binary model
 ellipsoid |-|**WGS84**, GRS80, WGS72| ellipsoidal (normal) Earth Gravitational Model  
 epoch |JD or MJD|2448349.06250|epoch when the astrometry and position of the target is measured
 observeatory|-|CTIO|observatory name
@@ -125,8 +123,7 @@ In the above table, from `name`  to `observatory` are non-fitable parameters whi
 
 ### Observatory data
 
-PEXO will first look for observatory data by finding `xtel`, `ytel`, and `ztel` from the parameter file. If it does not find these parameters, it will look for `elong` (longitude in degree), `phi` (latitude in degree) and `alt` (altitude in km). If these parameters are not given, PEXO will look for the observatory name (`observatory`) and code (`ObsCode`). It will look for the observatory data in `observatories/observatory_MPC.csv` or in `observatories/satellite_list.csv`. 
-
+PEXO will first look for observatory data by finding `xtel`, `ytel`, and `ztel` from the parameter file. If it does not find these parameters, it will look for `elong` (longitude in degree), `phi` (latitude in degree) and `height` (altitude in km). If these parameters are not given, PEXO will look for the observatory name (`observatory`) and code (`ObsCode`). It will look for the observatory data in `observatories/observatory_MPC.csv` or in `observatories/satellite_list.csv`. 
 For space-based observatory, the atmospheric refraction and delay are zero and would not be implemented by PEXO. For ground-based telescope, the `RefType` parameter should be `refro` (recommended), `refco`, or `refcoq` for the calculation of refraction in astrometry modeling. If `RefType` is `none`, the atmospheric refraction is zero. The tropospheric delay and its time derivative are automatically implemented for ground-based observatories and thus do not depend on the choice of `RefType`. 
 
 ### Binary or Keplerian model parameters
@@ -456,8 +453,8 @@ $\delta$ Del has a well-determined orbit based on astrometric and RV data from [
 Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf` reproduces figure 3 in the original paper. 
 
 <center>
-![](HD197461_orbit.png){width=320px}
-![](HD197461_P8.png){width=250px}
+![](HD197461_orbit.png){width=350px}
+![](HD197461_P8.png){width=280px}
 
 Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO using the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
 </center>

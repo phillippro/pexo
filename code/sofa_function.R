@@ -1074,10 +1074,10 @@ sofa_Gd2gc <- function(n, elong, phi, height){
 ####################################
 
 # Obtain reference ellipsoid parameters.
-    af <- Eform(n)
+    af <- sofa_Eform(n)
 
 # transform longitude, geodetic latitude, height to x,y,z.
-    Gd2gce(af[1], af[2], elong, phi, height)
+    sofa_Gd2gce(af[1], af[2], elong, phi, height)
 }
 sofa_Tdbtcb <- function(tdb){
 ####################################
