@@ -152,7 +152,7 @@ fi
 # run PEXO
 echo "Running $command"
 echo "---------------------------------"
-$($command)
+$command
 
 # go back to the original directory
 cd $original_path
