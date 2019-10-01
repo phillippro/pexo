@@ -170,10 +170,10 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     RSO <- sqrt(rowSums(rSO^2))
     RSB <- sqrt(rowSums(rSB^2))
     ZsO <- (VSO/Cauyr)^2/2#Doppler shift due to special relativity
-    ZgsO.de <- dtt.dtcb-1#Gravitational Doppler shift in the solar system at the observer's location due to general (potential) and special relativistic (velocity) effect
+    ZgsO.de <- -(dtt.dtcb-1)#positive for solar system; Gravitational Doppler shift in the solar system at the observer's location due to general (potential) and special relativistic (velocity) effect
     ZgSS <- rv_GravSolar(OutTime$OL)
     ZgO <- ZgSS$Zall
-#    ZgsO <- -(ZgO+ZsO)
+#    ZgsO <- ZgO+ZsO
     ZgsO <- ZgsO.de
     lensing <- rv_LenSolar(OutTime$OL,OutTime$rOT,vST=vST,vSO=vSO,g=1,LenRVmethod=Par$LenRVmethod)
     ZlO <- lensing$Zall
@@ -198,54 +198,33 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     RvST <- rowSums(uOT*vST)
     RvSB <- rowSums(uOT*OutTime$vSB)
     RvBT <- rowSums(uOT*OutTime$vBT)
-    ZST <- RvST/Cauyr#kinematic effects corresponding to Roemer delay
     RvSG <- rowSums(uOT*vSG)
     RvGO <- rowSums(uOT*vGO)
     RvSO <- rowSums(uOT*vSO)
+    ZST <- RvST/Cauyr#kinematic effects corresponding to Roemer delay
     ZSO <- RvSO/Cauyr
-    RvST <- rowSums(uOT*vST)
-    ZST <- RvST/Cauyr
     VST <-sqrt(rowSums(vST^2))
     ZsT <- (VST/Cauyr)^2/2#Doppler shift due to special relativity
     ZgsT <-ZgT+ZsT
+####local and remote
     Zlocal <- (1-ZgsO)/(1+ZSO-ZlO-Ztropo)-1
-#    ZLT <- (Par$rv/CKMPS)*(1000/Par$plx)*pc2au/Cauyr*(Par$pmra^2+Par$pmdec^2)*DMAS2R*DMAS2R*dt#light travel term
-#    ZLT <- 0
-    if(!is.null(OutTime$uSB.T2)){
-        tempo <- OutTime$uSB.T2
-        u0 <- tempo$u0
-        rOperp <- rSO-rowSums(rSO*u0)*u0
-        rTperp <- rST*pc2au-rowSums(rST*u0)*u0*pc2au
-        if(FALSE){
-            ##if u0==uSB
-            vuSB <- OutTime$vSB/(RSB*pc2au)
-            vOperp <- vSO-rowSums(vSO*u0)*u0-rowSums(rSO*vuSB)*uSB-rowSums(rSO*uSB)*vuSB
-            vTperp <- vST-rowSums(vST*u0)*u0-rowSums(rST*pc2au*vuSB)*uSB-rowSums(rST*pc2au*u0)*vuSB
-        }else{
-            ## if u0==tempo$u0
-            vOperp <- vSO-rowSums(vSO*u0)*u0
-            vTperp <- vST-rowSums(vST*u0)*u0
-        }
-        ZkpO <- -rOperp*vOperp/Cauyr*Par$plx*DMAS2R
-        ZkpT <- -rTperp*vTperp/Cauyr*Par$plx*DMAS2R
-        u <- tempo$u0+tempo$u1+tempo$u2+tempo$u3
-        du <- tempo$du1+tempo$du2+tempo$du3
-        u <- u/sqrt(rowSums(u^2))
-        RvSO1 <- rowSums(vSO*u+rSO*du+ZkpO*Cauyr)
-        RvST1 <- rowSums(vST*u+rST*pc2au*du)
-        RvST0 <- rowSums(vST*tempo$u0)
-        ZST0 <- RvST0/Cauyr
-        ZSO1 <- RvSO1/Cauyr
-        ZST1 <- RvST1/Cauyr
-        ZB <- ZSO-ZgsO+ZST0-ZST+ZlO-ZlT#-Ztropo
-        ZBt <- (1+ZSO1)*(1-ZgsO)*(1+ZST0)/(1+ZST1)-1+ZlO
-        ZB0 <- (1+ZSO)*(1-ZgsO)*(1+ZST0)/(1+ZST)-1-ZlO
-    }else{
-        ZkpO <- ZkpT <- ZST0 <- ZST1 <- ZBt <- ZB <- ZBt <- ZB0 <- 0
-    }
-    Z <- (1-ZgsO)/(1-ZgsT)*(1+ZST-ZlT)/(1+ZSO-ZlO-Ztropo)-1
     Zremote <- (1+ZST-ZlT)/(1-ZgsT)-1
-    Zcomb <- list(Ztot=Z,Zlocal=Zlocal,Zremote=Zremote,ZgsT=ZgsT,ZgsO=ZgsO,ZST=ZST,ZST0=ZST0,ZlT=ZlT,ZgT=ZgT,ZsT=ZsT,ZSO=ZSO,ZlO=ZlO,Ztropo=Ztropo,ZgsO.de=ZgsO.de,ZgO=ZgO,ZsO=ZsO,ZB=ZB,ZB0=ZB0,ZlT=ZlT,ZST0=ZST0,ZST1=ZST1,ZBt=ZBt,ZkpO=ZkpO,ZkpT=ZkpT,ZgSS=ZgSS,Zlensing=lensing$Zlist)
+###all RV
+    Z <- (1-ZgsO)/(1-ZgsT)*(1+ZST-ZlT)/(1+ZSO-ZlO-Ztropo)-1
+###barycentric correction
+    u0 <- t(replicate(Par$Nepoch,Par$u))
+    RvST0 <- rowSums(vST*u0)
+    ZST0 <- RvST0/Cauyr
+    ZLT <- (Par$rv/CKMPS)*(1000/Par$plx)*pc2au/Cauyr*(Par$pmra^2+Par$pmdec^2)*DMAS2R*DMAS2R*dt#light travel term
+    if(!Par$binary){
+##remove stellar motion and solar system effects
+        ZB <- (1+ZSO-ZlO-Ztropo)/(1-ZgsO)*(1+ZST0)/(1+ZST)-1
+    }else{
+##use Z as the barycentric correction, remove all effects and only planetary perturbation is left
+        ZB <- -Z
+    }
+    ZBwe <- (1+ZSO)/(1-ZgsO)*(1+ZST0)/(1+ZST)-1-ZlO-ZLT#Wright & Eastman 2014 version
+    Zcomb <- list(Ztot=Z,Zlocal=Zlocal,Zremote=Zremote,ZgsT=ZgsT,ZgsO=ZgsO,ZST=ZST,ZST0=ZST0,ZlT=ZlT,ZgT=ZgT,ZsT=ZsT,ZSO=ZSO,ZlO=ZlO,Ztropo=Ztropo,ZgsO.de=ZgsO.de,ZgO=ZgO,ZsO=ZsO,ZB=ZB,ZBwe=ZBwe,ZlT=ZlT,ZST0=ZST0,ZgSS=ZgSS,Zlensing=lensing$Zlist)
     RvTropo <- Ztropo*CMPS
     RvALL <- Z*CMPS#m/s; absolute RV
     RvRemote <- Zremote*CMPS

@@ -29,17 +29,18 @@ if(Par$RVmethod=='analytical'){
     size <- 1.2
     jd.utc <- rowSums(utc)
     par(mar=c(5,5,1,1),cex=size,cex.axis=size,cex.lab=size)
-    drv <- (OutRv$Zcomb$ZB0*CMPS-tf)*1e3#mm/s
+    drv <- (OutRv$Zcomb$ZBwe*CMPS-tf)*1e3#mm/s
+#    drv <- (OutRv$RvTot-tf)*1e3#mm/s
     #rv.up <- 1#m/s
-    rv.up <- 1e6#m/s
+    rv.up <- 1e5#m/s
     inds <- which(abs(drv)<rv.up)
     ind.rm <- which(abs(drv)>=rv.up)
     if(length(ind.rm)>1){
         cat('warning: more outliers occur in the comparison of the RVs simulated by PEXO and TEMPO2!\n')
     }
-    plot(jd.utc[inds],drv[inds],xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
-                                        #plot(jd.utc,drv,xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
-                                        #plot(jd.utc[ind1],tf[ind]-OutRv$zcomb$B[ind1]*CMPS,xlab=expression(JD[UTC]),ylab=expression(RV[bary]*'mm/s'),pch=20,cex=0.2)
+    plot(jd.utc[inds],drv[inds],xlab=expression(JD[UTC]),ylab=expression(Delta*v[bary]*' [mm/s]'),type='l')
+    ##plot(jd.utc,drv,xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
+    ##plot(jd.utc[ind1],tf[ind]-OutRv$zcomb$B[ind1]*CMPS,xlab=expression(JD[UTC]),ylab=expression(RV[bary]*'mm/s'),pch=20,cex=0.2)
     abline(h=0,lty=2)
     dev.off()
 }
@@ -76,7 +77,7 @@ if(Par$RVmethod=='numerical'){
 #    drv <- (zpexo[inds]-ztempo[inds])*CMPS*1e3
     drv <- (deinstein[ind1+1]+droemer[ind1+1]+dshapiro[ind1+1]-(deinstein[ind1-1]+droemer[ind1-1]+dshapiro[ind1-1]))*CMPS*1e3/dtt
     inds <- which(abs(drv)<1e6)
-    plot(jd.utc[inds],drv[inds],xlab=expression(JD[UTC]),ylab=expression(v[bary]*' [mm/s]'),type='l')
+    plot(jd.utc[inds],drv[inds],xlab=expression(JD[UTC]),ylab=expression(Delta*v[bary]*' [mm/s]'),type='l')
     abline(h=0,lty=2)
     dev.off()
 }
