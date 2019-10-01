@@ -32,11 +32,13 @@ if(!is.null(opt$time)){
 #    opt$time <- '../input/time_gaia80yrby10day.txt'
 #    opt$time <- '../input/time1.txt'
 #    opt$time <- '../input/hubble.tim'
-    opt$time <- '../input/TCpfs.tim'
+#    opt$time <- '../input/TCpfs.tim'
+#    opt$time <- '../input/HD27442pfs.tim'
 ###hip80yrby10day corresponds to Fig. 17 in the paper
 #    opt$time <- '../input/hip80yrby10day.tim'
 #    opt$time <- '../input/gaia80yrby10day.tim'
 #    opt$time <- '../input/mjd42000to52000by10day.tim'
+    opt$time <- '../input/HD128621pfs.tim'
 #    opt$time <- '2456640.5 2458462.5 0.5'
 #    opt$time <- '48620 58850 100'
 #    opt$time <- '38300 57600 100'
@@ -47,18 +49,20 @@ if(!is.null(opt$time)){
 #    opt$time <- '~/Documents/projects/ISO/borisov/time_horizon.txt'
 #    opt$par <- '../input/ACAgaia.par'
 #    opt$par <- '../input/TC_Fig11b.par'
+    opt$par <- '../input/HD128621pfs.par'
 #    opt$par <- '../input/TC_Fig11a.par'
 #    opt$par <- '../input/PSR_J0740+6620.par'
 #    opt$par <- '../input/S2_gravity.par'
 #    opt$par <- '../input/S2_E03.par'
 #    opt$par <- '../input/HD197461.par'
-    opt$par <- '../input/TCpfs.par'
+#    opt$par <- '../input/TCpfs.par'
+#    opt$par <- '../input/HD27442pfs.par'
 #    opt$var <- c('JDtai','JDut1','JDtt','JDtdb','JDtcb','BJDtdb','BJDtcb','tE','tS','RoemerSolar','RoemerTarget','EinsteinTarget','EinsteinIS','EinsteinTarget','elevation','TropoDelay','TargetDelay','VacuumIS','ShapiroSolar','ShapiroTarget')
     opt$var <- c('BJDtcb','BJDtdb','RvTot')
 }
 ###Example:
 ##Rscript pexo.R -m emulate -t ../input/time1.txt -p ../input/model_ACAhip.par -v 'JDtai JDut1 JDtt JDtdb' -o out1.txt
-##
+##Rscript pexo.R -m emulate -t ../input/TCpfs.tim -p ../input/TCpfs.par -v 'BJDtdb BJDtcb RvTot RvBT RvGO RvgsO RvgT RvlO RvLocal RvlT RvRemote RvSB RvSG RvSO RvsT RvST RvTot RvTropo ZB ZBwe' -o ../results/TC_obs.txt
 
 ###Read timing file
 if(!file.exists(opt$time)){
@@ -99,7 +103,8 @@ Par$figure <- as.logical(opt$figure)
 if(any(cn=='name')){
     Par$star <- gsub(' ','',pars['name'])
 }else{
-    Par$star <- substr(opt$par,1,5)
+    ss <- gsub('.+\\/|\\.|par','',opt$par)
+    Par$star <- substr(ss,1,nchar(ss))
 }
 
 if(any(cn=='RefType')){

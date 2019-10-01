@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -311,8 +311,8 @@ vSB | au/yr | velocity of TSB to SSB
 vST | au/yr | velocity of the target to SSB
 xp | rad | parameter for polar motion of the Earth
 yp | rad | parameter for polar motion of the Earth
-ZB | -| barycentric redshift
-ZBt | - | barycentric redshift using uSB.T2
+ZB | -| barycentric correction of Doppler shift
+ZBwe | - | barycentric correction of Doppler shift using Wright & Eastman 2014 method
 Zcomb | - | combined list of all doppler shifts
 ZenIn | rad | zenith angle
 ZenInT2 | rad | zenith angle using uSB(t=tpos) or ub (see paper)
@@ -458,6 +458,15 @@ Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100d
 
 Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf) while the right panel shows the orbit simulated by PEXO using the parameters from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). 
 </center>
+
+## Barycentric correction of radial velocity
+Although PEXO prefer combined modeling of all motions, PEXO provides barycentric correction especially for the high precision radial velocity. Such a correction is reliable for single stars or distant binaries. For single stars, equation 28 of [Wright & Eastman 2014](https://ui.adsabs.harvard.edu/abs/2014PASP..126..838W/abstract) is used to derive barycentric correction of Doppler shift (`ZBwe`). If Keplerian parameters for binary stars are given in the parameter file, PEXO would calculate the total Doppler shift (`Z`) and treat `-Z` as the barycentric Doppler shift (`ZB`). PEXO also computes barycentric correction by accounting for troposheric Doppler shift (`ZB`). 
+
+For example, the following commandline would generate an ascii file (`HD10700_bc.txt`) storing a data table for Barycentric Julian Date in TDB time standard (`BJD`) and the barycentric Doppler shift (`ZB`). The Doppler shift should be multipled by the speed of light to get the radial velocity counterpart (RVB). Then the RV corrected from barycentric motion of the Earth is the sum of the measured RV and RVB. 
+
+`Rscript pexo.R -m emulate -c TR -t ../input/HD10700pfs.tim -p ../input/HD10700pfs.par -v 'BJDtdb ZB' -o ../results/HD10700_bc.txt`
+
+The output file would have three columns, first two columns are two-part BJD and the third one is the barycentric Doppler shift. Note that `-c TR` is used because the variables (arguments of `-v`) are outputs of the radial velocity model. If astrometric variables are included in the `-v` arguments, `-c TA` should be used. If both astrometric and radial velocity variables are to be stored in the output file, `-c TAR` should be used. If one only needs timing variables, `-c T` is the proper syntax for timing-only modeling.  
 
 # Future development
 
