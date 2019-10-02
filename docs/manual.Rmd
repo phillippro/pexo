@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -470,5 +470,5 @@ The output file would have three columns, first two columns are two-part BJD and
 
 # Future development
 
-PEXO v0.1.0 only has the `emulate` mode. The `fit` mode will soon be implemented. A python wrapper would also be developed. An R Shiny application will be developed for some functions of PEXO such as barycentric correction. Feedback from PEXO users and contribution from the astronomical community is appreciated and is important to improve the software.  
+PEXO v0.1.0 only has the `emulate` mode. The `fit` mode will soon be implemented. A python wrapper would also be developed. An R Shiny application will be developed for some functions of PEXO such as barycentric correction. Feedback from PEXO users and contribution from the astronomical community are appreciated and are important to improve the software.  
 
