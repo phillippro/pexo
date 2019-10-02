@@ -1,4 +1,4 @@
-# PEXO v0.1.0: a global modeling framework for ns timing, μas astrometry, and μm/s radial velocities 
+# PEXO v0.1.0
 
 Compared with previous models and packages, PEXO is general enough to account for binary motion and stellar reflex motions induced by planetary companions. PEXO is precise enough to treat various relativistic effects both in the Solar System and in the target system (Roemer, Shapiro, and Einstein delays).
 
