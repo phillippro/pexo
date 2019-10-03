@@ -38,7 +38,8 @@ if(!is.null(opt$time)){
 #    opt$time <- '../input/hip80yrby10day.tim'
 #    opt$time <- '../input/gaia80yrby10day.tim'
 #    opt$time <- '../input/mjd42000to52000by10day.tim'
-    opt$time <- '../input/HD128621pfs.tim'
+#    opt$time <- '../input/HD128621pfs.tim'
+    opt$time <- '2457000 2458000 10'
 #    opt$time <- '2456640.5 2458462.5 0.5'
 #    opt$time <- '48620 58850 100'
 #    opt$time <- '38300 57600 100'
@@ -49,7 +50,8 @@ if(!is.null(opt$time)){
 #    opt$time <- '~/Documents/projects/ISO/borisov/time_horizon.txt'
 #    opt$par <- '../input/ACAgaia.par'
 #    opt$par <- '../input/TC_Fig11b.par'
-    opt$par <- '../input/HD128621pfs.par'
+#    opt$par <- '../input/HD128621pfs.par'
+    opt$par <- '../input/NGTS-10b.par'
 #    opt$par <- '../input/TC_Fig11a.par'
 #    opt$par <- '../input/PSR_J0740+6620.par'
 #    opt$par <- '../input/S2_gravity.par'
@@ -561,17 +563,17 @@ if(Par$binary){
     if(any(cn=='Tc')){
         Par$Tc <- time_ToJD(as.numeric(pars['Tc']))
         if(is.na(Par$Tc)) stop('Error: Tc value is not numerical!',call.=FALSE)
-        Par$Tp <- gen_Tc2tp(Par$e,Par$omegaT,Par$Pb,Par$Tc)
-        Par$M0 <- (Par$Tp-Par$T0)/Par$Pb*2*pi
+        Par$Tp <- gen_Tc2tp(Par$e,Par$omegaT,Par$Pd,Par$Tc)
+        Par$M0 <- (Par$Tp-Par$T0)/Par$Pd*2*pi
     }else if(any(cn=='Tp')){
         Par$Tp <- time_ToJD(as.numeric(pars['Tp']))
         if(is.na(Par$Tp)) stop('Error: Tp value is not numerical!',call.=FALSE)
-        Par$Tc <- gen_CalTc(Par$Tp,Par$Pb,Par$e,Par$omegaT)
-        Par$M0 <- (Par$Tp-Par$T0)/Par$Pb*2*pi
+        Par$Tc <- gen_CalTc(Par$Tp,Par$Pd,Par$e,Par$omegaT)
+        Par$M0 <- (Par$Tp-Par$T0)/Par$Pd*2*pi
     }else if(any(cn=='M0')){
         Par$M0 <- as.numeric(pars['M0'])/180*pi#rad
         if(is.na(Par$M0)) stop('Error: M0 value is not numerical!',call.=FALSE)
-        Par$Tp <- T0+M0/(2*pi)*Par$Pb#epoch at periastron
+        Par$Tp <- T0+M0/(2*pi)*Par$Pd#epoch at periastron
         Tc <- gen_CalTc(Par$Tp,Par$Pd,Par$e,Par$omegaT)#mid-transit epoch
     }
     Par$DD <- Par$DDGR <- list()
