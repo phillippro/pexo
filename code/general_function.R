@@ -748,7 +748,7 @@ gen_DDmodel <- function(tB,Par){
     Nt <-nrow(tB)
     dr = 0.0##WHAT SHOULD THESE BE SET TO?
     dth = 0.0
-    si <- Par$DD$sini
+    si <- Par$DDGR$sini
     am2 <- Par$mC
     am<- Par$mTC
 
@@ -757,7 +757,7 @@ gen_DDmodel <- function(tB,Par){
     }else{
         pb = Par$P#year
     }
-    an = 2.0*pi/pb#pb in unit of rad/second or rad/yr
+    an = 2.0*pi/pb#mean motion in unit of rad/second or rad/yr
     if(Par$BinaryUnit=='natural'){
         n <- rad2deg*365.25*86400.0*an#deg/yr
     }else{
@@ -796,10 +796,10 @@ gen_DDmodel <- function(tB,Par){
 
     ##a1==x0 in Eqn. 71 of E06; define x==a*sin(i)/c
     if(Par$BinaryUnit=='natural'){
-        x = Par$DDGR$a1*AULT+xdot*tt0#[x]=s; [xdot]=s/s;
+        x = Par$DDGR$x0+xdot*tt0#[x]=s; [xdot]=s/s;
         ar <-x/si#s
     }else{
-        x = Par$DDGR$a1/YC+xdot*tt0#[x]=yr, [xdot]=yr/yr
+        x = Par$DDGR$x0+xdot*tt0#[x]=yr, [xdot]=yr/yr
         ar <- x*YC/si#au
     }
     arr <-ar/am2*am
@@ -883,11 +883,7 @@ gen_DDmodel <- function(tB,Par){
     ##cdth=-ecc*ecc*x*cw*su/sqr1me2
     cm2=-2*dlogbr
     csi=2*m2*(sw*cume+sqr1me2*cw*su)/brace#
-    if(Par$BinaryUnit=='natural'){
-        a1dot <- xdot/si#s/s
-    }else{
-        a1dot <- xdot/si/AULT#au/yr
-    }
+    a1dot <- Par$DDGR$xdot#a1dot equivalent to xdot
     if(FALSE){
         pb <- -csigma*an*DAYSEC*tt0/(pb*DAYSEC)
         omdot <- ae*comega/(an*360.0/(2.0*pi)*365.25*DAYSEC)
@@ -918,8 +914,8 @@ gen_DDmodel <- function(tB,Par){
     adot <- 2/(an*sqrt(1-er^2))*(Rw*er*sin(ae)+(1+er*cos(ae))*Tw)
     edot <- sqrt(1-er^2)/(an*ar)*(Rw*sin(ae)+(er+2*cos(ae)+er*(cos(ae))^2)/(1+er*cos(ae))*Tw)
     udot <-(an+edot*su)/(1-er*cu)
-    bdot <-v <-adot*(1-er*cu)-ar*edot*cu+ar*er*su*udot
-    theta.dot <-an*(1+er*cos(ae))^2/(1-er^2)^(3/2)
+    bdot <-v <- adot*(1-er*cu)-ar*edot*cu+ar*er*su*udot
+    theta.dot <- an*(1+er*cos(ae))^2/(1-er^2)^(3/2)
     if(FALSE){
         udot <- an/(1-ecc*cu)
         bdot <- a1dot*(1-ecc*cu)-ar*(cu*edot-su*udot)
@@ -998,7 +994,6 @@ gen_ComputeU <- function(phase,ecc){
     }
     U
 }
-
 
 gen_DDGRmodel <- function(tB,Par){
 ####################################
@@ -1094,11 +1089,7 @@ gen_DDGRmodel <- function(tB,Par){
     xpbdot <- Par$DDGR$xpbdot
     Omega <- Par$Omega
 
-    if(Par$BinaryUnit=='natural'){
-        x = Par$DDGR$a1*AULT+xdot*tt0#[x]=s; [xdot]=s/s;
-    }else{
-        x = Par$DDGR$a1/YC+xdot*tt0#[x]=yr, [xdot]=yr/yr
-    }
+    x = Par$DDGR$x0+xdot*tt0#in unit of time
     ar <- x*YC/si
     ecc <- Par$DD$ecc+edot*tt0
 
@@ -1270,20 +1261,14 @@ gen_DDGRmodel <- function(tB,Par){
     sini <- rep(si,Nt)
     cosi  <- cos(asin(sini))
     b <- ar*(1-er*cu)#
-    p <- ar*(1-ecc^2)
     theta <- omega+ae
     mu <-m1*m2/m
-###DD85 B.9
-    q <- mu/m
+###DD85 B.1-9
     if(Par$BinaryUnit=='natural'){
-        s <-m^2/p^3
+        adot <- Par$DDGR$xdot/Par$DDGR$sini
     }else{
-        s <-(2*pi)^4*m^2/YC^2/p^3
+        adot <- Par$DDGR$xdot/Par$DDGR$sini*Cauyr
     }
-    Rw <-s*(1+ecc*cos(ae))^2*(3-q+3*ecc^2-3.5*q*ecc^2+(2-4*q)*ecc*cos(ae)+(-4+0.5*q)*ecc^2*(cos(ae))^2)
-    Tw <-s*(1+ecc*cos(ae))^3*(4-2*q)*ecc*sin(ae)
-    adot <- 2/(an*sqrt(1-ecc^2))*(Rw*ecc*sin(ae)+(1+ecc*cos(ae))*Tw)
-    edot <- sqrt(1-ecc^2)/(an*ar)*(Rw*sin(ae)+(ecc+2*cos(ae)+ecc*(cos(ae))^2)/(1+ecc*cos(ae))*Tw)
     udot <-(an+edot*su)/(1-ecc*cu)
     bdot <- v <- adot*(1-ecc*cu)-ar*edot*cu+ar*ecc*su*udot
     theta.dot <- an*(1+ecc*cos(ae))^2/(1-ecc^2)^(3/2)
@@ -1318,7 +1303,7 @@ gen_DDGRmodel <- function(tB,Par){
     Tc <- cbind(n*Pd+Par$Tp,dTc)
     f <- 0.5*pi-omega
     Vc <- 2*pi*sqrt(Par$mC^2/Par$mTC/arr/(1-ecc^2))*sqrt(1+2*ecc*cos(f)+ecc^2)
-    c(list(torb=torb,xpbdot=xpbdot,sini=sini,m2=m2,ar=ar,rvec=rvec,vvec=vvec,U=U,Dre=Dre,Ds=Ds,Da=Da,pb=pb,dpb=dpb,edot=edot,omega=omega,alpha=alpha,abdot=abdot,beta=beta,gamma=gamma,dre=dre,drep=drep,drepp=drepp,anhat=anhat,Dre1=Dre1,Dre2=Dre2,x=x,xdot=xdot,dth=dth,sw=sw,cw=cw,ae=ae,er=er,eth=eth,dr=dr,dth=dth,an=an,ecc=ecc,Tc=Tc,Vc=Vc,bdot=bdot,theta.dot=theta.dot,adot=adot,xo=xo,yo=yo),out)
+    c(list(torb=torb,xpbdot=xpbdot,sini=sini,m2=m2,ar=ar,rvec=rvec,vvec=vvec,U=U,Dre=Dre,Ds=Ds,Da=Da,pb=pb,dpb=dpb,omega=omega,alpha=alpha,abdot=abdot,beta=beta,gamma=gamma,dre=dre,drep=drep,drepp=drepp,anhat=anhat,Dre1=Dre1,Dre2=Dre2,x=x,xdot=xdot,dth=dth,sw=sw,cw=cw,ae=ae,er=er,eth=eth,dr=dr,dth=dth,an=an,ecc=ecc,Tc=Tc,Vc=Vc,bdot=bdot,theta.dot=theta.dot,xo=xo,yo=yo),out)
 }
 
 gen_mass2dd <- function(m,m2,x,ecc,an,BinaryUnit='auyr'){

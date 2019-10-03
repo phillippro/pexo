@@ -1,10 +1,10 @@
 ---
 title: "PEXO v0.1.0"
-author: "Fabo Feng"
+author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -392,8 +392,13 @@ The output pdf file  `../results/paper_pexo_vs_T2_TauCeti_tempoFB90_DE430_ttt2td
 will show a few $\mu$m/s numerical radial velocity difference between PEXO and TEMPO2. 
 
 ## Comparison of JPL ephemerides
-The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. One can download a JPL ephemerides using 
-`source download_ephemerides.sh XXX` where `XXX` could be any JPL ephemerides such as 438, 438t, 414, ... . The ephemerides would be downloaded into the `pexo/data/` directory. 
+The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. 
+
+To compare all ephemerides or to use other ephemerides in PEXO, one can download a JPL ephemerides using 
+
+`source download_ephemerides.sh XXX` 
+
+where `XXX` could be any JPL ephemerides such as 438, 438t, 414, ... . The ephemerides would be downloaded into the `pexo/data/` directory. 
 ```
 Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
 ```
@@ -448,7 +453,7 @@ Fig 3. Shapiro delay of PSR J0740+6620 simulated by PEXO using parameters from C
 ## $\delta$ Del (HD197461)
 $\delta$ Del has a well-determined orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following commandline, one can reproduce the binary orbit. 
 
-`Rscript pexo.R -c T -t '38300 57600 100' -p ../input/HD197461.par`
+`Rscript pexo.R -c TA -t '38300 57600 100' -p ../input/HD197461.par`
 
 Panel P8 in the output file `../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf` reproduces figure 3 in the original paper. 
 
@@ -467,6 +472,41 @@ For example, the following commandline would generate an ascii file (`HD10700_bc
 `Rscript pexo.R -m emulate -c TR -t ../input/HD10700pfs.tim -p ../input/HD10700pfs.par -v 'BJDtdb ZB' -o ../results/HD10700_bc.txt`
 
 The output file would have three columns, first two columns are two-part BJD and the third one is the barycentric Doppler shift. Note that `-c TR` is used because the variables (arguments of `-v`) are outputs of the radial velocity model. If astrometric variables are included in the `-v` arguments, `-c TA` should be used. If both astrometric and radial velocity variables are to be stored in the output file, `-c TAR` should be used. If one only needs timing variables, `-c T` is the proper syntax for timing-only modeling.  
+
+# Run PEXO using shell script
+
+A simple shell wrapper is included for convenience.
+The arguments are identical to `pexo.R`, type `./pexo.sh --help` so see help.
+
+To run PEXO via this script, you need to set an environment variable `$PEXODIR` to a path to the PEXO repository. It is also recommended to create an alias for this script to run it from anywhere in the terminal. To do that, add
+
+```sh
+export PEXODIR=/example/path/to/pexo
+alias pexo="/example/path/to/pexo/pexo.sh"
+```
+to your `~/.bashrc` if you're using bash, or
+
+```sh
+setenv PEXODIR /example/path/to/pexo
+alias pexo /example/path/to/pexo/pexo.sh
+```
+to `~/.tcshrc` if you're using tcsh.
+
+You'll need to open a new terminal or type `source ~/.bashrc` / `source ~/.tcshrc` to apply this.
+
+For example, one can follow the following steps to run a simulation of Tau Ceti.
+
+To run this simulation, you need to go to the `pexo/code` and run
+
+```sh
+Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
+```
+
+To run the same simulation using the shell script from, say, PEXO root, run
+
+```sh
+pexo -m emulate -c TR -t input/mjd42000to52000by10day.tim -p input/TC_Fig11b.par
+```
 
 # Future development
 

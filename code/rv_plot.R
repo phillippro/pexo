@@ -19,7 +19,7 @@ par(mfrow=c(3,4),mar=c(5,5,2,1),cex.lab=size1,cex.axis=size2,cex=1)
 tt3 <- time_Jd2yr(tS)
 #xlab <- expression((t[a]^{SSB}-t[pos])*' [yr]')
 xlab <- 'tS [yr]'
-type <- 'p'
+type <- 'o'
 if(Par$binary){
     plot(tt3,OutRv$RvgT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P1: General relativity in TS',type=type)
 }
