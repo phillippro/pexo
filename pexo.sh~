@@ -126,7 +126,7 @@ if [ ! -z "$time" ]
 then
     command="$command -t $time"
 fi
-echo "timing file: $time"
+echo $time
 if [ ! -z "$par" ]
 then
     command="$command -p $par"

@@ -1,5 +1,4 @@
-#dir <- '../data/'
-dir <- '../../pexo/data/'
+dir <- '../data/'
 ###read data
 #eop <- read.table(paste0(dir,'dut1_orientation.txt'),header=TRUE,check.names=FALSE)
 EopFile <- paste0(dir,'eopc04_IAU2000.62-now')

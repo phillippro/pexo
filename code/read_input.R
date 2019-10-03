@@ -7,7 +7,7 @@ option_list  <-  list(
 	make_option(c("-t", "--time"), type="character", default=NULL,help='Timing file: epochs or times could be in 1-part or 2-part JD[UTC] format [mandatory if mode=emulate]'),
 	make_option(c("-p", "--par"), type="character", default=NULL,help='Parameter file: parameters for models, observatory, for Keplerian/binary motion [mandatory]'),
 	make_option(c("-v", "--var"), type="character", default=NULL,help='Output variables [optional; default=%default]'),
-	make_option(c("-o", "--out"), type="character", default="out.txt",
+	make_option(c("-o", "--out"), type="character", default="../results/out.txt",
               help="Output file name: relative or absolute path [optional; default= %default]", metavar="character"),
 	make_option(c("-f", "--figure"), type="character", default=TRUE,
               help="Output figure and verbose: FALSE or TRUE [optional; default= %default]", metavar="character")
@@ -15,7 +15,6 @@ option_list  <-  list(
 
 opt_parser  <-  OptionParser(option_list=option_list)
 opt  <- parse_args(opt_parser)
-
 if(!is.null(opt$time)){
     if(is.null(opt$time) & opt$mode=='emulate'){
         print_help(opt_parser)
@@ -28,11 +27,12 @@ if(!is.null(opt$time)){
     }
 
 }else{
-    opt$time <- '../input/mjd42000to52000by10day.tim'
-    opt$par <- '../input/TC_Fig11b.par'
-    opt$var <- c('BJDtcb','BJDtdb','RvTot')
+###you can choose default or no default values for these mandatory arguments
+#    opt$time <- '../input/mjd42000to52000by10day.tim'
+#    opt$par <- '../input/TC_Fig11b.par'
+#    opt$var <- c('BJDtcb','BJDtdb')
 }
-###Example:
+###Usage example:
 ##Rscript pexo.R -m emulate -t ../input/TCpfs.tim -p ../input/TCpfs.par -v 'BJDtdb BJDtcb RvTot RvBT RvGO RvgsO RvgT RvlO RvLocal RvlT RvRemote RvSB RvSG RvSO RvsT RvST RvTot RvTropo ZB ZBwe' -o ../results/TC_obs.txt
 
 ###Read timing file

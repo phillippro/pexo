@@ -3,8 +3,8 @@ title: "PEXO v0.1.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -129,6 +129,11 @@ For space-based observatory, the atmospheric refraction and delay are zero and w
 ### Binary or Keplerian model parameters
 The five orbital parameters for a binary motion should be specified if the target system is a binary. If `BinaryModel` is `none`, PEXO treats the target system as a single-star system. If `BinaryModel` is `DDGR` or `kepler`, PEXO will look for Keplerian parameters. The target is denoted by `T` and companion by `C`. The mass of T is `mT`, the mass of C is `mC` and the mass of the whole system is `mTC`. Two of them should be given for binary simulations. The semi-major axis of the barycrentric orbit of T is `aT`, that of C is `aC`, and that of the binary orbit of C with respect to T is `aTC`. Either the orbital period `P` or one of the semi-major axes `aT`, `aC`, or `aTC` should be given to determine the binary orbit. If one of them is given, the other parameters will bederived. 
 Either the periastron epoch `Tp`, or the mean anomaly `M0` at the reference epoch `T0`, or the primary transit epoch `Tc` should be given to determine the binary orbit. If one of them is given, the others will be derived. 
+
+### TDB-TT computation method
+There are many three methods which can provide high-precision convertion: `eph`, `FB01`, and `FBgeo`. The `eph` method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use `eph` method and choose ephermides which has corresponding version (with `t`) with timing ephemeries, PEXO would look for the `t` version. If there is no `t` version downloaded, it would use FB01 method. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FB01 to calculate TDB-TT. 
+
+If there is no `t` versions downnloaded, PEXO would use the `FB01` method by default. However, this method requires fortran compiler (e.g. gfortran) and thus may fail if the compiler is not installed properly. In that case, one can either install gfortran or use other methods such as `FBgeo` by changing the value of `TtTdbMethod` in the parameter file. This method is precise enough for nanosecond timing precision. 
 
 ## Output 
 
@@ -400,7 +405,7 @@ To compare all ephemerides or to use other ephemerides in PEXO, one can download
 
 where `XXX` could be any JPL ephemerides such as 438, 438t, 414, ... . The ephemerides would be downloaded into the `pexo/data/` directory. 
 ```
-Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
+Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_FBgeo.par
 ```
 * `../results/ephemeris_comparison_BJDtdb_tttdbFB01_FALSE.pdf `
   + left panel of Figure 9
@@ -494,9 +499,9 @@ to `~/.tcshrc` if you're using tcsh.
 
 You'll need to open a new terminal or type `source ~/.bashrc` / `source ~/.tcshrc` to apply this.
 
-For example, one can follow the following steps to run a simulation of Tau Ceti.
+For example, one has the following two options to run a simulation of Tau Ceti.
 
-To run this simulation, you need to go to the `pexo/code` and run
+To run this simulation, you can go to the `pexo/code` and run
 
 ```sh
 Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
