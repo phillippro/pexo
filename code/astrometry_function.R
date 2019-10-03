@@ -46,10 +46,10 @@ astro_hdms2deg <- function(RAh,RAm,RAs,DECd,DECm,DECs){
 ##   RArad - RA in units of radian
 ##   DECrad - DEC in units of radian
 ####################################
-    RAdeg <- (rah+ram/60+ras/3600)/24*360
-    DECdeg <- sign(ded)*(abs(ded)+dem/60+des/3600)
-    RArad <- RA.deg/180*pi
-    DECrad <- DEC.deg/180*pi
+    RAdeg <- (RAh+RAm/60+RAs/3600)/24*360
+    DECdeg <- sign(DECd)*(abs(DECd)+DECm/60+DECs/3600)
+    RArad <- RAdeg/180*pi
+    DECrad <- DECdeg/180*pi
     cbind(RAdeg,DECdeg,RArad,DECrad)
 }
 
