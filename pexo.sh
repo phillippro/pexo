@@ -65,9 +65,8 @@ do
         shift # past value
         ;;
         -h|--help)
-        help="$2"
-        shift # past argument
-        shift # past value
+        usage
+        exit 0
         ;;
         *)    # unknown option
         echo "Unknown option: $1"
@@ -150,7 +149,6 @@ fi
 
 
 # run PEXO
-echo "Running $command"
 echo "---------------------------------"
 $command
 
