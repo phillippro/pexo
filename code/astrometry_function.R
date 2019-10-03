@@ -1,3 +1,58 @@
+###this file include functions for astrometry modeling
+
+astro_deg2hdms <- function(RAdeg,DEdeg){
+####################################
+## Convert from deg to h/d m s
+##
+## Input:
+##   RAdeg - RA in degree
+##   DECdeg - DEC in degree
+##
+## Output:
+##   RAh - RA hour
+##   RAm - RA minute
+##   RAs - RA second
+##   DECh - DEC hour
+##   DECm - DEC minute
+##   DECs - DEC second
+####################################
+    val <- RAdeg/360*24#hour
+    RAh <- floor(val)
+    RAm <- floor((val%%1)*60)
+    RAs <- (((val%%1)*60)%%1)*60
+    sig <- sign(DEdeg)
+    DEdeg <- abs(DEdeg)
+    DEd <- sig*floor(DEdeg)
+    DEm <- floor((DEdeg%%1)*60)
+    DEs <- (((DEdeg%%1)*60)%%1)*60
+    return(cbind(RAh,RAm,RAs,DEd,DEm,DEs))
+}
+
+astro_hdms2deg <- function(RAh,RAm,RAs,DECd,DECm,DECs){
+####################################
+## Convert from deg to h/d m s
+##
+## Input:
+##   RAh - RA hour
+##   RAm - RA minute
+##   RAs - RA second
+##   DECh - DEC hour
+##   DECm - DEC minute
+##   DECs - DEC second
+##
+## Output:
+##   RAdeg - RA in degree
+##   DECdeg - DEC in degree
+##   RArad - RA in units of radian
+##   DECrad - DEC in units of radian
+####################################
+    RAdeg <- (rah+ram/60+ras/3600)/24*360
+    DECdeg <- sign(ded)*(abs(ded)+dem/60+des/3600)
+    RArad <- RA.deg/180*pi
+    DECrad <- DEC.deg/180*pi
+    cbind(RAdeg,DECdeg,RArad,DECrad)
+}
+
 astro_refi <- function(DN,RDNDR){
 ####################################
 ## Calculate x/(x+y)
