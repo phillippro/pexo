@@ -1,4 +1,5 @@
 dir.out <- '../results/'
+if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 #plot.type <- 'all'
 plot.type <- 'useful'
 jd.utc <- rowSums(utc)

@@ -39,6 +39,7 @@ dir.OB <- gen_Xyz2lb(uOB)
 xlab <- expression(Delta*alpha*'* [as]')
 ylab <- expression(Delta*delta*' [as]')
 dir.out <- '../results/'
+if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 dt <- diff(rowSums(utc))[1]
 Ntime <- nrow(utc)
 fname <- paste0(Par$star,'_astrometry_',Par$BinaryModel,'_dt',gsub('\\.','',dt),'day_Ntime',Ntime,'_',Par$RefType,'.pdf')

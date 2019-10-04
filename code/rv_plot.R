@@ -6,6 +6,7 @@ star <- Par$star
 jd.utc <- rowSums(utc)
 fname <- paste0(star,'_RV_',Par$BinaryModel,'_dt',gsub('\\.','',diff(jd.utc[1:2])),'day_Ntime',Par$Nepoch,'_',Par$RefType,'.pdf')
 dir.out <- '../results/'
+if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 fout <- paste0(dir.out,'paper_',fname)
 cat(fout,'\n')
 #####pdf plot

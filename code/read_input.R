@@ -28,9 +28,9 @@ if(!is.null(opt$time)){
 
 }else{
 ###you can choose default or no default values for these mandatory arguments
-#    opt$time <- '../input/mjd42000to52000by10day.tim'
-#    opt$par <- '../input/TC_Fig11b.par'
-#    opt$var <- c('BJDtcb','BJDtdb')
+    opt$time <- '2456640.5 2458462.5 10'
+    opt$par <- '../input/PSR_J0740+6620.par'
+    opt$var <- c('BJDtcb','BJDtdb')
 }
 
 ###Usage example:
