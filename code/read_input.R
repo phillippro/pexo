@@ -32,6 +32,7 @@ if(!is.null(opt$time)){
 #    opt$par <- '../input/TC_Fig11b.par'
 #    opt$var <- c('BJDtcb','BJDtdb')
 }
+
 ###Usage example:
 ##Rscript pexo.R -m emulate -t ../input/TCpfs.tim -p ../input/TCpfs.par -v 'BJDtdb BJDtcb RvTot RvBT RvGO RvgsO RvgT RvlO RvLocal RvlT RvRemote RvSB RvSG RvSO RvsT RvST RvTot RvTropo ZB ZBwe' -o ../results/TC_obs.txt
 

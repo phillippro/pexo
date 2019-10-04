@@ -97,14 +97,15 @@ fi
 
 # save current path
 original_path="$PWD"
+#echo "current path: $original_path"
 
 # convert input paths to absolute
-time=$(realpath $time 2>/dev/null)
-par=$(realpath $par 2>/dev/null)
-out=$(realpath $out 2>/dev/null)
+#time=$(realpath $time 2>/dev/null)
+#par=$(realpath $par 2>/dev/null)
+#out=$(realpath $out 2>/dev/null)
 
 # go to pexo code
-cd $PEXODIR
+cd "$PEXODIR"
 cd "code"
 
 # base command
@@ -124,22 +125,22 @@ fi
 
 if [ ! -z "$time" ]
 then
-    command="$command -t $time"
+    command="$command -t $original_path/$time"
 fi
-echo "timing file: $time"
+
 if [ ! -z "$par" ]
 then
-    command="$command -p $par"
+    command="$command -p $original_path/$par"
 fi
 
 if [ ! -z "$var" ]
 then
-    command="$command -v $var"
+    command="$command -v '$var'"
 fi
 
 if [ ! -z "$out" ]
 then
-    command="$command -o $out"
+    command="$command -o $original_path/$out"
 fi
 
 if [ ! -z "$figure" ]
@@ -147,10 +148,9 @@ then
     command="$command -f $figure"
 fi
 
-
 # run PEXO
 echo "---------------------------------"
-$command
+eval $command
 
 # go back to the original directory
 cd $original_path
