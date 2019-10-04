@@ -364,7 +364,7 @@ summary {
 
 <h1 class="title toc-ignore">PEXO v1.0.0</h1>
 <h4 class="author">Fabo Feng &amp; Maksym Lisogorskyi</h4>
-<h4 class="date">03 October, 2019</h4>
+<h4 class="date">04 October, 2019</h4>
 
 </div>
 
@@ -420,7 +420,7 @@ summary {
 <h2><span class="header-section-number">3.1</span> Command Line</h2>
 <p>To use PEXO, one needs to go to the directory <code>pexo/code/</code> and run command lines such as</p>
 <pre><code>Rscript pexo.R -m emulate -c TR -t file.tim -p file.par</code></pre>
-<p>The commandline arguments are listed as follows.</p>
+<p>The command line arguments are listed as follows.</p>
 <table>
 <colgroup>
 <col width="13%"></col>
@@ -596,7 +596,7 @@ summary {
 <td>epoch when the astrometry and position of the target is measured</td>
 </tr>
 <tr class="odd">
-<td>observeatory</td>
+<td>observatory</td>
 <td>-</td>
 <td>CTIO</td>
 <td>observatory name</td>
@@ -737,7 +737,7 @@ summary {
 <td>omegaT</td>
 <td>degree</td>
 <td>52.006</td>
-<td>argument of periatron</td>
+<td>argument of periastron</td>
 </tr>
 <tr class="odd">
 <td>Omega</td>
@@ -760,11 +760,11 @@ summary {
 </div>
 <div id="binary-or-keplerian-model-parameters" class="section level3">
 <h3><span class="header-section-number">3.3.2</span> Binary or Keplerian model parameters</h3>
-<p>The five orbital parameters for a binary motion should be specified if the target system is a binary. If <code>BinaryModel</code> is <code>none</code>, PEXO treats the target system as a single-star system. If <code>BinaryModel</code> is <code>DDGR</code> or <code>kepler</code>, PEXO will look for Keplerian parameters. The target is denoted by <code>T</code> and companion by <code>C</code>. The mass of T is <code>mT</code>, the mass of C is <code>mC</code> and the mass of the whole system is <code>mTC</code>. Two of them should be given for binary simulations. The semi-major axis of the barycrentric orbit of T is <code>aT</code>, that of C is <code>aC</code>, and that of the binary orbit of C with respect to T is <code>aTC</code>. Either the orbital period <code>P</code> or one of the semi-major axes <code>aT</code>, <code>aC</code>, or <code>aTC</code> should be given to determine the binary orbit. If one of them is given, the other parameters will bederived. Either the periastron epoch <code>Tp</code>, or the mean anomaly <code>M0</code> at the reference epoch <code>T0</code>, or the primary transit epoch <code>Tc</code> should be given to determine the binary orbit. If one of them is given, the others will be derived.</p>
+<p>The five orbital parameters for a binary motion should be specified if the target system is a binary. If <code>BinaryModel</code> is <code>none</code>, PEXO treats the target system as a single-star system. If <code>BinaryModel</code> is <code>DDGR</code> or <code>kepler</code>, PEXO will look for Keplerian parameters. The target is denoted by <code>T</code> and companion by <code>C</code>. The mass of T is <code>mT</code>, the mass of C is <code>mC</code> and the mass of the whole system is <code>mTC</code>. Two of them should be given for binary simulations. The semi-major axis of the barycrentric orbit of T is <code>aT</code>, that of C is <code>aC</code>, and that of the binary orbit of C with respect to T is <code>aTC</code>. Either the orbital period <code>P</code> or one of the semi-major axes <code>aT</code>, <code>aC</code>, or <code>aTC</code> should be given to determine the binary orbit. If one of them is given, the other parameters will be derived. Either the periastron epoch <code>Tp</code>, or the mean anomaly <code>M0</code> at the reference epoch <code>T0</code>, or the primary transit epoch <code>Tc</code> should be given to determine the binary orbit. If one of them is given, the others will be derived.</p>
 </div>
 <div id="tdb-tt-computation-method" class="section level3">
 <h3><span class="header-section-number">3.3.3</span> TDB-TT computation method</h3>
-<p>There are many three methods which can provide high-precision convertion: <code>eph</code>, <code>FB01</code>, and <code>FBgeo</code>. The <code>eph</code> method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use <code>eph</code> method and choose ephermides which has corresponding version (with <code>t</code>) with timing ephemeries, PEXO would look for the <code>t</code> version. If there is no <code>t</code> version downloaded, it would use FB01 method. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FB01 to calculate TDB-TT.</p>
+<p>There are three main methods which can provide high-precision conversion: <code>eph</code>, <code>FB01</code>, and <code>FBgeo</code>. The <code>eph</code> method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use <code>eph</code> method and choose ephermides which has corresponding version (with <code>t</code>) with timing ephemeries, PEXO would look for the <code>t</code> version. If there is no <code>t</code> version downloaded, it would use FB01 method. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FB01 to calculate TDB-TT.</p>
 <p>If there is no <code>t</code> versions downnloaded, PEXO would use the <code>FB01</code> method by default. However, this method requires fortran compiler (e.g. gfortran) and thus may fail if the compiler is not installed properly. In that case, one can either install gfortran or use other methods such as <code>FBgeo</code> by changing the value of <code>TtTdbMethod</code> in the parameter file. This method is precise enough for nanosecond timing precision.</p>
 </div>
 </div>
@@ -1686,7 +1686,7 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 <h1><span class="header-section-number">4</span> Examples</h1>
 <div id="use-tau-ceti-as-an-example-to-compare-pexo-with-previous-packages" class="section level2">
 <h2><span class="header-section-number">4.1</span> Use Tau Ceti as an example to compare PEXO with previous packages</h2>
-<p>The following commandline will simulate the Tau Ceti system over 10000 days with a time step of 10 days. It will reproduce the right panel of figure 11 in the paper.</p>
+<p>The following command line will simulate the Tau Ceti system over 10000 days with a time step of 10 days. It will reproduce the right panel of figure 11 in the paper.</p>
 <pre><code>Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par</code></pre>
 <p>The following output pdf files correspond to the figures in the PEXO paper</p>
 <ul>
@@ -1736,7 +1736,7 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 </div>
 <div id="comparison-of-jpl-ephemerides" class="section level2">
 <h2><span class="header-section-number">4.2</span> Comparison of JPL ephemerides</h2>
-<p>The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared.</p>
+<p>The following command line will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared.</p>
 <p>To compare all ephemerides or to use other ephemerides in PEXO, one can download a JPL ephemerides using</p>
 <p><code>source download_ephemerides.sh XXX</code></p>
 <p>where <code>XXX</code> could be any JPL ephemerides such as 438, 438t, 414, … . The ephemerides would be downloaded into the <code>pexo/data/</code> directory.</p>
@@ -1761,7 +1761,7 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 </div>
 <div id="alpha-centauri-a-and-b" class="section level2">
 <h2><span class="header-section-number">4.3</span> <span class="math inline">\(\alpha\)</span> Centauri A and B</h2>
-<p>The following commandline will simmulate the alpha Centauri system from MJD42000 to MJD52000 by a step of 10 days.</p>
+<p>The following command line will simulate the alpha Centauri system from MJD42000 to MJD52000 by a step of 10 days.</p>
 <p><code>Rscript pexo.R -m emulate -c TA -t ../input/gaia80yrby10day.tim -p ../input/ACAgaia.par</code></p>
 <ul>
 <li><code>../results/absolute_alphaCenA_astrometry_DDGR_dt10day_Ntime2923_refro.pdf</code>
@@ -1775,13 +1775,13 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 <li>relative astrometry of alpha Cen B with respect to A</li>
 </ul></li>
 </ul>
-<p>The following commandline will simulate the radial velocity variation of alpha Centauri A.<br />
+<p>The following command line will simulate the radial velocity variation of alpha Centauri A.<br />
 <code>Rscript pexo.R -m emulate -c TR -t ../input/hip80yrby10day.tim -p ../input/ACAhip.par</code></p>
 <p>The file <code>../results/paper_alphaCenA_RV_DDGR_dt10day_Ntime2923_refro.pdf</code> is the same as Figure 17 in the paper and shows the decomposition of the radial velocity into multiples components due to various effects.</p>
 </div>
 <div id="psr-j07406620" class="section level2">
 <h2><span class="header-section-number">4.4</span> PSR J0740+6620</h2>
-<p>Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by <a href="https://www.nature.com/articles/s41550-019-0880-2">Cromarti et al. 2019</a>. PEXO can produce their results by using the reported orbital parameters in the following commandline.</p>
+<p>Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by <a href="https://www.nature.com/articles/s41550-019-0880-2">Cromarti et al. 2019</a>. PEXO can produce their results by using the reported orbital parameters in the following command line.</p>
 <p><code>Rscript pexo.R -c T -t '2456640.5 2458462.5 0.5' -p ../input/PSR_J0740+6620.par</code></p>
 The output pdf <code>../results/PSRJ0740+6620_shapiro.pdf</code> will predict a Shapiro delay matching the one shown in the paper.
 <center>
@@ -1793,7 +1793,7 @@ The output pdf <code>../results/PSRJ0740+6620_shapiro.pdf</code> will predict a 
 </div>
 <div id="delta-del-hd197461" class="section level2">
 <h2><span class="header-section-number">4.5</span> <span class="math inline">\(\delta\)</span> Del (HD197461)</h2>
-<p><span class="math inline">\(\delta\)</span> Del has a well-determined orbit based on astrometric and RV data from <a href="https://arxiv.org/pdf/1802.00468.pdf">Gardner et al. 2018</a>. By using the following commandline, one can reproduce the binary orbit.</p>
+<p><span class="math inline">\(\delta\)</span> Del has a well-determined orbit based on astrometric and RV data from <a href="https://arxiv.org/pdf/1802.00468.pdf">Gardner et al. 2018</a>. By using the following command line, one can reproduce the binary orbit.</p>
 <p><code>Rscript pexo.R -c TA -t '38300 57600 100' -p ../input/HD197461.par</code></p>
 <p>Panel P8 in the output file <code>../results/relative_HD197461_astrometry_DDGR_dt100day_Ntime194_none.pdf</code> reproduces figure 3 in the original paper.</p>
 <center>
@@ -1804,7 +1804,7 @@ Fig. 4. The left panel shows the orbit of <span class="math inline">\(\delta\)</
 <div id="barycentric-correction-of-radial-velocity" class="section level2">
 <h2><span class="header-section-number">4.6</span> Barycentric correction of radial velocity</h2>
 <p>Although PEXO prefer combined modeling of all motions, PEXO provides barycentric correction especially for the high precision radial velocity. Such a correction is reliable for single stars or distant binaries. For single stars, equation 28 of <a href="https://ui.adsabs.harvard.edu/abs/2014PASP..126..838W/abstract">Wright &amp; Eastman 2014</a> is used to derive barycentric correction of Doppler shift (<code>ZBwe</code>). If Keplerian parameters for binary stars are given in the parameter file, PEXO would calculate the total Doppler shift (<code>Z</code>) and treat <code>-Z</code> as the barycentric Doppler shift (<code>ZB</code>). PEXO also computes barycentric correction by accounting for troposheric Doppler shift.</p>
-<p>For example, the following commandline would generate an ascii file (<code>HD10700_bc.txt</code>) storing a data table for Barycentric Julian Date in TDB time standard (<code>BJD</code>) and the barycentric Doppler shift (<code>ZB</code>). The Doppler shift should be multipled by the speed of light to get the radial velocity counterpart (RVB). Then the RV corrected from barycentric motion of the Earth is the sum of the measured RV and RVB.</p>
+<p>For example, the following command line would generate an ascii file (<code>HD10700_bc.txt</code>) storing a data table for Barycentric Julian Date in TDB time standard (<code>BJD</code>) and the barycentric Doppler shift (<code>ZB</code>). The Doppler shift should be multipled by the speed of light to get the radial velocity counterpart (RVB). Then the RV corrected from barycentric motion of the Earth is the sum of the measured RV and RVB.</p>
 <p><code>Rscript pexo.R -m emulate -c TR -t ../input/HD10700pfs.tim -p ../input/HD10700pfs.par -v 'BJDtdb ZB' -o ../results/HD10700_bc.txt</code></p>
 <p>The output file would have three columns, first two columns are two-part BJD and the third one is the barycentric Doppler shift. Note that <code>-c TR</code> is used because the variables (arguments of <code>-v</code>) are outputs of the radial velocity model. If astrometric variables are included in the <code>-v</code> arguments, <code>-c TA</code> should be used. If both astrometric and radial velocity variables are to be stored in the output file, <code>-c TAR</code> should be used. If one only needs timing variables, <code>-c T</code> is the proper syntax for timing-only modeling.</p>
 </div>
@@ -1824,11 +1824,11 @@ alias pexo /example/path/to/pexo/pexo.sh</code></pre>
 <pre class="sh"><code>Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par</code></pre>
 <p>or run the following shell script in your current directory by providing paths for timing and parameter files</p>
 <pre class="sh"><code>pexo -m emulate -c TR -t mjd42000to52000by10day.tim -p TC_Fig11b.par </code></pre>
-<p>By running the above commandline, PEXO will look for the timing and parameter files in your current directory and save output file if you specify the <code>-v</code> and <code>-o</code> arguments.</p>
+<p>By running the above command line, PEXO will look for the timing and parameter files in your current directory and save output file if you specify the <code>-v</code> and <code>-o</code> arguments.</p>
 </div>
 <div id="future-development" class="section level1">
 <h1><span class="header-section-number">6</span> Future development</h1>
-<p>PEXO v1.0.0 only has the <code>emulate</code> mode. The <code>fit</code> mode will soon be implemented. A python wrapper would also be developed. An R Shiny application will be developed for some functions of PEXO such as barycentric correction. Feedback from PEXO users and contribution from the astronomical community are appreciated and are important to improve the software.</p>
+<p>PEXO v1.0.0 only has the <code>emulate</code> mode. The <code>fit</code> mode will soon be implemented. A python wrapper would also be developed. Feedback from PEXO users and contribution from the astronomical community are appreciated and are important to improve the software.</p>
 </div>
 
 

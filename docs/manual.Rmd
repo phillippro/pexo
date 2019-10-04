@@ -3,8 +3,8 @@ title: "PEXO v1.0.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -50,7 +50,7 @@ To use PEXO, one needs to go to the directory `pexo/code/` and run command lines
 ```
 Rscript pexo.R -m emulate -c TR -t file.tim -p file.par
 ```
-The commandline arguments are listed as follows. 
+The command line arguments are listed as follows. 
 
  Short name | Full name | Meaning
 --------- | ---------- | ----------------------------------------------
@@ -92,7 +92,7 @@ LenRVmethod | - | **T2**, PEXO | the method used to derive RV lensing, T2 is use
 BinaryModel|-|**none**, DDGR, kepler| binary model
 ellipsoid |-|**WGS84**, GRS80, WGS72| ellipsoidal (normal) Earth Gravitational Model  
 epoch |JD or MJD|2448349.06250|epoch when the astrometry and position of the target is measured
-observeatory|-|CTIO|observatory name
+observatory|-|CTIO|observatory name
 |||
 xtel|metre | 1814985.3| geocentric position of the telescope in the International Terrestrial Reference Frame (ITRF)
 ytel |metre|-5213916.8| geocentric position of the telescope in ITRF
@@ -115,7 +115,7 @@ aT  |au|10.80332|semi-major axis of the barycentric motion of the target
 P |year|79.929|orbital period of the target
 e |-|0.5208|eccentricity
 I |degree| 79.32|inclination
-omegaT |degree|52.006|argument of periatron
+omegaT |degree|52.006|argument of periastron
 Omega |degree|205.064|longitude of ascending node
 Tp |JD or MJD|2435328.96|periastron epoch
 
@@ -127,11 +127,11 @@ PEXO will first look for observatory data by finding `xtel`, `ytel`, and `ztel` 
 For space-based observatory, the atmospheric refraction and delay are zero and would not be implemented by PEXO. For ground-based telescope, the `RefType` parameter should be `refro` (recommended), `refco`, or `refcoq` for the calculation of refraction in astrometry modeling. If `RefType` is `none`, the atmospheric refraction is zero. The tropospheric delay and its time derivative are automatically implemented for ground-based observatories and thus do not depend on the choice of `RefType`. 
 
 ### Binary or Keplerian model parameters
-The five orbital parameters for a binary motion should be specified if the target system is a binary. If `BinaryModel` is `none`, PEXO treats the target system as a single-star system. If `BinaryModel` is `DDGR` or `kepler`, PEXO will look for Keplerian parameters. The target is denoted by `T` and companion by `C`. The mass of T is `mT`, the mass of C is `mC` and the mass of the whole system is `mTC`. Two of them should be given for binary simulations. The semi-major axis of the barycrentric orbit of T is `aT`, that of C is `aC`, and that of the binary orbit of C with respect to T is `aTC`. Either the orbital period `P` or one of the semi-major axes `aT`, `aC`, or `aTC` should be given to determine the binary orbit. If one of them is given, the other parameters will bederived. 
+The five orbital parameters for a binary motion should be specified if the target system is a binary. If `BinaryModel` is `none`, PEXO treats the target system as a single-star system. If `BinaryModel` is `DDGR` or `kepler`, PEXO will look for Keplerian parameters. The target is denoted by `T` and companion by `C`. The mass of T is `mT`, the mass of C is `mC` and the mass of the whole system is `mTC`. Two of them should be given for binary simulations. The semi-major axis of the barycrentric orbit of T is `aT`, that of C is `aC`, and that of the binary orbit of C with respect to T is `aTC`. Either the orbital period `P` or one of the semi-major axes `aT`, `aC`, or `aTC` should be given to determine the binary orbit. If one of them is given, the other parameters will be derived. 
 Either the periastron epoch `Tp`, or the mean anomaly `M0` at the reference epoch `T0`, or the primary transit epoch `Tc` should be given to determine the binary orbit. If one of them is given, the others will be derived. 
 
 ### TDB-TT computation method
-There are many three methods which can provide high-precision convertion: `eph`, `FB01`, and `FBgeo`. The `eph` method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use `eph` method and choose ephermides which has corresponding version (with `t`) with timing ephemeries, PEXO would look for the `t` version. If there is no `t` version downloaded, it would use FB01 method. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FB01 to calculate TDB-TT. 
+There are three main methods which can provide high-precision conversion: `eph`, `FB01`, and `FBgeo`. The `eph` method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use `eph` method and choose ephermides which has corresponding version (with `t`) with timing ephemeries, PEXO would look for the `t` version. If there is no `t` version downloaded, it would use FB01 method. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FB01 to calculate TDB-TT. 
 
 If there is no `t` versions downnloaded, PEXO would use the `FB01` method by default. However, this method requires fortran compiler (e.g. gfortran) and thus may fail if the compiler is not installed properly. In that case, one can either install gfortran or use other methods such as `FBgeo` by changing the value of `TtTdbMethod` in the parameter file. This method is precise enough for nanosecond timing precision. 
 
@@ -352,7 +352,7 @@ Ztropo|-|tropospheric doppler shift
 
 ## Use Tau Ceti as an example to compare PEXO with previous packages
 
-The following commandline will simulate the Tau Ceti system over 10000 days with a time step of 10 days. It will reproduce the right panel of figure 11 in the paper. 
+The following command line will simulate the Tau Ceti system over 10000 days with a time step of 10 days. It will reproduce the right panel of figure 11 in the paper. 
 ```
 Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
 ```
@@ -397,7 +397,7 @@ The output pdf file  `../results/paper_pexo_vs_T2_TauCeti_tempoFB90_DE430_ttt2td
 will show a few $\mu$m/s numerical radial velocity difference between PEXO and TEMPO2. 
 
 ## Comparison of JPL ephemerides
-The following commandline will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. 
+The following command line will compare various ephemerides and recover Figure 9 in the paper. There are only DE430 and DE405 ephemerides in the github repository and thus only they will be compared. 
 
 To compare all ephemerides or to use other ephemerides in PEXO, one can download a JPL ephemerides using 
 
@@ -421,7 +421,7 @@ Rscript compare_ephemeris.R -m emulate -c TR -t ../input/mjd42000to52000by10day.
   
 ## $\alpha$ Centauri A and B
 
-The following commandline will simmulate the alpha Centauri system from MJD42000 to MJD52000 by a step of 10 days. 
+The following command line will simulate the alpha Centauri system from MJD42000 to MJD52000 by a step of 10 days. 
 
 `Rscript pexo.R -m emulate -c TA -t ../input/gaia80yrby10day.tim -p ../input/ACAgaia.par`
 
@@ -433,14 +433,14 @@ The following commandline will simmulate the alpha Centauri system from MJD42000
    + Figure 15
    + relative astrometry of alpha Cen B with respect to A
    
-The following commandline will simulate the radial velocity variation of alpha Centauri A.  
+The following command line will simulate the radial velocity variation of alpha Centauri A.  
 `Rscript pexo.R -m emulate -c TR -t ../input/hip80yrby10day.tim -p ../input/ACAhip.par`
 
 The file `../results/paper_alphaCenA_RV_DDGR_dt10day_Ntime2923_refro.pdf` is the same as Figure 17 in the paper and shows the decomposition of the radial velocity into multiples components due to various effects. 
 
 ## PSR J0740+6620
 
-Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by  [Cromarti et al. 2019](https://www.nature.com/articles/s41550-019-0880-2). PEXO can produce their results by using the reported orbital parameters in the following commandline. 
+Recently the Shapiro delay of PSR J0740+6620 is measured to a high precision by  [Cromarti et al. 2019](https://www.nature.com/articles/s41550-019-0880-2). PEXO can produce their results by using the reported orbital parameters in the following command line. 
 
 `Rscript pexo.R -c T -t '2456640.5 2458462.5 0.5' -p ../input/PSR_J0740+6620.par`
 
@@ -456,7 +456,7 @@ Fig 3. Shapiro delay of PSR J0740+6620 simulated by PEXO using parameters from C
 </center>
 
 ## $\delta$ Del (HD197461)
-$\delta$ Del has a well-determined orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following commandline, one can reproduce the binary orbit. 
+$\delta$ Del has a well-determined orbit based on astrometric and RV data from [Gardner et al. 2018](https://arxiv.org/pdf/1802.00468.pdf). By using the following command line, one can reproduce the binary orbit. 
 
 `Rscript pexo.R -c TA -t '38300 57600 100' -p ../input/HD197461.par`
 
@@ -472,7 +472,7 @@ Fig. 4. The left panel shows the orbit of $\delta$ Del determined by [Gardner et
 ## Barycentric correction of radial velocity
 Although PEXO prefer combined modeling of all motions, PEXO provides barycentric correction especially for the high precision radial velocity. Such a correction is reliable for single stars or distant binaries. For single stars, equation 28 of [Wright & Eastman 2014](https://ui.adsabs.harvard.edu/abs/2014PASP..126..838W/abstract) is used to derive barycentric correction of Doppler shift (`ZBwe`). If Keplerian parameters for binary stars are given in the parameter file, PEXO would calculate the total Doppler shift (`Z`) and treat `-Z` as the barycentric Doppler shift (`ZB`). PEXO also computes barycentric correction by accounting for troposheric Doppler shift. 
 
-For example, the following commandline would generate an ascii file (`HD10700_bc.txt`) storing a data table for Barycentric Julian Date in TDB time standard (`BJD`) and the barycentric Doppler shift (`ZB`). The Doppler shift should be multipled by the speed of light to get the radial velocity counterpart (RVB). Then the RV corrected from barycentric motion of the Earth is the sum of the measured RV and RVB. 
+For example, the following command line would generate an ascii file (`HD10700_bc.txt`) storing a data table for Barycentric Julian Date in TDB time standard (`BJD`) and the barycentric Doppler shift (`ZB`). The Doppler shift should be multipled by the speed of light to get the radial velocity counterpart (RVB). Then the RV corrected from barycentric motion of the Earth is the sum of the measured RV and RVB. 
 
 `Rscript pexo.R -m emulate -c TR -t ../input/HD10700pfs.tim -p ../input/HD10700pfs.par -v 'BJDtdb ZB' -o ../results/HD10700_bc.txt`
 
@@ -511,9 +511,9 @@ or run the following shell script in your current directory by providing paths f
 pexo -m emulate -c TR -t mjd42000to52000by10day.tim -p TC_Fig11b.par 
 ```
 
-By running the above commandline, PEXO will look for the timing and parameter files in your current directory and save output file if you specify the `-v` and `-o` arguments. 
+By running the above command line, PEXO will look for the timing and parameter files in your current directory and save output file if you specify the `-v` and `-o` arguments. 
 
 # Future development
 
-PEXO v1.0.0 only has the `emulate` mode. The `fit` mode will soon be implemented. A python wrapper would also be developed. An R Shiny application will be developed for some functions of PEXO such as barycentric correction. Feedback from PEXO users and contribution from the astronomical community are appreciated and are important to improve the software.  
+PEXO v1.0.0 only has the `emulate` mode. The `fit` mode will soon be implemented. A python wrapper would also be developed. Feedback from PEXO users and contribution from the astronomical community are appreciated and are important to improve the software.  
 

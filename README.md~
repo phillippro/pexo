@@ -4,5 +4,22 @@ Compared with previous models and packages, PEXO is general enough to account fo
 
 PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 μas, and radial velocity to a precision of 1 μm/s. There are [pdf](https://github.com/phillippro/pexo/blob/master/docs/manual.pdf) and [html](http://rpubs.com/Fabo/pexo) versions of the manual available for instructions of how to use PEXO.
 
-The relevant paper will be published by ApJS. If you use PEXO in your work, please cite the paper titled "PEXO: a global modeling framework for nanosecond timing, microsecond astrometry, and μm/s radial velocities" by Fabo Feng, Maksym Lisogorskyi, Hugh R. A. Jones, Sergei M. Kopeikin, R. Paul Butler, Guillem Anglada-Escude, Alan P. Boss
+The relevant paper will be published by ApJS, please cite the paper if you use PEXO in your work. 
+```
+@ARTICLE{pexo,
+   author = {{Feng}, F. and {Lisogorskyi}, M. and {Jones}, H.~R.~A. and {Kopeikin}, S.M. and {Butler}, R.P. and {Anglada-Escude\e}, G. and {Boss}, A.},
+    title = "{PEXO: a global modeling framework for ns timing, μas astrometry, and μm/s radial velocities}",
+  journal = {\apjs},
+archivePrefix = "arXiv",
+   eprint = {xxx},
+ primaryClass = "xxx",
+     year = 2019,
+    month = sep,
+   volume = xx,
+    pages = {xx},
+      doi = {xx},
+   adsurl = {xx},
+  adsnote = {xx}
+}
+```
 
