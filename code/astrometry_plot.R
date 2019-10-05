@@ -1,4 +1,3 @@
-library('magicaxis')
 options(scipen=-1)
 ###catalog astrometry
 EleLowLimit <- 5#deg

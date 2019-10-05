@@ -1,4 +1,3 @@
-library("optparse")
 option_list  <-  list(
   make_option(c("-m", "--mode"), type="character", default='emulate',
               help="PEXO mode: emulate or fit [optional; default=%default]", metavar="character"),
