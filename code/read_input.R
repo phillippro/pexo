@@ -6,9 +6,8 @@ option_list  <-  list(
               help="PEXO model component: timing (T), astrometry (A), radial velocity (R) and their combinations [optional; default=%default]", metavar="character"),
 	make_option(c("-t", "--time"), type="character", default=NULL,help='Timing file: epochs or times could be in 1-part or 2-part JD[UTC] format [mandatory if mode=emulate]'),
 	make_option(c("-p", "--par"), type="character", default=NULL,help='Parameter file: parameters for models, observatory, for Keplerian/binary motion [mandatory]'),
-	make_option(c("-v", "--var"), type="character", default=NULL,help='Output variables [optional; default=%default]'),
-	make_option(c("-o", "--out"), type="character", default="../results/out.txt",
-              help="Output file name: relative or absolute path [optional; default= %default]", metavar="character"),
+	make_option(c("-v", "--var"), type="character", default=c('BJDtcb','BJDtdb','RvTot','ZB'),help='Output variables [optional; default=%default]'),
+	make_option(c("-o", "--out"), type="character", default="../results/out.txt", help="Output file name: relative or absolute path [optional; default= %default]", metavar="character"),
 	make_option(c("-f", "--figure"), type="character", default=TRUE,
               help="Output figure and verbose: FALSE or TRUE [optional; default= %default]", metavar="character")
 )
@@ -28,14 +27,18 @@ if(!is.null(opt$time)){
 
 }else{
 ###you can choose default or no default values for these mandatory arguments
-    opt$time <- '2456640.5 2458462.5 10'
-    opt$par <- '../input/PSR_J0740+6620.par'
+#    opt$time <- '2456640.5 2458462.5 10'
+    opt$time <- '../input/mjd42000to52000by10day.tim'
+#    opt$par <- '../input/PSR_J0740+6620.par'
+    opt$par <- '../input/TC_FBgeo.par'
     opt$var <- c('BJDtcb','BJDtdb')
 }
 
 ###Usage example:
 ##Rscript pexo.R -m emulate -t ../input/TCpfs.tim -p ../input/TCpfs.par -v 'BJDtdb BJDtcb RvTot RvBT RvGO RvgsO RvgT RvlO RvLocal RvlT RvRemote RvSB RvSG RvSO RvsT RvST RvTot RvTropo ZB ZBwe' -o ../results/TC_obs.txt
 
+cat('names(opt)=',names(opt),'\n')
+cat('opt=',unlist(opt),'\n')
 ###Read timing file
 if(!file.exists(opt$time)){
     s <- unlist(strsplit(opt$time,split=' '))

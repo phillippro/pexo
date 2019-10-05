@@ -13,7 +13,6 @@ source('rv_function.R')
 Tstart <- proc.time()
 ####Read parameter files
 source('read_input.R')
-
 if(grepl('T',Par$component)){
     OutBary <- time_Utc2tb(utc,Par)
     OutTime <- time_Ta2te(OutBary,Par)
@@ -28,10 +27,11 @@ if(grepl('R',Par$component)){
         OutRv <- rv_FullModel(OutBary,OutTime,Par)
 #        OutRv <- rv_Numerical(utc,Par,OutBary,OutTime)
 }
-
+cat('ok5\n')
 if(Par$Unit=='TDB'){
     source('output_tcb2tdb.R')
 }
+cat('ok6\n')
 
 if(Par$figure){
     if(!file.exists('../input')) system('mkdir ../input')
