@@ -3,8 +3,8 @@ title: "PEXO v1.0.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  #pdf_document:
-  html_document:
+  pdf_document:
+  #html_document:
     number_sections: yes
     #theme: united
     toc: yes
@@ -134,9 +134,10 @@ Either the periastron epoch `Tp`, or the mean anomaly `M0` at the reference epoc
 There are three methods which can provide high-precision conversion from TT to TDB: `eph`, `FB01`, and `FBgeo`. The `eph` method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use `eph` method and choose ephermides which has corresponding version (with `t`) with timing ephemeries, PEXO would look for the `t` version. If there is no `t` version downloaded, it would use `FBgeo` which is the 1990 verion of the FB method calculating TDB-TT at the geocenter [(Fairhead & Bretagnon 1990)](http://adsabs.harvard.edu/abs/1990A%26A...229..240F). For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FBgeo to calculate TDB-TT. 
 
 If there is no `t` versions downnloaded, PEXO would use the `FBgeo` method by default. The 2001 version of FB method (`FB01`) is more advanced than `FBgeo`. To use `FB01` to convert TT to TDB,  one needs to install `gfortran` and compile the fortran routine `code/FB01/fb2001.f` written by Alan W. Irwin to read `fb2001.dat` using the following command line in `code/FB01`: 
-``gfortran -O2 fb2001.f -o fb2001``.
 
-All TDB-TT methods are precise to a few nanoseconds. 
+```gfortran -O2 fb2001.f -o fb2001```
+
+. Although this is automatically implemented in PEXO, the compiler of fb2001.f should be checked if an error occures when using the FB01 method. All TDB-TT methods are precise to a few nanoseconds. 
 
 ## Output 
 
@@ -356,9 +357,11 @@ Ztropo|-|tropospheric doppler shift
 ## Use Tau Ceti as an example to compare PEXO with previous packages
 
 The following command line will simulate the Tau Ceti system over 10000 days with a time step of 10 days. It will reproduce the right panel of figure 11 in the paper. 
+
 ```
 Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par
 ```
+
 The following output pdf files correspond to the figures in the PEXO paper 
 
 * `../results/timing_E10original_TauCeti_tempoFB90_DE430_ttt2tdbeph_tempo_par4_none.pdf`
@@ -394,7 +397,8 @@ The following output pdf files correspond to the figures in the PEXO paper
    + shapiro delay due to Uranus
 
 The left panel of figure 11 can be recovered by the following command line. 
-`Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11a.par`
+
+```Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11a.par```
 
 The output pdf file  `../results/paper_pexo_vs_T2_TauCeti_tempoFB90_DE430_ttt2tdbeph_Tstep1d_none.pdf`
 will show a few $\mu$m/s numerical radial velocity difference between PEXO and TEMPO2. 
@@ -498,7 +502,7 @@ to your `~/.bashrc` or `~/.bash_profile` if you're using bash, or
 setenv PEXODIR /example/path/to/pexo
 alias pexo /example/path/to/pexo/pexo.sh
 ```
-to `~/.tcshrc` if you're using tcsh. You'll need to open a new terminal or type `source ~/.bashrc` / `source ~/.tcshrc` to apply this. You may also `source ~/.bash_profile` to permanently save the settings. Then you can open a new terminal window to use PEXO everywhere in your computer. 
+to `~/.tcshrc` if you're using tcsh. You'll need to open a new terminal or type `source ~/.bashrc` / `source ~/.tcshrc` to apply this. You may also `source ~/.bash_profile` to permanently save the settings. Note that the path to pexo should be absolute. Then you can open a new terminal window to use PEXO everywhere in your computer. 
 
 For example, you have the following two options to run a simulation of Tau Ceti.
 

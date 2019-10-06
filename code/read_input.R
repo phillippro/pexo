@@ -27,17 +27,15 @@ if(!is.null(opt$time)){
 }else{
 ###you can choose default or no default values for these mandatory arguments
 #    opt$time <- '2456640.5 2458462.5 10'
-    opt$time <- '../input/mjd42000to52000by10day.tim'
-#    opt$par <- '../input/PSR_J0740+6620.par'
-    opt$par <- '../input/TC_FBgeo.par'
+    opt$time <- '../input/HD10700pfs.tim'
+    opt$par <- '../input/HD10700pfs.par'
+#    opt$par <- '../input/TC_FBgeo.par'
     opt$var <- c('BJDtcb','BJDtdb')
 }
 
 ###Usage example:
 ##Rscript pexo.R -m emulate -t ../input/TCpfs.tim -p ../input/TCpfs.par -v 'BJDtdb BJDtcb RvTot RvBT RvGO RvgsO RvgT RvlO RvLocal RvlT RvRemote RvSB RvSG RvSO RvsT RvST RvTot RvTropo ZB ZBwe' -o ../results/TC_obs.txt
 
-cat('names(opt)=',names(opt),'\n')
-cat('opt=',unlist(opt),'\n')
 ###Read timing file
 if(!file.exists(opt$time)){
     s <- unlist(strsplit(opt$time,split=' '))
@@ -130,6 +128,13 @@ if(any(cn=='TtTdbMethod')){
     Par$TtTdbMethod <- pars['TtTdbMethod']
 }else{
     Par$TtTdbMethod <- 'eph'
+}
+if(Par$TtTdbMethod=='FB01'){
+   tmp <- try(system('cd FB01 ; ./fb2001 <fb2001.in >fb2001.out'),TRUE)
+   if(tmp>0){
+       tmp <- try(system('cd FB01 ; gfortran -O2 fb2001.f -o fb2001'),TRUE)
+   }
+   if(tmp>0) stop("fb2001.f cannot be compiled or fb2001.in is not found in code/FB01/!", call.=FALSE)
 }
 
 ## SBscaling - Whether or not transform the coordinate time at the SSB (tS) to the coordinate time at the TSB (tB). Since it is a linear transformation, it could be absorbed into the fit of orbital period or other time-scale parameters. So we follow TEMPO2 not to do this transformation/scaling by using scaling=FALSE as default.

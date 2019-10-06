@@ -765,8 +765,9 @@ summary {
 <div id="tdb-tt-computation-method" class="section level3">
 <h3><span class="header-section-number">3.3.3</span> TDB-TT computation method</h3>
 <p>There are three methods which can provide high-precision conversion from TT to TDB: <code>eph</code>, <code>FB01</code>, and <code>FBgeo</code>. The <code>eph</code> method is the most precise one because it uses the JPL ephemeries of TDB-TT. If one use <code>eph</code> method and choose ephermides which has corresponding version (with <code>t</code>) with timing ephemeries, PEXO would look for the <code>t</code> version. If there is no <code>t</code> version downloaded, it would use <code>FBgeo</code> which is the 1990 verion of the FB method calculating TDB-TT at the geocenter <a href="http://adsabs.harvard.edu/abs/1990A%26A...229..240F">(Fairhead &amp; Bretagnon 1990)</a>. For example, if one use DE430, PEXO would use DE430t to determine TDB-TT. If PEXO cannot find DE430t, it will use FBgeo to calculate TDB-TT.</p>
-<p>If there is no <code>t</code> versions downnloaded, PEXO would use the <code>FBgeo</code> method by default. The 2001 version of FB method (<code>FB01</code>) is more advanced than <code>FBgeo</code>. To use <code>FB01</code> to convert TT to TDB, one needs to install <code>gfortran</code> and compile the fortran routine <code>code/FB01/fb2001.f</code> written by Alan W. Irwin to read <code>fb2001.dat</code> using the following command line in <code>code/FB01</code>: <code>gfortran -O2 fb2001.f -o fb2001</code>.</p>
-<p>All TDB-TT methods are precise to a few nanoseconds.</p>
+<p>If there is no <code>t</code> versions downnloaded, PEXO would use the <code>FBgeo</code> method by default. The 2001 version of FB method (<code>FB01</code>) is more advanced than <code>FBgeo</code>. To use <code>FB01</code> to convert TT to TDB, one needs to install <code>gfortran</code> and compile the fortran routine <code>code/FB01/fb2001.f</code> written by Alan W. Irwin to read <code>fb2001.dat</code> using the following command line in <code>code/FB01</code>:</p>
+<p><code>gfortran -O2 fb2001.f -o fb2001</code></p>
+<p>. Although this is automatically implemented in PEXO, the compiler of fb2001.f should be checked if an error occures when using the FB01 method. All TDB-TT methods are precise to a few nanoseconds.</p>
 </div>
 </div>
 <div id="output" class="section level2">
@@ -1732,7 +1733,8 @@ OutAstroC &lt;- astro_FullModel(OutBary,OutTime,Par,Mlens=Par$mT,component='C')<
 <li>shapiro delay due to Uranus</li>
 </ul></li>
 </ul>
-<p>The left panel of figure 11 can be recovered by the following command line. <code>Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11a.par</code></p>
+<p>The left panel of figure 11 can be recovered by the following command line.</p>
+<p><code>Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11a.par</code></p>
 <p>The output pdf file <code>../results/paper_pexo_vs_T2_TauCeti_tempoFB90_DE430_ttt2tdbeph_Tstep1d_none.pdf</code> will show a few <span class="math inline">\(\mu\)</span>m/s numerical radial velocity difference between PEXO and TEMPO2.</p>
 </div>
 <div id="comparison-of-jpl-ephemerides" class="section level2">
@@ -1819,7 +1821,7 @@ alias pexo=&quot;/example/path/to/pexo/pexo.sh&quot;</code></pre>
 <p>to your <code>~/.bashrc</code> or <code>~/.bash_profile</code> if you’re using bash, or</p>
 <pre class="sh"><code>setenv PEXODIR /example/path/to/pexo
 alias pexo /example/path/to/pexo/pexo.sh</code></pre>
-<p>to <code>~/.tcshrc</code> if you’re using tcsh. You’ll need to open a new terminal or type <code>source ~/.bashrc</code> / <code>source ~/.tcshrc</code> to apply this. You may also <code>source ~/.bash_profile</code> to permanently save the settings. Then you can open a new terminal window to use PEXO everywhere in your computer.</p>
+<p>to <code>~/.tcshrc</code> if you’re using tcsh. You’ll need to open a new terminal or type <code>source ~/.bashrc</code> / <code>source ~/.tcshrc</code> to apply this. You may also <code>source ~/.bash_profile</code> to permanently save the settings. Note that the path to pexo should be absolute. Then you can open a new terminal window to use PEXO everywhere in your computer.</p>
 <p>For example, you have the following two options to run a simulation of Tau Ceti.</p>
 <p>You may either go to the <code>pexo/code</code> directory and run</p>
 <pre class="sh"><code>Rscript pexo.R -m emulate -c TR -t ../input/mjd42000to52000by10day.tim -p ../input/TC_Fig11b.par</code></pre>

@@ -5,7 +5,7 @@ TaiType instant
 TtType TAI
 unit TDB
 DE 430
-tt2tdb eph
+TtTdbMethod eph
 SBscaling FALSE
 PlanetShapiro TRUE
 CompareT2 TRUE
