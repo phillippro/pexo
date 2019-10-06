@@ -1,10 +1,10 @@
 ---
-title: "PEXO v1.0.0"
+title: "PEXO v1.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
-  #html_document:
+  #pdf_document:
+  html_document:
     number_sections: yes
     #theme: united
     toc: yes
