@@ -49,8 +49,8 @@ if(!file.exists(dirt) & !file.exists(dirDE)){
 
 if(!file.exists(dirt)){
     if(Par$TtTdbMethod=='eph'){
-        cat(paste0('Warn: DE',Par$DE,'t is not found and the FB01 method is used to calculate TDB-TT!\n'))
-        Par$TtTdbMethod <- 'FB01'
+        cat(paste0('Warn: DE',Par$DE,'t is not found and the FBgeo method is used to calculate TDB-TT!\n'))
+        Par$TtTdbMethod <- 'FBgeo'
     }
     dirt <- dirDE
 }

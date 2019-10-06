@@ -126,7 +126,7 @@ if(any(cn=='DE')){
 }
 
 if(any(cn=='TtTdbMethod')){
-    if(pars['TtTdbMethod']!='eph' & pars['TtTdbMethod']!='FB01' & pars['TtTdbMethod']!='FBgeo' & pars['TtTdbMethod']!='FB90') stop(paste0('In',opt$par,', TtTdbMethod value is not valid, it should be eph or FB01 or FBsofa or FBgeo or FB90 or analytic!'),call. = FALSE)
+    if(pars['TtTdbMethod']!='eph' & pars['TtTdbMethod']!='FB01' & pars['TtTdbMethod']!='FBgeo') stop(paste0('In',opt$par,', TtTdbMethod value is not valid, it should be eph or FB01 or FBgeo'),call. = FALSE)
     Par$TtTdbMethod <- pars['TtTdbMethod']
 }else{
     Par$TtTdbMethod <- 'eph'
