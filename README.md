@@ -8,22 +8,18 @@ PEXO is able to model timing to a precision of 1 ns, astrometry to a precision o
 
 The relevant paper will be published by ApJS. If you use PEXO in your work, please cite the paper:
 ```
-@ARTICLE{2019arXiv191001750F,
-       author = {{Feng}, Fabo and {Lisogorskyi}, Maksym and {Jones}, Hugh R.~A. and
-         {Kopeikin}, Sergei M. and {Butler}, R. Paul and
-         {Anglada-Escude}, Guillem and {Boss}, Alan P.},
-        title = "{PEXO: a global modeling framework for nanosecond timing, microsecond astrometry, and \{\textbackslashmu\}m/s radial velocities}",
-      journal = {arXiv e-prints},
-     keywords = {Astrophysics - Earth and Planetary Astrophysics, Astrophysics - Instrumentation and Methods for Astrophysics, Astrophysics - Solar and Stellar Astrophysics},
-         year = "2019",
-        month = "Oct",
-          eid = {arXiv:1910.01750},
-        pages = {arXiv:1910.01750},
-archivePrefix = {arXiv},
-       eprint = {1910.01750},
- primaryClass = {astro-ph.EP},
-       adsurl = {https://ui.adsabs.harvard.edu/abs/2019arXiv191001750F},
-      adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+@article{Feng_2019,
+	doi = {10.3847/1538-4365/ab40b6},
+	url = {https://doi.org/10.3847%2F1538-4365%2Fab40b6},
+	year = 2019,
+	month = {oct},
+	publisher = {American Astronomical Society},
+	volume = {244},
+	number = {2},
+	pages = {39},
+	author = {Fabo Feng and Maksym Lisogorskyi and Hugh R. A. Jones and Sergei M. Kopeikin and R. Paul Butler and Guillem Anglada-Escud{\'{e}} and Alan P. Boss},
+	title = {{PEXO}: A Global Modeling Framework for Nanosecond Timing, Microarcsecond Astrometry, and $\upmu$m s-1 Radial Velocities},
+	journal = {The Astrophysical Journal Supplement Series}
 }
 ```
 
