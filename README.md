@@ -6,7 +6,7 @@ Compared with previous models and packages, PEXO is general enough to account fo
 
 PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 μas, and radial velocity to a precision of 1 μm/s. There are [pdf](https://github.com/phillippro/pexo/blob/master/docs/manual.pdf) and [html](http://rpubs.com/Fabo/pexo) versions of the manual available for instructions of how to use PEXO. The fitting mode and a python wrapper are in development and expected to be released by the end of November 2019.
 
-The relevant paper will be published by ApJS. If you use PEXO in your work, please cite the paper:
+The relevant paper was published by ApJS. If you use PEXO in your work, please cite the paper:
 ```
 @article{Feng_2019,
 	doi = {10.3847/1538-4365/ab40b6},
