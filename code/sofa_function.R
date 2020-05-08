@@ -388,7 +388,7 @@ sofa_Dat <- function(g){
 # for pre-1960 dates, zero difference is used.
     index <- which(m<mmin)
     if(length(index)>0){
-        cat('Warning: ',length(index),' epochs earlier than 1960 January 1.0 (JD 2436934.5) when UTC began and zero UTC-TAI drift is used.')
+        cat('Warning: ',length(index),' epochs earlier than 1960 January 1.0 (JD 2436934.5) when UTC began and zero UTC-TAI drift is used.\n')
         if(length(Dt)>length(index)){
             Dt[index] <- min(Dt[-index])
         }else{

@@ -1,5 +1,4 @@
 ###this file include functions for astrometry modeling
-
 astro_deg2hdms <- function(RAdeg,DEdeg){
 ####################################
 ## Convert from deg to h/d m s
@@ -730,8 +729,8 @@ astro_aberration <- function(lo,vSO,RSO,MA=1,g=1){
 ##   dl3 - third order aberration vector
 ##   dl - total aberration vector
 ####################################
-    lvl <- cross(lo,cross(vSO,lo))
-    vlv <- cross(vSO,cross(lo,vSO))
+    lvl <- pracma::cross(lo,pracma::cross(vSO,lo))
+    vlv <- pracma::cross(vSO,pracma::cross(lo,vSO))
     lv <- rowSums(lo*vSO)
     w <- 4*pi^2*MA/RSO#au/yr
     p1 <- lvl
@@ -760,16 +759,21 @@ astro_CalSB <- function(tB,Par){
 ##   uSB.T2 - uSB calculated using the TEMPO2 method
 ####################################
     d0 <- 1/Par$plx#kpc
-    pqu <- cbind(Par$p,Par$q,Par$u)
-
+    pqu <- Par$pqu
+#    cat('p=',pqu[,1],'\n')
+#    cat('q=',pqu[,2],'\n')
+#    cat('u=',pqu[,3],'\n')
+#    cat('Par$pmra=',Par$pmra,'\n')
+#    cat('Par$pmdec=',Par$pmdec,'\n')
+#    cat('Par$rv=',Par$rv,'\n')
     v1 <- c(d0*Par$pmra,d0*Par$pmdec,Par$rv/auyr2kms)#au/yr in p,q,u system, assuming zero galactic acceleration, vSB(t)=vSB(t0)
-    vSB <- as.numeric(Par$p*v1[1]+Par$q*v1[2]+Par$u*v1[3])#au/yr
+    vSB <- as.numeric(pqu[,1]*v1[1]+pqu[,2]*v1[2]+pqu[,3]*v1[3])#au/yr
     dt <- as.numeric((tB[,1]-Par$tpos)+(tB[,2]))/DJY#year
 #    if(UNITS=='TDB'){
 #        dt <- dt/IFTE.K
 #    }
     drSB <- cbind(dt*vSB[1],dt*vSB[2],dt*vSB[3])/pc2au#pc
-    rSB0 <- d0*1e3*c(cos(dec0)*cos(ra0),cos(dec0)*sin(ra0),sin(dec0))#pc
+    rSB0 <- d0*1e3*c(cos(Par$dec)*cos(Par$ra),cos(Par$dec)*sin(Par$ra),sin(Par$dec))#pc
     rSB <- cbind(drSB[,1]+rSB0[1],drSB[,2]+rSB0[2],drSB[,3]+rSB0[3])
 #    if(UNITS=='TDB'){
 #        rSB <- rSB/IFTE.K
@@ -779,17 +783,16 @@ astro_CalSB <- function(tB,Par){
     RSB0 <- sqrt(sum(rSB0^2))
 #    SB <- cbind(asNumeric(rSB),t(replicate(nrow(t),vSB)))
     SB <- cbind(rSB,t(replicate(nrow(tB),vSB)))
-
 ###compared with the TEMPO2 approach
     if(Par$CompareT2){
-        mu.perp <- Par$pmra*Par$p+Par$pmdec*Par$q/IFTE.K#mas/yr; from ephemeris to coordinate
+        mu.perp <- Par$pmra*Par$pqu[,1]+Par$pmdec*Par$pqu[,2]/IFTE.K#mas/yr; from ephemeris to coordinate
         mu.para <- Par$rv/auyr2kms/d0/IFTE.K#mas/yr
         u1 <- outer(dt,mu.perp*DMAS2R,FUN='*')#rad
-        u2 <- -outer(dt^2*DMAS2R^2,0.5*sum(mu.perp^2)*Par$u,'*')#rad
+        u2 <- -outer(dt^2*DMAS2R^2,0.5*sum(mu.perp^2)*Par$pqu[,3],'*')#rad
         u3 <- -outer(dt^2*DMAS2R^2,mu.para*mu.perp,'*')#rad
-        u0 <- t(replicate(nrow(tB),Par$u))
+        u0 <- t(replicate(nrow(tB),Par$pqu[,3]))
         du1 <- t(replicate(length(dt),mu.perp*DMAS2R))#rad/yr
-        du2 <- -outer(2*dt*DMAS2R^2,0.5*sum(mu.perp^2)*Par$u,'*')#rad/yr
+        du2 <- -outer(2*dt*DMAS2R^2,0.5*sum(mu.perp^2)*Par$pqu[,3],'*')#rad/yr
         du3 <- -outer(2*dt*DMAS2R^2,mu.para*mu.perp,'*')#rad/yr
         uSBt <- u0+u1+u2+u3
         uSB.T2 <- list(uSBt=uSBt,u0=u0,u1=u1,u2=u2,u3=u3,du1=du1,du2=du2,du3=du3)
@@ -818,7 +821,7 @@ astro_LenSolar <- function(l1,OL,g=1){
     Def <- 0
     for(n in ns){
         sr <- SRS*Mssp[n]*(1+g)/2#au
-        dL <- cross(l1,cross(OL[[n]][,c('x.au','y.au','z.au')],l1))
+        dL <- pracma::cross(l1,pracma::cross(OL[[n]][,c('x.au','y.au','z.au')],l1))
         DL <- sqrt(rowSums(dL^2))
         dl <- -(sr*dL/(DL^2))*(1+OL[[n]][,'cpsi'])#rad
         Def <- Def+dl
@@ -844,7 +847,7 @@ astro_LenTarget <- function(l1,MA,rOT,rOA,rTA,g=1){
     RTA <- sqrt(rowSums(rTA^2))
     ROT <- sqrt(rowSums(rOT^2))
     ROA <- sqrt(rowSums(rOA^2))
-    oto <- cross(as.matrix(rOT),cross(as.matrix(rTA),as.matrix(rOA)))
+    oto <- pracma::cross(as.matrix(rOT),pracma::cross(as.matrix(rTA),as.matrix(rOA)))
     oaa <- ROT*ROA*(RTA*ROA+rowSums(rOA*rTA))
     dl <- -pp*oto/oaa#vector
     list(l=l1+dl,dl=dl)
@@ -870,16 +873,14 @@ astro_Relative <- function(rBT,rSO,tS,Par){
 ##   eta - Full offset in +y
 ####################################
     dt <- ((tS[,1]-Par$tpos)+tS[,2])/DJY
-    ra <- Par$ra
-    dec <- Par$dec
     pmra <- Par$pmra
     pmdec <- Par$pmdec
     plx <- Par$plx
     pmrv <- Par$rv/auyr2kms*plx#mas/yr
     R <- (rBT-rSO)*plx
-    p <- Par$p
-    q <- Par$q
-    u <- Par$u
+    p <- Par$pqu[,1]
+    q <- Par$pqu[,2]
+    u <- Par$pqu[,3]
     pR <- R[,1]*p[1]+R[,2]*p[2]+R[,3]*p[3]
     qR <- R[,1]*q[1]+R[,2]*q[2]+R[,3]*q[3]
     uR <- R[,1]*u[1]+R[,2]*u[2]+R[,3]*u[3]
@@ -954,7 +955,8 @@ astro_FullModel <- function(OutBary,OutTime,Par,Mlens=1,component='T'){
 
 ##lensing in the target system
 ###PPN parameter; GR (g=1)
-    if(Mlens>0 & Par$binary){
+    if(is.null(Mlens)) Mlens <- 0
+    if(Mlens>0 & Par$binary & Par$Np>0){
         if(component=='T'){
             tmp <- astro_LenTarget(l1=le,MA=Mlens,rOT=rOT*pc2au,rOA=rOC*pc2au,rTA=rTC,g=Par$g)
         }else{
@@ -974,7 +976,12 @@ astro_FullModel <- function(OutBary,OutTime,Par,Mlens=1,component='T'){
 
 ####atmospheric refraction
                                         #    elevation[elevation<0] <- -elevation[elevation<0]
-    if(grepl('ref',Par$RefType) & Par$ObsType=='ground'){
+    elevation <- rep(NA,Par$Nepoch)
+    Ref <- rep(0,Par$Nepoch)
+    ref <- cbind(Ref,Ref,Ref)
+    lo <- li
+    indG <- which(Par$ObsInfo[,'ObsType']=='ground' & Par$ObsInfo[,'RefType']!='none')
+    if(length(indG)>0){
         if(component=='T'){
             elevation <- asin(rowSums(zenith*uOT))
         }else{
@@ -990,11 +997,6 @@ astro_FullModel <- function(OutBary,OutTime,Par,Mlens=1,component='T'){
         }
         lo <- li-ref
         lo <- lo/sqrt(rowSums(lo^2))
-    }else{
-        elevation <- NA
-        Ref <- rep(0,Par$Nepoch)
-        ref <- cbind(Ref,Ref,Ref)
-        lo <- li
     }
     lomli <- lo-li
 
@@ -1028,7 +1030,7 @@ astro_FullModel <- function(OutBary,OutTime,Par,Mlens=1,component='T'){
     list(DirObs=dir,uo=uo,lo=lo,li=li,ll=ll,OffAll=OffAll,OffAbe=OffAbe,OffAbe1=OffAbe1,OffAbe2=OffAbe2,OffLenT=OffLenT,OffLenS=OffLenS,SolarDef=LenSolar$Def,SolarDefList=LenSolar$DefList,OffRef=OffRef,Ref=Ref,ref=ref,uommlo=uommlo,uommlo1=uommlo1,uommlo2=uommlo2,uommlo3=uommlo3,lomli=lomli,limll=limll,llmle=llmle,dl.all=dl.all,dl.woRef=dl.woRef)
 }
 
-astro_CalElevation <- function(zenith,dzenith,uOT){
+astro_CalElevation <- function(zenith,dzenith,uOT,verbose=FALSE){
 ####################################
 ## Calculate elevation angle of the target
 ##
@@ -1046,8 +1048,7 @@ astro_CalElevation <- function(zenith,dzenith,uOT){
     delevation <- 1/sqrt(1-(rowSums(zenith*uOT))^2)*(rowSums(dzenith*uOT))
     ind <- which(elevation<0)
     if(length(ind)>0){
-#        cat('elevation angle < 0 for ',length(ind),'UTC times and the absolute values of elevation are used!!!\n')
-        cat('elevation angle < 0 for ',length(ind),'UTC epochs!\n')
+        if(verbose) cat('elevation angle < 0 for ',length(ind),'UTC epochs!\n')
     }
 #    elevation <- abs(elevation)
     ZenIn <- pi/2-elevation
@@ -1080,4 +1081,23 @@ astro_CalRefraction <- function(zenith,ZenIn,uOT,Par){
         Ref <- ref <- RvRef <- 0
     }
     list(Ref=Ref,ref=ref,RvRef=RvRef)
+}
+
+astro_RaDec2pqu <- function(ra,dec){
+####################################
+## Convert from RA and DEC to [p q u] triad
+##
+## Input:
+##   ra - Right ascension (rad)
+##   dec - Declination (rad)
+##
+## Output:
+##  p - Direction of increasing RA
+##  q - Direction of increasing DEC
+##  u - Direction of increasing distance
+####################################
+    p <- as.numeric(c(-sin(ra),cos(ra),0))
+    q <- as.numeric(c(-sin(dec)*cos(ra),-sin(dec)*sin(ra),cos(dec)))
+    u <- as.numeric(c(cos(dec)*cos(ra),cos(dec)*sin(ra),sin(dec)))
+    cbind(p,q,u)
 }

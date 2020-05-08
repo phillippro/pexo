@@ -1,9 +1,8 @@
 ###################################################################################
 ##This file includes functions for relativistic astrometry
 ################################################################################
-
 rv_GravTarget <- function(M,r,g=1){
-####################################
+##n##################################
 ## Calculate gravitational redshift
 ##
 ## Input:
@@ -62,7 +61,7 @@ rv_LenTarget <- function(ML,vSL,RLT,rOT,vSO,rOL,vST,g=1){
     ROT <- gen_CalLen(rOT)
     uOT <- gen_CalUnit(rOT)
     ROL <- sqrt(rowSums(rOL^2))
-    lambda <- cross(uOT,cross(rOL,uOT))
+    lambda <- pracma::cross(uOT,pracma::cross(rOL,uOT))
     alpha <- (1+g)*SRS*ML*lambda/rowSums(lambda^2)#alpha
     dZ <- (vSL-RLT/ROT*vSO-ROL/ROT*vST)/Cauyr
     rowSums(dZ*alpha)
@@ -92,7 +91,7 @@ rv_LenSolar <- function(OL,rOT,vST,vSO,g=1,LenRVmethod='T2'){
     ROT <- gen_CalLen(rOT)*pc2au
     uOT <- gen_CalUnit(rOT)
     for(n in ns){
-#        lambda <- cross(uOT,cross(OL[[n]][,c('x.au','y.au','z.au')],uOT))#au
+#        lambda <- pracma::cross(uOT,pracma::cross(OL[[n]][,c('x.au','y.au','z.au')],uOT))#au
         rOL <- OL[[n]][,c('x.au','y.au','z.au')]
         vOL <- OL[[n]][,c('vx.auyr','vy.auyr','vz.auyr')]
         cpsi <-  OL[[n]][,'cpsi']
@@ -118,50 +117,74 @@ rv_LenSolar <- function(OL,rOT,vST,vSO,g=1,LenRVmethod='T2'){
     list(Zall=Zall,Zlist=Zlist)
 }
 
-rv_FullModel <- function(OutBary,OutTime,Par){
+rv_FullModel <- function(OutBary,OutTime,Par,component='T'){
 ####################################
-    ## Full model of redshift/rv due to all effects
-    ##
-    ## Input:
-    ##   OutBary - Output of time_Utc2tb
-    ##   OutTime - Output of time_Ta2te
-    ##   Par - Input parameters
-    ##
-    ## Output:
-    ##   all - All RV effects
-    ##   RvgsO - RV due to general and special relativity in the Solar System
-    ##   RvgT - RV due to general relativity in the target system
-    ##   RvlO - RV due to lensing by Solar System bodies
-    ##   RvSO - RV due to motion of the SSB relative to the observer
-    ##   RvsT - RV due to special relativity in the target system
-    ##   RvST - RV due to the motion of the SSB relative to the target
-    ##   RvSB - RV due to the motion of the SSB relative to the TSB
-    ##   RvBT - RV due to the motion of the TSB relative to the target
-    ##   RvSG - RV due to the motion of the SSB relative to the geocenter
-    ##   RvGO - RV due to the motion of the geocenter relative to the observer
-    ##   RvlT - RV due to lensing by target system bodies (Only companion lensing is considered assuming the lensing effect due to the target star is symmetric)
-    ##   RvTropo - RV due to atmospheric/tropospheric refraction
-    ##   RvRemote - Combined RV due to remote (or target system) effects
-    ##   RvLocal - Combined RV due to local (or Solar System) effects
-    ##   Zcomb - A list of all types of Doppler shifts (the corresponding meanings of names are simliar to that of rv terms)
+## Full model of redshift/rv due to all effects
+##
+## Input:
+##   OutBary - Output of time_Utc2tb
+##   OutTime - Output of time_Ta2te
+##   Par - Input parameters
+##   component - component in the target system
+##
+## Output:
+##   all - All RV effects
+##   RvgsO - RV due to general and special relativity in the Solar System
+##   RvgT - RV due to general relativity in the target system
+##   RvlO - RV due to lensing by Solar System bodies
+##   RvSO - RV due to motion of the SSB relative to the observer
+##   RvsT - RV due to special relativity in the target system
+##   RvST - RV due to the motion of the SSB relative to the target
+##   RvSB - RV due to the motion of the SSB relative to the TSB
+##   RvBT - RV due to the motion of the TSB relative to the target
+##   RvSG - RV due to the motion of the SSB relative to the geocenter
+##   RvGO - RV due to the motion of the geocenter relative to the observer
+##   RvlT - RV due to lensing by target system bodies (Only companion lensing is considered assuming the lensing effect due to the target star is symmetric)
+##   RvTropo - RV due to atmospheric/tropospheric refraction
+##   RvRemote - Combined RV due to remote (or target system) effects
+##   RvLocal - Combined RV due to local (or Solar System) effects
+##   Zcomb - A list of all types of Doppler shifts (the corresponding meanings of names are simliar to that of rv terms)
 ####################################
-    MT <- Par$mT
-    MC <- Par$mC
+    if(component!='T' & component!='C') stop('Error: the component argument is not T or C!')
     RT <- NA
-    if(any(names(Par)=='RT')) RT <- Par['RT']#Target radii (Rsun)
     emrat <- OutBary$emrat
     dt <- ((OutTime$tS[,1]-Par$tpos)+OutTime$tS[,2])/DJY
+    Nepoch <- length(dt)
     vSO <- OutBary$SO[,4:6]/auyr2kms#au/yr
     rSO <- OutBary$SO[,1:3]/au2km#au
     rSB <- OutTime$rSB#pc
-    rST <- OutTime$rST
-    rOT <- OutTime$rOT
-    ROT <- gen_CalLen(rOT)#pc
-    uOT <- OutTime$uOT
+    vSB <- OutTime$vSB
+    if(component=='T'){
+        MT <- Par$mT
+        MC <- Par$mC1
+        if(any(names(Par)=='RT')) RT <- Par$RT#Target radii (Rsun)
+        rST <- OutTime$rST
+        rOT <- OutTime$rOT
+        rOC <- OutTime$rOC
+        ROT <- gen_CalLen(rOT)#pc
+        uOT <- OutTime$uOT
+        vST <- OutTime$vST#au/yr
+        vSC <- OutTime$vSC
+        if(Par$binary & Par$Np>0) rTC <- OutTime$rTC
+        vBT <- OutTime$vBT#au/yr
+    }else{
+###exchange T and C if component=C
+        MC <- Par$mT
+        MT <- Par$mC1
+        if(any(names(Par)=='RC')) RT <- Par$RC#Target radii (Rsun)
+        rST <- OutTime$rSC
+        rOT <- OutTime$rOC
+        rOC <- OutTime$rOT
+        ROT <- gen_CalLen(rOT)#pc
+        uOT <- OutTime$uOC
+        vST <- OutTime$vSC#au/yr
+        vSC <- OutTime$vST#au/yr
+        if(Par$binary & Par$Np>0) rTC <- -OutTime$rTC
+        vBT <- OutTime$vSC-vSB
+    }
     Ztropo <- OutTime$Ztropo
     dtt.dtcb <- 1/OutBary$dTCB.dTT
     vSG <- OutBary$SG[,4:6]/auyr2kms
-    vST <- OutTime$vST#au/yr
     vGO <- OutBary$GO[,4:6]/auyr2kms
     rGO <- OutBary$GO[,1:3]/au2km
     RGO <- sqrt(rowSums(rGO^2))
@@ -175,29 +198,43 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     ZgO <- ZgSS$Zall
 #    ZgsO <- ZgO+ZsO
     ZgsO <- ZgsO.de
-    lensing <- rv_LenSolar(OutTime$OL,OutTime$rOT,vST=vST,vSO=vSO,g=1,LenRVmethod=Par$LenRVmethod)
+    lensing <- rv_LenSolar(OutTime$OL,rOT,vST,vSO,g=1,LenRVmethod=Par$LenRVmethod)
     ZlO <- lensing$Zall
-    if(Par$binary){
-        RCT <- gen_CalLen(OutTime$rTC)
-        ZgT <- rv_GravTarget(MC,RCT,g=Par$g)
+    Zgc <- 0#gravitational and convection Doppler shift of the target star
+    if(component=='T'){
+        star <- Par$star
+        vn <- paste0('vOff.',star)
+        if(any(names(Par)==vn)) Zgc <- Par[[vn]]/CMPS
+    }else{
+        star <- Par$stars[Par$stars!=Par$star]
+        vn <- paste0('vOff.',star)
+        if(any(names(Par)==vn)) Zgc <- Par[[vn]]/CMPS
+    }
+    ZgT <- Zgc
+    if(Par$binary & Par$Np>0){
+        RCT <- gen_CalLen(rTC)
+        ZgT <- ZgT+rv_GravTarget(MC,RCT,g=Par$g)
         if(!is.na(RT)){
-            ZgT <- ZgT+rv_GravTarget(MT,RT*Rsun.au,g=Par$g)#gravitational Doppler shift due to the target if the radius and mass of the target star is known
+            Zself <- rv_GravTarget(MT,RT*Rsun.au,g=Par$g)#gravitational Doppler shift due to the target if the radius and mass of the target star is known
+#	    cat('Zself*CMPS=',Zself*CMPS,'\n')
+            ZgT <- ZgT+Zself
         }
         if(length(ZgT)==1){
             ZgT <- rep(ZgT,nrow(uOT))
         }
         if(all(is.na(ZgT)))  ZgT <- 0
-
 ###lensing in the solar system at the observer's location; assuming the Sun is static in the SSB
 ###    ZLO <- lensing.shift(1,vLT=vSO,uOT=uOT,rOL=rOS)
 ###        ZLT <- lensing.shift(ML=MC,vLT=vCT,uOT=uOT,rOL=rOC*pc2au)#lensing in the target system; correspond to shapiro delay
-        ZlT <- rv_LenTarget(ML=MC,vSL=OutTime$vSC,RLT=RCT,rOT=rOT*pc2au,vSO=vSO,rOL=OutTime$rOC*pc2au,vST=vST,g=1)
+        ZlT <- rv_LenTarget(ML=MC,vSL=vSC,RLT=RCT,rOT=rOT*pc2au,vSO=vSO,rOL=rOC*pc2au,vST=vST,g=1)
     }else{
         ZlT <- ZgT <- 0
     }
+#test
+    if(TRUE) uOT <- OutTime$uOB
     RvST <- rowSums(uOT*vST)
-    RvSB <- rowSums(uOT*OutTime$vSB)
-    RvBT <- rowSums(uOT*OutTime$vBT)
+    RvSB <- rowSums(uOT*vSB)
+    RvBT <- rowSums(uOT*vBT)
     RvSG <- rowSums(uOT*vSG)
     RvGO <- rowSums(uOT*vGO)
     RvSO <- rowSums(uOT*vSO)
@@ -205,14 +242,17 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     ZSO <- RvSO/Cauyr
     VST <-sqrt(rowSums(vST^2))
     ZsT <- (VST/Cauyr)^2/2#Doppler shift due to special relativity
-    ZgsT <-ZgT+ZsT
+    if(Par$Einstein){
+       ZgsT <- ZgT+ZsT
+    }else{
+       ZgsT <- ZsT
+    }
 ####local and remote
     Zlocal <- (1-ZgsO)/(1+ZSO-ZlO-Ztropo)-1
     Zremote <- (1+ZST-ZlT)/(1-ZgsT)-1
-###all RV
     Z <- (1-ZgsO)/(1-ZgsT)*(1+ZST-ZlT)/(1+ZSO-ZlO-Ztropo)-1
 ###barycentric correction
-    u0 <- t(replicate(Par$Nepoch,Par$u))
+    u0 <- t(replicate(Nepoch,Par$pqu[,3]))
     RvST0 <- rowSums(vST*u0)
     ZST0 <- RvST0/Cauyr
     ZLT <- (Par$rv/CKMPS)*(1000/Par$plx)*pc2au/Cauyr*(Par$pmra^2+Par$pmdec^2)*DMAS2R*DMAS2R*dt#light travel term
@@ -226,7 +266,7 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     ZBwe <- (1+ZSO)/(1-ZgsO)*(1+ZST0)/(1+ZST)-1-ZlO-ZLT#Wright & Eastman 2014 version
     Zcomb <- list(Ztot=Z,Zlocal=Zlocal,Zremote=Zremote,ZgsT=ZgsT,ZgsO=ZgsO,ZST=ZST,ZST0=ZST0,ZlT=ZlT,ZgT=ZgT,ZsT=ZsT,ZSO=ZSO,ZlO=ZlO,Ztropo=Ztropo,ZgsO.de=ZgsO.de,ZgO=ZgO,ZsO=ZsO,ZB=ZB,ZBwe=ZBwe,ZlT=ZlT,ZST0=ZST0,ZgSS=ZgSS,Zlensing=lensing$Zlist)
     RvTropo <- Ztropo*CMPS
-    RvALL <- Z*CMPS#m/s; absolute RV
+    RvAll <- Z*CMPS#m/s; absolute RV
     RvRemote <- Zremote*CMPS
     RvLocal <- Zlocal*CMPS
     RvgsO <- ZgsO*CMPS#m/s
@@ -235,7 +275,7 @@ rv_FullModel <- function(OutBary,OutTime,Par){
     RvsT <- ZsT*CMPS#
     RvlO <- ZlO*CMPS#
     RvlT <- ZlT*CMPS#
-    list(RvTot=RvALL,RvgsO=RvgsO,RvgT=RvgT,RvlO=RvlO,RvSO=RvSO*auyr2kms*1e3,RvsT=RvsT,RvST=RvST*auyr2kms*1e3,RvSB=RvSB*auyr2kms*1e3,RvBT=RvBT*auyr2kms*1e3,RvSG=RvSG*auyr2kms*1e3,RvGO=RvGO*auyr2kms*1e3,RvlT=RvlT,RvTropo=RvTropo,RvRemote=RvRemote,RvLocal=RvLocal,Zcomb=Zcomb)
+    list(RvTot=RvAll,RvgsO=RvgsO,RvgT=RvgT,RvlO=RvlO,RvSO=RvSO*auyr2kms*1e3,RvsT=RvsT,RvST=RvST*auyr2kms*1e3,RvSB=RvSB*auyr2kms*1e3,RvBT=RvBT*auyr2kms*1e3,RvSG=RvSG*auyr2kms*1e3,RvGO=RvGO*auyr2kms*1e3,RvlT=RvlT,RvTropo=RvTropo,RvRemote=RvRemote,RvLocal=RvLocal,Zcomb=Zcomb)
 }
 
 rv_Numerical <- function(utc,Par,OutBary,OutTime){

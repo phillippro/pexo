@@ -1,0 +1,5 @@
+This file is to describe the content and use of each R script file.
+
+##linear_fit.R
+This file is to fit a linear function to each run and combine all data in order to avoid potential intra-night or intra-season drift. It is equivalent to treat each season as an independent set.
+

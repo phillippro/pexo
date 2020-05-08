@@ -30,13 +30,13 @@ layout(matrix(data=c(rep(1,4),rep(2,4),rep(3,4),rep(4,4)),nrow=4,ncol=4,byrow = 
 t <- time_Jd2yr(utc)
 #xlab=expression(JD[UTC]-JD[UTC0])
 ylabs <- c('UTC-TAI','TCG-TAI','TT-TAI','UT1-TAI','TDB-TAI','TCB-TAI','BJD[TDB]-TAI','BJD[TCB]-TAI','tB-TAI','tauE-TAI')
-tai <- OutBary$JDtai
+tai <- OutObs$JDtai
 dutc <- time_T2mT2(utc,tai)
-dtcg <- time_T2mT2(OutBary$JDtcg,tai)
-dtt <- time_T2mT2(OutBary$JDtt,tai)
-dut1 <- time_T2mT2(OutBary$JDut1,tai)
-dtdb <- time_T2mT2(OutBary$JDtdb,tai)
-dtcb <- time_T2mT2(OutBary$JDtcb,tai)
+dtcg <- time_T2mT2(OutObs$JDtcg,tai)
+dtt <- time_T2mT2(OutObs$JDtt,tai)
+dut1 <- time_T2mT2(OutObs$JDut1,tai)
+dtdb <- time_T2mT2(OutObs$JDtdb,tai)
+dtcb <- time_T2mT2(OutObs$JDtcb,tai)
 dBJDtdb <- time_T2mT2(OutTime$BJDtdb,tai)
 dBJDtcb <- time_T2mT2(OutTime$BJDtcb,tai)
 dtB <- time_T2mT2(OutTime$tB,tai)
@@ -76,13 +76,13 @@ legend('topright',legend=ylabs,col=cols,lty=1,bty='n',cex=size)
 par(mar=c(5,5,1,1),mfrow=c(4,4))
 plot(t,OutTime$TropoDelay,xlab=xlab,ylab='Tropospheric delay [s]',type='l')
 plot(t,OutTime$RoemerSolar,xlab=xlab,ylab='RoemerSolar [s]',type='l')
-plot(t,time_T2mT2(OutBary$JDtcb,OutBary$JDtt),xlab=xlab,ylab='EinsteinSolar [s]',type='l')
+plot(t,time_T2mT2(OutObs$JDtcb,OutObs$JDtt),xlab=xlab,ylab='EinsteinSolar [s]',type='l')
 plot(t,OutTime$ShapiroSolar,xlab=xlab,ylab='ShapiroSolar [s]',type='l')
 plot(t,OutTime$ShapiroPlanet$Sun,xlab=xlab,ylab='ShapiroSun [s]',type='l')
 plot(t,OutTime$ShapiroPlanet$Earth,xlab=xlab,ylab='ShapiroEarth [s]',type='l')
 plot(t,OutTime$ShapiroPlanet$Saturn,xlab=xlab,ylab='ShapiroSaturn [s]',type='l')
 plot(t,OutTime$ShapiroPlanet$Jupiter,xlab=xlab,ylab='ShapiroJupiter [s]',type='l')
-if(Par$binary){
+if(Par$binary & Par$Np>0){
     if(any(names(Par)=='T0')){
         dt <- (rowSums(OutTime$tB)-Par$T0)/DJY
     }
@@ -125,12 +125,12 @@ if(Par$binary){
 t1 <- time_Jd2yr(OutTime$tB)
 plot(t1,time_T2mT2(OutTime$tauE,OutTime$tB),xlab='tB [yr]',ylab='tauE-tB [s]',type='l')
 plot(t1,time_T2mT2(OutTime$tB,OutTime$tS),xlab='tB [yr]',ylab='tB - tS [s]',type='l')
-plot(t1,time_T2mT2(OutTime$BJDtcb,OutBary$JDtcb),xlab='tB [yr]',ylab='tS-JD[TCB] [s]',type='l')
-plot(t1,time_T2mT2(OutBary$JDtcb,utc),xlab='tB [yr]',ylab='JD[TCB]-JD[UTC] [s]',type='l')
+plot(t1,time_T2mT2(OutTime$BJDtcb,OutObs$JDtcb),xlab='tB [yr]',ylab='tS-JD[TCB] [s]',type='l')
+plot(t1,time_T2mT2(OutObs$JDtcb,utc),xlab='tB [yr]',ylab='JD[TCB]-JD[UTC] [s]',type='l')
 
 dev.off()
 
-if(Par$binary){
+if(Par$binary & Par$Np>0){
 fout <- paste0('../results/',Par$star,'_shapiro.pdf')
 cat(fout,'\n')
 pdf(fout,12,4)
@@ -142,9 +142,9 @@ dev.off()
 if(FALSE){
 xrange <-c(0,4)
 t2 <- rowSums(utc-as.numeric(utc[1,]))
-plot(t2,rowSums(OutBary$JDtt-utc)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
-plot(t2,rowSums(OutBary$JDtcb-OutBary$JDtt)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
-plot(t2,rowSums(tS-OutBary$JDtcb)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
+plot(t2,rowSums(OutObs$JDtt-utc)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
+plot(t2,rowSums(OutObs$JDtcb-OutObs$JDtt)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
+plot(t2,rowSums(tS-OutObs$JDtcb)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
 plot(t2,rowSums(tS-utc)*DAYSEC,xlab=expression('JY[UTC]-'*JY[0]*'[UTC]'),type='l')
 
 if(Par$SBscaling){

@@ -1,0 +1,18 @@
+Hipparcos astrometry computed via the hipAstrometry Java application.
+Each file contains observations of a HIP star, with its HIP number if the file name
+
+Columns:
+t: float year
+
+obsX obsY: RA, Dec
+
+barStartX barStartY barEndX barEndY: X and Y position of the error bar edges.
+From the documentation: "Each straight line indicates the observed po-sition of the star at a particular epoch: because themeasurement is one-dimensional, the precise locationalong this position line is undetermined by the observation."
+
+The field Consortium has the following meaning:
+F:data from FAST;
+f:data from FAST rejected in constructing the published astrometric solution;
+N:data from NDAC;
+n:data from NDAC rejected in constructing the published astrometric solution.
+
+
