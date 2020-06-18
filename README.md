@@ -1,4 +1,4 @@
-# PEXO v1.0
+# PEXO v2.0
 [![DOI](https://zenodo.org/badge/210655784.svg)](https://zenodo.org/badge/latestdoi/210655784)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
