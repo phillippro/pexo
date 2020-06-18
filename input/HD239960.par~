@@ -1,0 +1,61 @@
+Niter 1e5
+Ncore 4
+Nmax 1
+name HD239960
+#RefType refro
+RefType.KECK none
+RefType.WDS none
+EopType 2006
+TaiType instant
+TtType BIPM
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+BinaryModel kepler
+phi.KECK 19.82636 
+elong.KECK -155.47501
+height.KECK 4.145
+phi.APF 37.3425
+elong.APF -121.63825
+height.APF 1.274
+xtel.WDS 0
+ytel.WDS 0
+ztel.WDS 0
+xtel.hip 0
+ytel.hip 0
+ztel.hip 0
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch 2457206
+mT 0.271
+logmC -1.737271 -10 10 U
+ra 336.9920415327921
+dec 57.69411435099629
+plx 249.7407167785235
+pmra -807.4670357941834
+pmdec -405.6753355704698
+rv -33.937
+logP 9.7 -10 20 U
+e 0.410 0 1 U
+I  167.2 0 180 U
+omegaT 211.0 0 360 U
+Omega 154.5 0 360 U
+Tp 2440667.8 2430000 2450000 U
+raOff 0 -1000000 1000000 U
+decOff 0 -1000000 1000000 U
+pmraOff 0 -10000 10000 U
+pmdecOff 0 -10000 10000 U
+plxOff 0 -1000 1000 U
+#rvOff 0 -1000 1000 U
+jitterRv.HD239960.KECK 0 0 100 U
+jitterRv.HD239960.APF 0 0 100 U
+bRv.HD239960.KECK 0 -100000 100000 U
+bRv.HD239960.APF 0 -100000 100000 U
+#bRA.HD239960.hip 0 0 1000 N
+#bDEC.HD239960.hip 0 0 1000 N
