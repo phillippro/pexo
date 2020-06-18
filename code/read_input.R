@@ -33,26 +33,27 @@ option_list  <-  list(
 opt_parser  <-  OptionParser(option_list=option_list)
 opt  <- parse_args(opt_parser)
 ###Here are some examples for these arguments
-#if(FALSE){
-if(TRUE){
+if(FALSE){
+#if(TRUE){
 #opt$primary <- 'HD46375'
 #opt$primary <- 'GJ534'
 #opt$primary <- 'HD10790'
-opt$primary <- 'HD16160'
+opt$primary <- 'HD10700'
 #opt$Niter <- 1e4
 #opt$time <- '2447047 2458467 10'
-opt$time <- '2447000 2462000 10'
+#opt$time <- '2447000 2462000 10'
+opt$time <- '2450000 2460000 10'
 #opt$time <- '2445000 2465000 10'
 #opt$time <- '2454597 2454633 1'
 #opt$time <- '2452850 2457498 1'
 opt$mode  <- 'emulate'
 #opt$mode  <- 'fit'
 #opt$component <- 'TAR'
-opt$component <- 'TR'
+#opt$component <- 'TR'
 opt$ins <- 'APF'
-opt$var <- 'JDutc BJDtdb RvST RvgT RvsT RvgsO'
+#opt$var <- 'JDutc BJDtdb RvST RvgT RvsT RvgsO'
+opt$var <- 'JDutc BJDtdb BJDtcb'
 }
-if(opt$mode=='emulate') opt$component <- 'TAR'
 if(opt$mode=='emulate' & is.na(opt$ins)) stop('No input instrumentation or observatory for emulation!')
 instrument <- opt$ins
 

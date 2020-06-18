@@ -154,6 +154,7 @@ rv_FullModel <- function(OutObs,OutTime,Par,component='T'){
     vSB <- OutTime$vSB
     vSG <- OutObs$SG[,4:6]/auyr2kms
     vGO <- OutObs$GO[,4:6]/auyr2kms
+    Nt <- nrow(vGO)
 
     if(component=='T'){
         MT <- Par$mT
@@ -196,9 +197,9 @@ rv_FullModel <- function(OutObs,OutTime,Par,component='T'){
         lensing <- rv_LenSolar(OutTime$OL,rOT,vST,vSO,g=1,LenRVmethod=Par$LenRVmethod)
         ZlO <- lensing$Zall
     }else{
-        ZlO <- 0
+        ZlO <- rep(0,Nt)
     }
-    Zgc <- 0#gravitational and convection Doppler shift of the target star
+    Zgc <- rep(0,Nt)#gravitational and convection Doppler shift of the target star
     if(component=='T'){
         star <- Par$star
         vn <- paste0('vOff.',star)
@@ -221,9 +222,9 @@ rv_FullModel <- function(OutObs,OutTime,Par,component='T'){
             if(length(ZgT)==1){
                 ZgT <- rep(ZgT,nrow(uOT))
             }
-            if(all(is.na(ZgT)))  ZgT <- 0
+            if(all(is.na(ZgT)))  ZgT <- rep(0,Nt)
         }else{
-            ZgT <- 0
+            ZgT <- rep(0,Nt)
         }
 ###lensing in the solar system at the observer's location; assuming the Sun is static in the SSB
 ###    ZLO <- lensing.shift(1,vLT=vSO,uOT=uOT,rOL=rOS)
@@ -231,10 +232,10 @@ rv_FullModel <- function(OutObs,OutTime,Par,component='T'){
         if(Par$Lensing){
             ZlT <- rv_LenTarget(ML=MC,vSL=vSC,RLT=RCT,rOT=rOT*pc2au,vSO=vSO,rOL=rOC*pc2au,vST=vST,g=1)
         }else{
-            ZlT <- 0
+            ZlT <- rep(0,Nt)
         }
     }else{
-        ZlT <- ZgT <- 0
+        ZlT <- ZgT <- rep(0,Nt)
     }
 #the following is for test
 #    if(TRUE) uOT <- OutTime$uOB
@@ -251,7 +252,7 @@ rv_FullModel <- function(OutObs,OutTime,Par,component='T'){
     if(Par$Einstein){
         ZsT <- (VST/Cauyr)^2/2#Doppler shift due to special relativity
     }else{
-        ZsT <- 0
+        ZsT <- rep(0,Nt)
     }
     ZgsT <- ZgT+ZsT
 

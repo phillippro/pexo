@@ -29,12 +29,12 @@ if(Par$binary & Par$Np>0){
 np <- np+1
 plot(tt3,OutRv$RvsT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Special relativity in TS'),type=type)
 if(Par$binary & Par$Np>0){
-np <- np+1
-plot(tt3,OutRv$RvBT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of T w.r.t. TSB'),type=type)
-np <- np+1
-plot(tt3,OutRv$RvSB,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of TSB w.r.t. SSB'),type=type)
-np <- np+1
-plot(tt3,OutRv$RvlT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Lensing in TS'),type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvBT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of T w.r.t. TSB'),type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvSB,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of TSB w.r.t. SSB'),type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvlT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Lensing in TS'),type=type)
 }
 np <- np+1
 plot(tt3,OutRv$RvlO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Lensing in SS'),type=type)

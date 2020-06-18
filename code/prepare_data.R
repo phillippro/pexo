@@ -26,7 +26,7 @@ if(opt$mode=='emulate'){
         utc <- time_ChangeBase(utc,1)
     }
     Data <- cbind(rowSums(utc),NA,NA,NA,NA,Par$star,'rv',instrument,0.5)
-    Par$ins[[star]]$rv <- opt$ins
+    Par$ins[[Par$star]]$rv <- opt$ins
 }else{
     Nt <- 0
     for(kk in 1:length(stars)){

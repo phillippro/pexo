@@ -14,15 +14,17 @@ ddu <- (du-du1)
 drv2 <- OutRv$RvTot*sqrt(rowSums(ddu^2))
 cat('\nRV effects:\n')
 cat('Relativistic effects in solar system:',gen_CalAmp(OutRv$RvgsO),'m/s\n')
-if(Par$PlanetShapiro){
-    ns <- c('Sun','Mercury','Venus','Earth','Moon','Mars','Jupiter','Saturn','Uranus','Neptune')
-}else{
-    ns <- 'Sun'
+if(Par$Lensing){
+    if(Par$PlanetShapiro){
+        ns <- c('Sun','Mercury','Venus','Earth','Moon','Mars','Jupiter','Saturn','Uranus','Neptune')
+    }else{
+        ns <- 'Sun'
+    }
+    for(n in ns){
+        cat('Lensing shift by',n,':',gen_CalAmp(OutRv$Zcomb$Zlensing[[n]])*CMPS,'m/s\n')
+    }
+    cat('Lensing by all SS planets and the Moon:',gen_CalAmp(OutRv$RvlO -OutRv$Zcomb$Zlensing$Sun*CMPS),'m/s\n')
 }
-for(n in ns){
-    cat('Lensing shift by',n,':',gen_CalAmp(OutRv$Zcomb$Zlensing[[n]])*CMPS,'m/s\n')
-}
-cat('Lensing by all SS planets and the Moon:',gen_CalAmp(OutRv$RvlO -OutRv$Zcomb$Zlensing$Sun*CMPS),'m/s\n')
 cat('SR effect in TS:',gen_CalAmp(OutRv$RvsT),'m/s\n')
 cat('GR effect in TS:',gen_CalAmp(OutRv$RvgT),'m/s\n')
 cat('lensing effect in target system:',gen_CalAmp(OutRv$RvlT),'m/s\n')

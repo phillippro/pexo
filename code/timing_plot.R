@@ -4,7 +4,7 @@ if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 plot.type <- 'useful'
 jd.utc <- rowSums(utc)
 Ntime <- nrow(utc)
-source('compare_with_T2.R')
+#source('compare_with_T2.R')
 
 dt <- diff(rowSums(utc))[1]
 tS <- OutTime$tS

@@ -5,7 +5,7 @@ if(grepl(',',opt$var)){
 }
 vars <- vars[vars!='']
 
-OutAll <- c(OutBary,OutTime,JDutc=utc)
+OutAll <- c(OutObs,OutTime,JDutc=utc)
 if(grepl('A',Par$component)){
     OutAll <- c(OutAll,OutAstroT)
 }
