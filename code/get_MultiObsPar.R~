@@ -36,8 +36,8 @@ Par[[tn]] <- 'ground'#Observatory type: ground (default) or space
 if(any(cn==xn) & any(cn==yn) & any(cn==zn)){
 ####customerized gound based observatory data
     eph <- sofa_Gc2gd(2,xyz=c(Par[[xn]]/1e3,Par[[yn]]/1e3,Par[[zn]]/1e3))
-    Par[[en]] <- eph['elong']*180/pi#deg
-    Par[[pn]] <- eph['phi']*180/pi#deg
+    Par[[en]] <- eph['elong']*180/pi#rad
+    Par[[pn]] <- eph['phi']*180/pi#rad
     Par[[hn]] <- eph['height']/1e3#km
 }else if(any(cn==en) & any(cn==pn) & any(cn==hn)){
 ####customerized gound based observatory data

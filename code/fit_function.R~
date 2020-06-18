@@ -791,7 +791,6 @@ fit_proposal <- function(ParOld, ParMin,ParMax,CovNew,PostSample,Sd,eps=1e-16,si
         if(class(ParProp)=='try-error') stop('Error: adatpive covariance is not positive definitive!\n')
         if(all(ParProp>ParMin & ParProp<ParMax)) break()
     }
-#    cat('k=',k,'\n')
     if(k==Ntt){
         ind <- which(ParProp<ParMin | ParProp>ParMax)
 	cat('problematic parameter:',names(ParProp)[ind],'\n')
@@ -884,8 +883,6 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
 ##   loglike - Log likelihood
 ####################################
     Niter <- Par$Niter
-    cat('Niter=',Niter,'\n')
-    t0 <- proc.time()
     Npar <- length(ParIni)
     CovIni  <- 1e-6*diag(Npar)
 #    CovIni  <- 1e-3*diag(Npar)
@@ -974,7 +971,6 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
             }
         }
     }
-    t1 <- fit_TimeCount(t0,'duration')
     cbind(chain,logpost,loglike)
 }
 
@@ -1049,15 +1045,21 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
 ####################################
     Niter0 <- Par$Niter
     Npar <- length(ParIni)
-    Nbasic <- Par$Niter <- Niter1 <- 1e3
+    Niter1 <- 1e3
+    Par$Niter <- Niter1
+    cat('Niter=',Par$Niter,'\n')
 ####check whether the lowest temperture is appropriate and redermine TemLow
     mcmc <- fit_multiChain(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=TemLow,verbose=verbose,OutTime0=OutTime0)
     ParIni <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
     acceptance <- fit_acceptance(mcmc)
     if(opt$verbose) cat('initial acceptance=',acceptance,'\n')
     beta <- 10
+#    beta <- 2
+    Nbasic <- Niter1
+    if(Niter0>=1e4) Nbasic <- 1e4
     if(acceptance<50){
         TemLow <- 1e-3*TemLow
+#	beta <- 2
     }
 
 #####Determine the optimal temperture
@@ -1074,12 +1076,12 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
         }
         mcmc <- fit_multiChain(Data=Data,OutObs=OutObs,RateObs=RateObs,ParIni=ParIni,ParMin=ParMin,ParMax=ParMax,Par=Par,tem=tem,verbose=verbose,OutTime0=OutTime0)
         acceptance <-  (1-mean(duplicated(mcmc)))*100
+
         if((acceptance<AccUp & tem>1e-3) | tem==1) break()
         ParIni <- mcmc[which.max(mcmc[,'loglike']),1:length(ParIni)]
 	if(OffUpdate) ParIni <- fit_OptIni(Data,OutObs,RateObs,ParIni,Par)#optimize offsets
 
-#        if(opt$verbose){
-        if(TRUE){
+        if(opt$verbose){
             cat('Adaptive tempering burning: tem=',format(tem,digit=3),'\n')
             cat('maximum likelihood=',max(mcmc[,'loglike']),'\n')
             cat('acceptance:',acceptance,'\n')

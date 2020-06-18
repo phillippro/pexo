@@ -41,7 +41,7 @@ dir.out <- '../results/'
 if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 dt <- diff(rowSums(utc))[1]
 Ntime <- nrow(utc)
-fname <- paste0(Par$star,'_astrometry_',Par$BinaryModel,'_dt',gsub('\\.','',dt),'day_Ntime',Ntime,'_',Par$RefType,'.pdf')
+fname <- paste0(Par$star,'_astrometry_',Par$BinaryModel,'_Ntime',Ntime,'_',Par$RefType,'.pdf')
 fout <- paste0(dir.out,'absolute_',fname)
 cat(fout,'\n')
 pdf(fout,12,12)
@@ -190,6 +190,7 @@ if(Par$star=='alphaCenA'){
 }
 dev.off()
 
+if(exists('OutAstroC')){
 ####relative astrometry
 if(Par$Np>0){
 fout <- paste0(dir.out,'relative_',fname)
@@ -257,6 +258,7 @@ eta.obs <- cbind((OutAstroC$DirObs[,1]-OutAstro$DirObs[,1])*cosd,OutAstroC$DirOb
 eta.obs2 <- cbind(OutAstroC$DirObs[,1]-OutAstro$DirObs[,1],OutAstroC$DirObs[,2]-OutAstro$DirObs[,2])*pc2au
 plot(eta.obs[index,1],eta.obs[index,2],xlab=expression(Delta*alpha*'* [as]'),ylab=expression(Delta*delta*' [as]'),main='P9: Observed orbit',pch=20,cex=0.2)
 points(0,0,pch='*',cex=3)
+}
 #points(eta.obs2[,1],eta.obs2[,2],pch=20,cex=0.2,col='red')
 dev.off()
 }

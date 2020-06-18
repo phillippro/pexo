@@ -170,8 +170,7 @@ gen_CalLen <- function(x){
 ## Output:
 ##   Unit vector of x
 ####################################
-#    sqrt(rowSums(x^2))
-    sqrt(x[,1]^2+x[,2]^2+x[,3]^2)
+    sqrt(rowSums(x^2))
 }
 
 gen_Rt2ad <- function(rho,erho,theta,etheta){
