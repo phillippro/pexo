@@ -1,0 +1,61 @@
+Niter 1000
+Ncore 4
+Nmax 1
+name alphaCenB
+#RefType refro
+RefType.PFS none
+RefType.ALMA none
+RefType.WDS none
+EopType 2006
+TaiType instant
+TtType BIPM
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+BinaryModel kepler
+phi.PFS -29.013983
+elong.PFS -70.692633
+height.PFS 2.40792
+phi.ALMA -23.0234
+elong.ALMA -67.7538
+height.ALMA 5.0587
+xtel.WDS 0
+ytel.WDS 0
+ztel.WDS 0
+xtel.hip 0
+ytel.hip 0
+ztel.hip 0
+xtel.K17 0
+ytel.K17 0
+ztel.K17 0
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch  2448348.750
+mT 0.9373
+mC 1.1055 0.0000001 10 logU
+ra 219.92041041666666956
+dec -60.835147222222225594
+plx 747.1700008
+pmra -3619.9
+pmdec 693.8
+rv -22.3930
+P 28971.629999999997381 0.1 1e7 logU
+e 0.5208 0 1 U
+I  79.929 0 180 U
+omegaT 232.006 0 360 U
+Omega 205.064 0 360 U
+Tp 2435328.96 2430000 2450000 U
+raOff 0 0 10 N
+decOff 0 0 10 N
+pmraOff 0 0 10 N
+pmdecOff 0 0 10 N
+plxOff 0 0 1 N
+rvOff 0 -100 100 U
+bRv 0 -10000 10000 U
+jitterRv 0 0 10 U

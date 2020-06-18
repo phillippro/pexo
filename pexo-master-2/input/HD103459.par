@@ -1,0 +1,54 @@
+Niter 1e5
+Ncore 4
+Nmax 1
+name HD103459
+#RefType refro
+RefType.KECK none
+RefType.WDS none
+EopType 2006
+TaiType instant
+TtType BIPM
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+BinaryModel kepler
+phi.KECK 19.82636 
+elong.KECK -155.47501
+height.KECK 4.145
+xtel.WDS 0
+ytel.WDS 0
+ztel.WDS 0
+xtel.hip 0
+ytel.hip 0
+ztel.hip 0
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch 2451544.5
+mT 0.1397619
+logmC -1.91192 -10 10 U
+ra 178.7164989060577
+dec -01.4515195609332
+plx 15.9511
+pmra 129.40
+pmdec -306.82
+rv 20.20
+logP 7.5115612 -10 20 U
+e 0.7104757 0 1 U
+I  45 0 180 U
+omegaT 182.6627 0 360 U
+Omega 0 0 360 U
+Mo 180.2852 0 360 U
+raOff 0 -1000000 1000000 U
+decOff 0 -1000000 1000000 U
+pmraOff 0 -10000 10000 U
+pmdecOff 0 -10000 10000 U
+plxOff 0 -1000 1000 U
+#rvOff 0 -1000 1000 U
+jitterRv.HD103459.KECK 0 0 100 U
+bRv.HD103459.KECK 0 -1000000 1000000 U

@@ -1,0 +1,84 @@
+Niter 1e4
+Ncore 4
+Nmax 0
+name GJ699
+RefType none
+EopType 2006
+TaiType instant
+TtType BIPM
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+#BinaryModel kepler
+BinaryModel none
+phi.HARPSpre -29.2584
+elong.HARPSpre -70.7345
+height.HARPSpre 2.4
+phi.HARPSpost -29.2584
+elong.HARPSpost -70.7345
+height.HARPSpost 2.4
+phi.HARPN 28.754
+elong.HARPN -17.88814
+height.HARPN 2.37
+phi.PFS -29.013983
+elong.PFS -70.692633
+height.PFS 2.40792
+phi.UVES -24.625407
+elong.UVES -70.403015
+height.UVES 2.648
+phi.KECK 19.82636
+elong.KECK -155.47501
+height.KECK 4.145
+phi.APF 37.3425
+elong.APF -121.63825
+height.APF 1.274
+#xtel.UVES 0 -1e5 1e5 U
+#ytel.UVES 0 -1e5 1e5 U
+#ztel.UVES 0 -1e5 1e5 U
+xtel 0
+ytel 0
+ztel 0
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch  2457206.375
+mT 0.1221
+logmC -8 -20 20 U
+ra 269.44861435804
+dec 04.73798076559
+plx 547.4506
+pmra -802.803
+pmdec 10362.542
+rv -110.6
+logP 7.5 -20 20 U
+e 0.41 0 1 U
+I  45 0 180 U
+omegaT 1.7 0 360 U
+Omega 90 0 360 U
+Mo 2455983 2430000 2460000 U
+raOff 0 -1e6 1e6 U
+decOff 0 -1e6 1e6 U
+pmraOff 0 -1e4 1e4 U
+pmdecOff 0 -1e4 1e4 U
+plxOff 0 -1e4 1e4 U
+#rvOff 0 0 10 N
+jitterRv.GJ699.APF 1 0 100 U
+jitterRv.GJ699.HARPN 1 0 100 U
+jitterRv.GJ699.KECK 1 0 100 U
+jitterRv.GJ699.UVES 1 0 100 U
+jitterRv.GJ699.PFS 1 0 100 U
+jitterRv.GJ699.HARPSpre 1 0 100 U
+jitterRv.GJ699.HARPSpost 1 0 100 U
+bRv.GJ699.APF 0 -100000 100000 U
+bRv.GJ699.HARPN 0 -100000 100000 U
+bRv.GJ699.KECK 0 -100000 100000 U
+bRv.GJ699.UVES 0 -100000 100000 U
+bRv.GJ699.PFS 0 -100000 100000 U
+bRv.GJ699.HARPSpre 0 -100000 100000 U
+bRv.GJ699.HARPSpost 0 -100000 100000 U
+

@@ -1,0 +1,170 @@
+Code,Name,Shortname
+-136134,none,none
+-399050,2015 PDC (simulation),none
+-937001,2017 PDC (simulation),PDC17
+-937002,2017 PDCa (simulation),PDC17a
+-937011,2019 PDC (simulation),PDC19
+-937013,2019 PDCa (simulation),PDC19a
+-116908,AJISAI (spacecraft),none
+-126639,AMC-8 (spacecraft),GE-8
+-123553,AMSC-1 (spacecraft),none
+-128868,Anik-F1R (spacecraft),none
+-399101,Apollo 10 LM (spacecraft) (Snoopy),none
+-399100,Apollo 10 S-IVB (spacecraft),none
+-399110,Apollo 11 S-IVB (spacecraft),none
+-399120,Apollo 12 S-IVB (spacecraft),none
+-399080,Apollo 8 S-IVB (spacecraft),none
+-399090,Apollo 9 S-IVB (spacecraft),none
+-127424,Aqua (spacecraft),none
+-128376,Aura (spacecraft),none
+-138250,BEIDOU-M3 (spacecraft),none
+-121,BepiColombo (Spacecraft),MPO MMO
+-86,CH1 (spacecraft) (CH-1),none
+-204,CONTOUR-A (SPACECRAFT FRAGMENT),none
+-205,CONTOUR-B (SPACECRAFT FRAGMENT),none
+-206,CONTOUR-C (SPACECRAFT FRAGMENT),none
+-82,Cassini (spacecraft),none
+-150,Cassini Huygens (spacecraft),none
+-151,Chandra Observatory (spacecraft),none
+-153,Chandrayaan-2 (LANDER spacecraft) (CH-2=CH2),none
+-152,Chandrayaan-2 (ORBITER spacecraft) (CH-2=CH2),none
+-40,Clementine (spacecraft),DSPSE
+-129107,Cloudsat (spacecraft),none
+-78,DSCOVR (spacecraft),Triana
+-203,Dawn (spacecraft),none
+-140,Deep Impact Flyby - EPOXI (spacecraft),EPOXI
+-70,Deep Impact IMPACTOR (spacecraft),none
+-30,Deep Space 1 (spacecraft),DS1 DS-1
+-140663,DirecTV-15 (spacecraft),none
+-129494,DirecTV-9S (spacecraft),none
+-126619,EO-1 (spacecraft),none
+-123754,Echostar-1 (spacecraft),none
+-133207,Echostar-11 (spacecraft),none
+-136499,Echostar-14 (spacecraft),none
+-138551,Echostar-17 (spacecraft),none
+-124313,Echostar-2 (spacecraft),none
+-126402,Echostar-6 (spacecraft),none
+-159,Europa Clipper (spacecraft),none
+-143,ExoMars TGO (spacecraft),none
+-111353,FLTSATCOM 2 (spacecraft),none
+-127783,GALEX (spacecraft),none
+-108366,GOES-1 (spacecraft),none
+-124786,GOES-10 (spacecraft),none
+-126352,GOES-11 (spacecraft),none
+-126871,GOES-12 (spacecraft),none
+-135491,GOES-14 (spacecraft),none
+-112472,GOES-5 (spacecraft),none
+-114050,GOES-6 (spacecraft),none
+-123051,GOES-8 (spacecraft),none
+-123581,GOES-9 (spacecraft),none
+-127391,GRACE-1 (spacecraft),none
+-177,GRAIL-A (spacecraft),Ebb
+-181,GRAIL-B (spacecraft),Flow
+-176,GRAIL-SS Second Stage (spacecraft),none
+-143241,GSAT-6A (spacecraft),none
+-139479,Gaia (spacecraft),none
+-128884,Galaxy-15 (spacecraft),none
+-77,Galileo (spacecraft),none
+-344,Galileo Probe (spacecraft),none
+-47900,Genesis (SRC) (spacecraft),none
+-47,Genesis (bus) (spacecraft),none
+-125126,HGS-1 (spacecraft) (Asiasat-3),none
+-130,Hayabusa (spacecraft),Muses-C
+-37,Hayabusa 2 (spacecraft),none
+-486,Herschel Space Observatory (spacecraft),none
+-48,Hubble Space Telescope (HST (spacecraft)),none
+-111,ICE (spacecraft),ISEE-3
+-198,INTEGRAL (spacecraft),none
+-189,InSight (spacecraft),none
+-640,Infrared Space Observatory (spacecraft),ISO
+-125544,International Space Station (spacecraft),ISS
+-170,James Webb Space Telescope (spacecraft),JWST
+-133105,Jason-2 (spacecraft),none
+-141240,Jason-3 (spacecraft),none
+-61,Juno (spacecraft),none
+-610,Juno Centaur Stage (spacecraft),none
+-227,Kepler (spacecraft),none
+-134381,Kepler Booster (Third Stage) (spacecraft),none
+-12,LADEE (spacecraft),none
+-108820,LAGEOS-1 (spacecraft),none
+-122195,LAGEOS-2 (spacecraft),none
+-18,LCROSS (spacecraft),none
+-141043,LISA Pathfinder (spacecraft),LPF
+-999742,LISA Pathfinder Propulsion Module (spacecraft),PRM
+-85,LRO (spacecraft),none
+-25,Lunar Prospector (LP) (spacecraft),none
+-202,MAVEN (spacecraft),none
+-236,MESSENGER (spacecraft),none
+-140482,MMS-1 (spacecraft),none
+-140483,MMS-2 (spacecraft),none
+-140484,MMS-3 (spacecraft),none
+-140485,MMS-4 (spacecraft),none
+-74900,MRO Centaur Stage (spacecraft),none
+-123846,MSAT-1 (spacecraft),none
+-760,MSL Centaur Stage (spacecraft),none
+-65,MarCO-A (spacecraft),Wall-E
+-66,MarCO-B (spacecraft),Eva
+-2,Mariner 2 (spacecraft),none
+-41,Mars Express (spacecraft),MEX
+-53,Mars Odyssey (spacecraft),none
+-3,Mars Orbiter Mission (MOM) (spacecraft),Mangalyaan ISRO
+-74,Mars Reconnaissance Orbiter (spacecraft),MRO
+-76,Mars Science Laboratory (spacecraft),MSL
+-120452,NAVSTAR-18 (spacecraft),none
+-126407,NAVSTAR-48 (spacecraft),none
+-138833,NAVSTAR-67 (spacecraft),none
+-139166,NAVSTAR-68 (spacecraft),none
+-93,NEAR (spacecraft),none
+-997,NEOCP 6Q0B44E,B44E
+-998,NEOCP J002E3,none
+-98,New Horizons (spacecraft),NH New_Horizons
+-178,Nozomi (spacecraft),Planet-B
+-138358,NuSTAR (spacecraft),SMEX-11
+-140059,OCO-2 (spacecraft),none
+-64,OSIRIS-REx (spacecraft),ORX
+-253,Opportunity (spacecraft),MER
+-39,Ouna (spacecraft),none
+-96,Parker Solar Probe (spacecraft),SPP PSP
+-84,Phoenix (spacecraft),none
+-23,Pioneer 10 (spacecraft),none
+-24,Pioneer 11 (spacecraft),none
+-6,Pioneer 6 (spacecraft),none
+-20,Pioneer 8 (spacecraft),none
+-489,Planck Space Observatory (spacecraft),none
+-5,Planet-C (spacecraft),VCO Akatsuki
+-125789,QuikSCAT (spacecraft),none
+-226,Rosetta (spacecraft),none
+-113631,SATCOM-C5 (spacecraft),RCA-SATCOM-5
+-112065,SBS-1 (spacecraft),none
+-137218,SKYTERRA-1 (spacecraft),none
+-140376,SMAP (spacecraft),none
+-21,SOHO (spacecraft),none
+-234900,STEREO Third Stage (spacecraft),none
+-234,STEREO-A (spacecraft),AHEAD
+-235,STEREO-B (spacecraft),BEHIND
+-136395,Solar Dynamics Observatory (spacecraft),SDO
+-122911,Solidaridad-1 (spacecraft),none
+-143205,SpaceX Roadster (spacecraft) (Tesla),none
+-557,Spektr-R Observatory (spacecraft),none
+-254,Spirit (spacecraft),MER
+-79,Spitzer Space Telescope,SST SIRTF (spacecraft)
+-29900,Stardust (SRC) (spacecraft),none
+-29,Stardust (bus) (spacecraft) (NExT),none
+-128485,Swift Observatory (spacecraft),none
+-119548,TDRS-3 (spacecraft),none
+-125994,TERRA (spacecraft),EOS-1
+-95,TESS (spacecraft),none
+-192,THEMIS-B (spacecraft),ARTEMIS-P1
+-193,THEMIS-C (spacecraft),ARTEMIS-P2
+-122927,Telstar-401 (spacecraft),none
+-137820,Tiangong-1 (spacecraft),none
+-55,Ulysses (spacecraft),none
+-248,Venus Express (spacecraft),VEX
+-31,Voyager 1 (spacecraft),none
+-32,Voyager 2 (spacecraft),none
+-113269,WESTAR-5 (spacecraft),none
+-163,WISE (spacecraft),none
+-165,WMAP (spacecraft),none
+-129520,XM-4 (spacecraft),none
+-125989,XMM-Newton (spacecraft),none
+-937012,c2019 PDC (simulation),cPDC19 PDC19-c
