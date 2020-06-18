@@ -8,9 +8,9 @@ time_CalHms2JD <- function(CalHms){
 ## Output:
 ##   JD - 2-part Julian Date
 ####################################
-    cal2 <- calHms[,1:3,drop=FALSE]
+    cal2 <- CalHms[,1:3,drop=FALSE]
     jd2 <- time_Cal2JD(cal2)
-    fd <- cal[,4]/24+cal[,5]/(24*60)+cal[,6]/(24*3600)
+    fd <- CalHms[,4]/24+CalHms[,5]/(24*60)+CalHms[,6]/(24*3600)
     cbind(jd2[,1],jd2[,2]+fd)
 }
 
@@ -152,7 +152,7 @@ time_Jd2yr <- function(jd){
 
 time_Yr2jd <- function(yr){
 ####################################
-## Convert Year to Julian Date
+## Convert Year to Julian Day
 ## ref: https://www.mathworks.com/matlabcentral/fileexchange/15285-geodetic-toolbox
 ##
 ## Input:
@@ -167,6 +167,7 @@ time_Yr2jd <- function(yr){
     doy  <-  (yr-iyr)*days + 1
     time_Doy2jd(iyr,doy)
 }
+
 time_Ut1mUtc <- function(mjd,tempo=TRUE){
 ####################################
 ## Given a epoch in MJD[UTC], calculate UT1-UTC.
@@ -223,7 +224,7 @@ time_Utc2tt <- function(utc,Par){
     list(tt=tt,tai=tmp$tai,leap=tmp$leap)
 }
 
-time_GetEop <- function(utc,tai){
+time_GetEop <- function(utc,tai,verbose=FALSE){
 ####################################
 ## Get Earth orientation parameters (EOP)
 ##
@@ -237,21 +238,22 @@ time_GetEop <- function(utc,tai){
     mjd.utc <- (utc[,1]-DJM0)+utc[,2]
     mjd.max <- max(eop[,'MJD'])
     mjd.min <- min(eop[,'MJD'])
-    if(any(mjd.utc<mjd.min)) cat('Warning: some epochs are earlier than the minium epoch of EOP file which is MJD',mjd.min,'!\n') #return(NULL)
-    if(any(mjd.utc>mjd.max)) cat('Warning: some epochs are later than the maximum epoch of EOP file which is MJD',mjd.max,'!\n') #return(NULL)
+    if(any(mjd.utc<mjd.min) & verbose) cat('Warning: some epochs are earlier than the earliest epoch of EOP file which is MJD',mjd.min,'!\n') #return(NULL)
+    if(any(mjd.utc>mjd.max) & verbose) cat('Warning: some epochs are later than the latest epoch of EOP file which is MJD',mjd.max,'!\n') #return(NULL)
     tmp <- time_Dut1dot(mjd.utc,TAImUTC=time_T2mT2(tai,utc))
 #    dut1dot <- tmp$dut1dot
 #    leap <- tmp$leap
     ut1 <- cbind(utc[,1],utc[,2]+tmp$dut1/DAYSEC)
     ut1 <- time_ChangeBase(ut1,1)
-    c(list(ut1=ut1),tmp)
+    data.frame(ut1=ut1,tmp)
 }
 
 time_Itrs2icrsApp <- function(tt,utc,rpom,EopPar){
 ##Approximate procedures; from Wallance 2006
     Nt <- nrow(tt)
-    tau <- (EopPar$ut1[,1]-DJ00)+EopPar$ut1[,2]
-    era <- sofa_Era00(EopPar$ut1)
+    ut1 <- cbind(EopPar$ut11,EopPar$ut12)
+    tau <- (ut1[,1]-DJ00)+ut1[,2]
+    era <- sofa_Era00(ut1)
     Omega <- 2.182-9.242e-4*tau
     X <- 2.6603e-7*tau-33.2e-6*sin(Omega)
     Y <- -8.14e-14*tau^2+44.6e-6*cos(Omega)
@@ -284,7 +286,6 @@ time_Dut1dot <- function(mjd,TAImUTC,T2=TRUE){
 ##   dut1 - UT1-UTC
 ####################################
 ##deal with earlier epochs
-t1 <- proc.time()
     eop1 <- eop[,c('MJD','UT1-UTC','x','y')]
     mjd.max <- max(eop[,'MJD'])
     mjd.min <- min(eop[,'MJD'])
@@ -330,7 +331,7 @@ t1 <- proc.time()
     xp <- eop1[ind2,'x'] + f*(eop1[isamp,'x'] - eop1[ind2,'x'])
     yp <- eop1[ind2,'y'] + f*(eop1[isamp,'y'] - eop1[ind2,'y'])
     dut1 <- dut10 + f*(dut11 - leap - dut10)
-    return(list(dut1dot=dut1dot,leap=leap,xp=xp/DR2AS,yp=yp/DR2AS,dut1=dut1))
+    data.frame(dut1dot=dut1dot,leap=leap,xp=xp/DR2AS,yp=yp/DR2AS,dut1=dut1)
 }
 
 time_Itrs2icrs06 <- function(tt,utc,t,rpom,EopPar){
@@ -354,7 +355,8 @@ time_Itrs2icrs06 <- function(tt,utc,t,rpom,EopPar){
 ####################################
     Nt <- nrow(tt)
 ###Earth rotation angle
-    era <- sofa_Era00(EopPar$ut1)
+    ut1 <- cbind(EopPar$ut11,EopPar$ut12)
+    era <- sofa_Era00(ut1)
 ####all angles are in arcsec
 ####precision and nutation
     xi0 <- -0.016617
@@ -435,7 +437,7 @@ time_BipmCorr <- function(mjd.utc,BIPM='2018'){
     return(dt)
 }
 
-time_TropoDelay <- function(mjd.utc,elevation,delevation,Par){
+time_TropoDelay <- function(mjd.utc,elevation,delevation,pmb,height,phi){
 ####################################
 ## Calculate hydrostatic tropospheric delay
 ## Ref: Edwards, Hobbs & Manchester 2006
@@ -451,16 +453,15 @@ time_TropoDelay <- function(mjd.utc,elevation,delevation,Par){
 ##   dt - Troposheric delay in second
 ##   z - Redshift due to tropospheric delay
 ####################################
-    pressure <- Par$pmb/10#kpa
-    H <- Par$height*1e3#metre
-    phi <- Par$phi#rad
+    pressure <- pmb/10#kpa
+    H <- height*1e3#metre
 ###David et al., 1985; Elgered et al. 1991; https://agupubs.onlinelibrary.wiley.com/doi/epdf/10.1029/90JB00834
     dt.hz <-  0.02268*pressure/CMPS/(1-0.00266*cos(2*phi)-2.8e-7*H)
     dry <- astro_NMFhydro(mjd.utc,as.numeric(phi),as.numeric(H),as.numeric(elevation),as.numeric(delevation))
-    list(dt=dt.hz*dry$map,z=dt.hz*dry$dmap)
+    data.frame(dt=dt.hz*dry$map,z=dt.hz*dry$dmap)
 }
 
-time_Geo2obs <- function(utc,tai,tt,ObsPar,EopType='2006',n=1){
+time_Geo2obs <- function(utc,tai,tt,Par,EopType='2006',n=1,verbose=FALSE){
 ####################################
 ## Convert quantities from ITRS frame to ICRS frame
 ##
@@ -486,42 +487,64 @@ time_Geo2obs <- function(utc,tai,tt,ObsPar,EopType='2006',n=1){
 ##   EopPar - Earth orientation parameters
 ####################################
 ###ITRS position
-    t <- ((tt[,1] - DJ00)+tt[,2])/DJC#Julian century since J2000.0
-    Nt <- nrow(tt)
-    robs.itrs <- as.numeric(c(Par$xtel,Par$ytel,Par$ztel))
-    zenith.itrs <- c(cos(Par$elong)*cos(Par$phi),sin(Par$elong)*cos(Par$phi),sin(Par$phi))
-    ##Get Earth orientation parameters
-    EopPar <- time_GetEop(utc,tai)
-    ##other ITRS quantities ...
-    itrs <- gen_RvzItrs(robs.itrs,EopPar,Nt,sp=NULL)
+    indG <- which(Par$ObsInfo[,'ObsType']=='ground' & !(Par$ObsInfo[,'xtel']==0 & Par$ObsInfo[,'ytel']==0 & Par$ObsInfo[,'ztel']==0))
+#    robs.icrs <- robs.itrs <- vGOitrs <- vobs.icrs <- zenith.icrs <- zenith.itrs  <- pole.icrs <- pole <- array(NA,dim=c(nrow(utc),3))
+    robs.icrs <- robs.itrs <- vGOitrs <- vobs.icrs <- zenith.icrs <- zenith.itrs  <- pole.icrs <- pole <- array(0,dim=c(nrow(utc),3))
+    EopPar <- data.frame(array(0,dim=c(nrow(utc),7)))
+    colnames(EopPar) <- c('ut11','ut12','dut1dot','leap','xp','yp','dut1')
+    if(length(indG)>0){
+        t <- ((tt[indG,1] - DJ00)+tt[indG,2])/DJC#Julian century since J2000.0
+        robs.itrs <- cbind(Par$ObsInfo[indG,'xtel'],Par$ObsInfo[indG,'ytel'],Par$ObsInfo[indG,'ztel'])
+        phi <- Par$ObsInfo[indG,'phi']*pi/180
+        elong <- Par$ObsInfo[indG,'elong']*pi/180
+        zenith.itrs[indG,] <- cbind(cos(elong)*cos(phi),sin(elong)*cos(phi),sin(phi))
+        ##Get Earth orientation parameters
+        tmp <- time_GetEop(utc,tai,verbose=verbose)
+        cn <- colnames(tmp)
+        cn[1:2] <- c('ut11','ut12')
+        EopPar[indG,] <- as.matrix(tmp)[indG,]
+#        EopPar[indG,] <- as.matrix(tmp[indG,])
+        colnames(EopPar) <- cn
+        ##other ITRS quantities ...
+        itrs <- gen_RvzItrs(robs.itrs,EopPar[indG,],length(indG),sp=NULL)
 
-    ##ITRS to ICRS; three methods
-    if(EopType=='2006'){
-        Mt2c <- time_Itrs2icrs06(tt,utc,t,itrs$rpom,EopPar)$Mt2c
-    }else if(EopType=='2000B'){
-        Mt2c <- sofa_C2t00b(tt,EopPar$ut1,EopPar$xp,EopPar$yp,itrs$rpom)$Mt2c
-    }else if(EopType=='approx'){
-        Mt2c <- time_Itrs2icrsApp(tt,utc,itrs$rpom,EopPar)$Mt2c
-    }
+        ##ITRS to ICRS; three methods
+        if(EopType=='2006'){
+            Mt2c <- time_Itrs2icrs06(tt[indG,],utc[indG,],t,itrs$rpom,EopPar[indG,])$Mt2c
+        }else if(EopType=='2000B'){
+            ut1 <- EopPar[indG,1:2]
+            Mt2c <- sofa_C2t00b(tt[indG],ut1,EopPar$xp[indG],EopPar$yp[indG],itrs$rpom)$Mt2c
+        }else if(EopType=='approx'){
+            Mt2c <- time_Itrs2icrsApp(tt[indG,],utc[indG,],itrs$rpom,EopPar[indG,])$Mt2c
+        }
 
-    ##Multiply the itrs position/velocity vector by its transpose (=inverse) to transform trs->crs
-    pole.icrs <- zenith.icrs <- robs.icrs <- vobs.icrs <- array(NA,dim=c(Par$Nepoch,3))
-    for(j in 1:Par$Nepoch){
-        robs.icrs[j,] <- Mt2c[,,j]%*%robs.itrs#position in CRS; km
-        vobs.icrs[j,] <- Mt2c[,,j]%*%t(itrs$vobs[j,,drop=FALSE])#velocity in CRS; km/s
-        zenith.icrs[j,] <- Mt2c[,,j]%*%zenith.itrs#zenith in CRS
-        pole.icrs[j,] <- Mt2c[,,j]%*%itrs$pole[j,]#Pole in CRS
+        ##Multiply the itrs position/velocity vector by its transpose (=inverse) to transform trs->crs
+        for(k in 1:length(indG)){
+            j  <-  indG[k]
+            robs.icrs[j,] <- Mt2c[,,k]%*%robs.itrs[k,]#position in CRS; km
+            vobs.icrs[j,] <- Mt2c[,,k]%*%t(itrs$vobs[k,,drop=FALSE])#velocity in CRS; km/s
+            zenith.icrs[j,] <- Mt2c[,,k]%*%zenith.itrs[j,]#zenith in CRS
+            pole.icrs[j,] <- Mt2c[,,k]%*%itrs$pole[k,]#Pole in CRS
+        }
+        vGOitrs[indG,] <- t(itrs$vobs)
+        pole[indG,] <- itrs$pole
     }
-    return(c(list(rGO=robs.icrs,rGOitrs=robs.itrs,vGO=vobs.icrs,vGOitrs=t(itrs$vobs[j,,drop=FALSE]),ZenithIcrs=zenith.icrs,ZenithItrs=zenith.itrs,PoleIcrs=pole.icrs,PoleItrs=itrs$pole),EopPar))
+    indS <- which(Par$ObsInfo[,'ObsType']=='space' & !(Par$ObsInfo[,'xtel']==0 & Par$ObsInfo[,'ytel']==0 & Par$ObsInfo[,'ztel']==0))
+    if(length(indS)>0){
+        if(opt$verbose) cat('space satellite equatorial coordiantes directly from ephemeries!\n')
+        robs.icrs[indS,] <- as.matrix(Par$ObsInfo[indS,1:3])
+        vobs.icrs[indS,] <- as.matrix(Par$ObsInfo[indS,4:6])
+    }
+    c(list(rGO=robs.icrs,rGOitrs=robs.itrs,vGO=vobs.icrs,vGOitrs=vGOitrs,ZenithIcrs=zenith.icrs,ZenithItrs=zenith.itrs,PoleIcrs=pole.icrs,PoleItrs=pole),EopPar)
 }
 
-time_Jd2bjd <- function(OutBary,OutSB,OutEle,Par,CompareT2=FALSE){
+time_Jd2bjd <- function(OutObs,OutSB,OutEle,Par,CompareT2=FALSE,fit=FALSE,OutTime0=NULL){
 ####################################
 ## Convert from JD to BJD considering the Tropospheric delay, Roemer delay, Shapiro delay, Einstein delay;
 ## the input position vectors are in units of pc and the input velocity vectors are in units of
 ##
 ## Input:
-##   OutBary - output of time_Utc2tb
+##   OutObs - output of time_Utc2tb
 ##   OutSB - output of astro_CalSB
 ##   OutEle - output of astro_CalElevation
 ##   Par - Input parameters
@@ -537,34 +560,48 @@ time_Jd2bjd <- function(OutBary,OutSB,OutEle,Par,CompareT2=FALSE){
 ##   RoemerT2 - Roemer delay using the TEMPO2 method (equivalent to degraded PEXO called PEXOt)
 ####################################
 ###troposphere delay
+    utc <- OutObs$JDutc
     mjd.utc <- time_Jd2mjd(utc)
-    if(Par$ObsType=='ground'){
-        tropo <- time_TropoDelay(mjd.utc,OutEle$elevation,OutEle$delevation,Par)
-        TropoDelay <- tropo$dt*OutBary$dTCB.dTT
+    Nepoch <- nrow(utc)
+
+###treat space telescope the same as ground-based, need to modified
+    indG <- which(Par$ObsInfo[,'ObsType']=='ground' & !(Par$ObsInfo[,'xtel']==0 | Par$ObsInfo[,'ytel']==0 | Par$ObsInfo[,'ztel']==0))
+    tropo <- data.frame(array(0,dim=c(Nepoch,2)))
+    Ztropo <- rep(0,Nepoch)
+    TropoDelay  <- rep(0,Nepoch)
+    if(length(indG)>0){
+        tmp <- time_TropoDelay(mjd.utc[indG],OutEle$elevation[indG],OutEle$delevation[indG],pmb=Par$ObsInfo[indG,'pmb'],Par$ObsInfo[indG,'height'],Par$ObsInfo[indG,'phi']*pi/180)
+        cn <- colnames(tmp)
+        tropo[indG,] <- as.matrix(tmp)
+        colnames(tropo) <- cn
+        TropoDelay <- tropo$dt*OutObs$dTCB.dTT
         Ztropo <- tropo$z
-    }else{
-        TropoDelay <- Ztropo <- 0
     }
+
 ###Roemer delay in solar system
-    roemer <- time_RoemerSolar(OutBary,OutSB,SB=FALSE)#day; in coordiante units
-    if(CompareT2){
-        roemerSB <- time_RoemerSolar(OutBary,OutSB,SB=TRUE)#day; in coordiante units
+    roemer <- time_RoemerSolar(OutObs,OutSB,SB=FALSE)#day; in coordiante units
+    if(Par$CompareT2){
+        roemerSB <- time_RoemerSolar(OutObs,OutSB,SB=TRUE)#day; in coordiante units
     }else{
         roemerSB <- NULL
     }
     DRS <- roemer$Roemer
-###Shapiro delay in solar system
-    ShapiroSolar <- time_ShapiroSolar(OutBary,OutSB,Par)
+###Shapiro delay in solar system; third order effects; no need to update
+    if(fit & !is.null(OutTime0) & length(OutTime0)>0){
+        ShapiroSolar <- OutTime0$ShapiroSolarList
+    }else{
+        ShapiroSolar <- time_ShapiroSolar(OutObs,OutSB,Par)
+    }
     DSS <- ShapiroSolar$dt.all#second
-    DDT <- (DRS+DSS+TropoDelay)/DAYSEC#Sum of Roemer, Shapiroa and tropospheric delays in the solar system
-  if(Par$Unit=='TCB'){
-        bjd.tcb <- cbind(OutBary$JDtcb[,1],OutBary$JDtcb[,2]-DDT)
+    DDT <- (DRS+DSS+TropoDelay)/DAYSEC#Sum of Roemer, Shapiroa and tropospheric
+    if(Par$unit=='TCB'){
+        bjd.tcb <- cbind(OutObs$JDtcb[,1],OutObs$JDtcb[,2]-DDT)
         bjd.tdb <- sofa_Tcbtdb(bjd.tcb)
     }else{
-        bjd.tdb <- cbind(OutBary$JDtdb[,1],OutBary$JDtdb[,2]-DDT/IFTE.K)
+        bjd.tdb <- cbind(OutObs$JDtdb[,1],OutObs$JDtdb[,2]-DDT/IFTE.K)
         bjd.tcb <- sofa_Tdbtcb(bjd.tdb)
     }
-    return(list(BJDtcb=bjd.tcb,BJDtdb=bjd.tdb,Roemer=DRS,ShapiroSolar=ShapiroSolar,RoemerOrder=list(Roemer1=roemer$Roemer1,Roemer2=roemer$Roemer2,Roemer3=roemer$Roemer3),TropoDelay=TropoDelay,Ztropo=Ztropo,RoemerT2=roemer$RoemerT2,RoemerSB=roemerSB))
+    return(list(BJDtcb=bjd.tcb,BJDtdb=bjd.tdb,Roemer=DRS,ShapiroSolar=ShapiroSolar,RoemerOrder=list(Roemer1=roemer$Roemer1,Roemer2=roemer$Roemer2,Roemer3=roemer$Roemer3),TropoDelay=TropoDelay,Ztropo=Ztropo,RoemerT2=roemer$RoemerT2,RoemerSB=roemerSB,ShapiroSolarList=ShapiroSolar))
 }
 
 
@@ -582,13 +619,12 @@ time_TsTb1 <- function(tO,OS,Par){
 ##   tBf - first order coordinate time at TSB
 ####################################
     tol <- 1e-10
-    ra <- Par$ra
-    dec <- Par$dec
-    pmra <- Par$pmra#mas/yr
-    pmdec <- Par$pmdec#mas/yr
-    plx <- Par$plx#mas
+    pmra <- Par$pmra
+    pmdec <- Par$pmdec
+    plx <- Par$plx
     rv <- Par$rv
-    dOS0 <- OS[,1]*Par$u[1]+OS[,2]*Par$u[2]+OS[,3]*Par$u[3]
+    u <- Par$pqu[,3]
+    dOS0 <- OS[,1]*u[1]+OS[,2]*u[2]+OS[,3]*u[3]
     dt.rom <- dOS0*AULT/DAYSEC#day
     v2 <- (pmra^2+pmdec^2)/plx^2+(rv/auyr2kms)^2#au/yr
     v2.c2 <- v2/Cauyr^2
@@ -645,7 +681,7 @@ time_Tt2tbObs <- function(tcg,tt,TDBmTTgeo,TDBmTTgeo0,TDBmTTobs,Zgeo){
     list(tcb=tcb,tdb=tdb)
 }
 
-time_Tt2tb <- function(utc,tai,tcg,tt,Par){
+time_Tt2tb <- function(utc,tai,tcg,tt,Par,verbose=FALSE){
 ####################################
 ## Convert TT to TDB at the observer's location with multiple methods.
 ## Calculate TDB accounting for the relativistic effects at the observer's location.
@@ -699,15 +735,15 @@ time_Tt2tb <- function(utc,tai,tcg,tt,Par){
     TtTdbMethod <- Par$TtTdbMethod
     for(j in 1:Ntry){
 ##only consider first-order roemer delay from observer to geocenter
-        if(TtTdbMethod=='eph' | Par$ObsType=='space'){
-            cat('Calculate TDB-TT using JPL ephemeris!\n')
+        if(TtTdbMethod=='eph'){
+            if(verbose) cat('Calculate TDB-TT using JPL ephemeris!\n')
             tt2tdb.geo <- gen_CalEph(jd,body='TT-TDB (at geocenter)',DE=Par$DE)
             TDBmTTgeo <- -tt2tdb.geo[,1]#TDB-TT; s
             zTDBmTTgeo <- -tt2tdb.geo[-1,2]
             TDBmTTgeo0 <- TDBmTTgeo[1]
             TDBmTTgeo <- TDBmTTgeo[-1]
         }else if(TtTdbMethod=='FB01'){
-            cat('Calculate Teph-TT as a function of Teph using FB01 method!\n')
+            if(verbose) cat('Calculate Teph-TT as a function of Teph using FB01 method!\n')
             tmin <- min(rowSums(jd))
             tmax <- max(rowSums(jd))
             dt <- median(diff(rowSums(utc)))
@@ -753,17 +789,15 @@ time_Tt2tb <- function(utc,tai,tcg,tt,Par){
 ####from terrestial to ephemeris coordinates
     dTT.dTDB.geo <- 1+zTDBmTTgeo
     dTDB.dTT.geo <- 1/dTT.dTDB.geo
-    if(Par$ObsType=='ground'){
-        OutGeo2obs <- time_Geo2obs(utc,tai,tt,Par)
-    }else{
-        OutGeo2obs <- list(rGO=SpaceObs[,1:3],vGO=SpaceObs[,4:6],ZenithICRS=NA,PoleICRS=NA,ut1=utc)
-    }
+#    if(Par$ObsType=='ground'){
+    OutGeo2obs <- time_Geo2obs(utc,tai,tt,Par,verbose=verbose)
     tdb0 <- tdb <- jd
-
 ###obs term for tt to tdb
     TDBmTTobs <- 0
     for(k in 1:Ntry){
         geo <- gen_GeoEph(tdb,DE=Par$DE)
+###add offsets to heliocentric position of the geocenter
+        geo$out[,3:8] <- geo$out[,3:8]+t(replicate(nrow(utc),c(Par$xgeoOff,Par$ygeoOff,Par$zgeoOff,Par$vxgeoOff*1e-6,Par$vygeoOff*1e-6,Par$vzgeoOff*1e-6)))
         if(TtTdbMethod!='FBsofa'){
             TDBmTTobs <- rowSums(OutGeo2obs$rGO*dTDB.dTT.geo*geo$out[,6:8])/CKMPS^2#s
         }
@@ -801,8 +835,12 @@ time_Tt2tb <- function(utc,tai,tcg,tt,Par){
     }else{
         zTDBmTTobs <- zTDBmTTobsR <- zTDBmTTobsV <- 0
     }
-    Robs <- sqrt(Par$xtel^2+Par$ytel^2+Par$ztel^2)*IFTE.K#km; in TCB-compatible unit
-    dzenith <- OutGeo2obs$vGO/Robs*DAYSEC#rad/day
+    indG <- which(Par$ObsInfo[,'ObsType']=='ground' & !(Par$ObsInfo[,'xtel']==0 | Par$ObsInfo[,'ytel']==0 | Par$ObsInfo[,'ztel']==0))
+    dzenith <- array(0,dim=c(nrow(utc),3))
+    if(length(indG)>0){
+        Robs <- sqrt(rowSums(Par$ObsInfo[indG,c('xtel','ytel','ztel')]^2))*IFTE.K#km; in TCB-compatible unit
+        dzenith[indG,] <- OutGeo2obs$vGO[indG,]/Robs*DAYSEC#rad/day
+    }
     ##TDB at the observatory
     tcb <-  sofa_Tdbtcb(tdb)
     robust <- FALSE
@@ -820,7 +858,6 @@ time_Tt2tb <- function(utc,tai,tcg,tt,Par){
     }
     dTDB.dTT <- 1/dTT.dTDB
     dTCB.dTT <- IFTE.K*dTDB.dTT
-
 ###barrycorr approach
     return(c(list(JDtdb=tdb,JDtcb=tcb,geo=geo$out,dTT.dTDB=dTT.dTDB,dTDB.dTT=dTDB.dTT,dTCB.dTT=dTCB.dTT,dzenith=dzenith,emrat=geo$emrat,GM=geo$GM,TDBmTTgeo=TDBmTTgeo,TDBmTTobs=TDBmTTobs,zTDBmTTgeo=zTDBmTTgeo,zTDBmTTobs=zTDBmTTobs,zTDBmTTobsV=zTDBmTTobsV,zTDBmTTobsR=zTDBmTTobsR),OutGeo2obs))
 }
@@ -886,7 +923,7 @@ time_Jd2calHms <- function(jd){
     return(cbind(tmp[,1:3,drop=FALSE],cbind(h,m,s)))
 }
 
-time_Utc2tb <- function(utc,Par){
+time_Utc2tb <- function(utc,Par,verbose=FALSE){
 ####################################
 ## Convert UTC to TCB and TDB
 ##
@@ -926,7 +963,7 @@ time_Utc2tb <- function(utc,Par){
     leap <- val$leap
     tcg <- sofa_Tttcg(tt)
     h <- 1e-12#day
-    tmp <- time_Tt2tb(utc,tai,tcg,tt,Par)
+    tmp <- time_Tt2tb(utc,tai,tcg,tt,Par,verbose=verbose)
     tdb <- tmp$JDtdb
     emrat <- tmp$emrat
 
@@ -936,7 +973,7 @@ time_Utc2tb <- function(utc,Par){
     GM <- tmp$GM
     rGO <- tmp$rGO
 ###First convert all quantities from the ephemeris (TDB) unit to coordinate (TDB) unit; then provide output quantities according to the unit chosen by the user.
-###    if(Par$Unit=='TCB'){
+###    if(Par$unit=='TCB'){
     SG[,1:3] <- SG[,1:3]*IFTE.K
 #    rGO <- rGO*IFTE.K
     rGO <- rGO*tmp$dTCB.dTT
@@ -947,17 +984,17 @@ time_Utc2tb <- function(utc,Par){
     SO <- SG+GO#in coordinate unit
 
 ###transfer into coordinate unit
-    return(list(JDtcb=tmp$JDtcb,JDtdb=tdb,JDtt=tt,JDtai=tai,JDut1=tmp$ut1,JDtcg=tcg,dTCB.dTT=tmp$dTCB.dTT,dTDB.dTT=tmp$dTDB.dTT,SO=SO,SG=SG,GO=GO,vGO=tmp$vGO,zTDBmTTgeo=tmp$zTDBmTTgeo,zTDBmTTobs=tmp$zTDBmTTobs,TDBmTTgeo=tmp$TDBmTTgeo,zTDBmTTobsR=tmp$zTDBmTTobsR,zTDBmTTobsV=tmp$zTDBmTTobsV,leap=leap,xp=tmp$xp,yp=tmp$yp,zenith=tmp$ZenithIcrs,dzenith=tmp$dzenith,emrat=emrat,MO=MO,GM=GM))
+    return(list(JDutc=utc,JDtcb=tmp$JDtcb,JDtdb=tdb,JDtt=tt,JDtai=tai,JDut1=cbind(tmp$ut11,tmp$ut12),JDtcg=tcg,dTCB.dTT=tmp$dTCB.dTT,dTDB.dTT=tmp$dTDB.dTT,SO=SO,SG=SG,GO=GO,vGO=tmp$vGO,zTDBmTTgeo=tmp$zTDBmTTgeo,zTDBmTTobs=tmp$zTDBmTTobs,TDBmTTgeo=tmp$TDBmTTgeo,zTDBmTTobsR=tmp$zTDBmTTobsR,zTDBmTTobsV=tmp$zTDBmTTobsV,leap=leap,xp=tmp$xp,yp=tmp$yp,zenith=tmp$ZenithIcrs,dzenith=tmp$dzenith,emrat=emrat,MO=MO,GM=GM))
 }
 
-time_ShapiroSolar <- function(OutBary,OutSB,Par){
+time_ShapiroSolar <- function(OutObs,OutSB,Par){
 ####################################
 ## Shapiro delay in the solar system
 ## Although the time when the Sun deflect the light ray is different from the observed TDB by about 8 min
 ## The Sun's velocity with respect to the barycenter is about 11m/s and thus the Sun only moves by about 5.5 km and thus negligible.
 ##
 ## Input:
-##   OurBary - Output of time_Utc2tb
+##   OurObs - Output of time_Utc2tb
 ##   OutSB - Output of astro_CalSB
 ##   Par - Input parameters
 ##
@@ -966,7 +1003,7 @@ time_ShapiroSolar <- function(OutBary,OutSB,Par){
 ##   dt.list - Shapiro delay due to individual bodies in units of second
 ##   OL - Position and velocity vectors from the observer to lenses
 ####################################
-    tdb <- OutBary$JDtdb
+    tdb <- OutObs$JDtdb
     ROB <- sqrt(rowSums(OutSB$rOB^2))
     dt.list <- list()
     dt.all <- 0
@@ -979,15 +1016,15 @@ time_ShapiroSolar <- function(OutBary,OutSB,Par){
         if(ns[j]!='Earth' & ns[j]!='Moon'){
             eph <- gen_CalEph(tdb,body=ns[j],DE=Par$DE)
         }else if(ns[j]=='Earth'){
-            eph <- OutBary$SG
+            eph <- OutObs$SG
         }else if(ns[j]=='Moon'){
-            eph <- OutBary$SO-OutBary$GO
+            eph <- OutObs$SO-OutObs$GO
         }
         eph[,1:3] <- eph[,1:3]*IFTE.K#from ephemeris to coordinate length
         Eph[[ns[j]]] <- eph
         rSL <- eph[,1:3]/au2km
-        rOL <- -OutBary$SO[,1:3]/au2km+rSL#au
-        vOL <- (-OutBary$SO[,4:6]+eph[,4:6])/auyr2kms#au/yr
+        rOL <- -OutObs$SO[,1:3]/au2km+rSL#au
+        vOL <- (-OutObs$SO[,4:6]+eph[,4:6])/auyr2kms#au/yr
         VOL <- gen_CalLen(vOL)
         ROL <- gen_CalLen(rOL)
         ##cosine of angle between sun and observatory
@@ -1003,12 +1040,12 @@ time_ShapiroSolar <- function(OutBary,OutSB,Par){
     return(list(dt.all=dt.all,dt.list=dt.list,OL=OL,Eph=Eph))
 }
 
-time_RoemerSolar <- function(OutBary,OutSB,SB=FALSE){
+time_RoemerSolar <- function(OutObs,OutSB,SB=FALSE){
 ####################################
 ## Roemer delay (first order) and curvature delay (second order) in the solar system
 ##
 ## Input:
-##   OutBary - Output of time_Utc2tb
+##   OutObs - Output of time_Utc2tb
 ##   OutSB - Output of astro_CalSB
 ##
 ## Output:
@@ -1018,7 +1055,7 @@ time_RoemerSolar <- function(OutBary,OutSB,SB=FALSE){
 ##   Roemer3 - Third order Roemer delay (s)
 ##   RoemerT2 - Roemer delay using TEMPO2 method (s)
 ##
-    rSO <- OutBary$SO[,1:3]/au2km#au
+    rSO <- OutObs$SO[,1:3]/au2km#au
     rSB <- OutSB$SB[,1:3,drop=FALSE]
     RSB <- sqrt(rowSums(rSB^2))
     RSO <- sqrt(rowSums(rSO^2))
@@ -1050,7 +1087,7 @@ time_RoemerSolar <- function(OutBary,OutSB,SB=FALSE){
     if(!is.null(OutSB$uSB.T2)){
         ##Rperp2 <- (RSO^2-RSOpara^2)*AULT#s
         ##In tempo2, r.perp is perpendicular to u0 rather than uOT or uOB or uSB; so the following will recover tempo2 prediction of parallax delay
-        Rperp2 <- RSO^2 - (rSO[,1]*Par$u[1]+rSO[,2]*Par$u[2]+rSO[,3]*Par$u[3])^2
+        Rperp2 <- RSO^2 - (rSO[,1]*Par$pqu[1,3]+rSO[,2]*Par$pqu[2,3]+rSO[,3]*Par$pqu[3,3])^2
         tt3 <- +0.5*Rperp2*AULT*Par$plx*DMAS2R
         rlt <- -rSO*AULT
         tt0 <- rowSums(rlt*OutSB$uSB.T2$u0)
@@ -1067,6 +1104,49 @@ time_ShapiroTarget <- function(m2,e,U,sini,omega){
     brace <- 1-e*cos(U)-sini*(sin(omega)*(cos(U)-e)+sqrt(1-e^2)*cos(omega)*sin(U))
     dt <- -2*r*log(brace)#day
     return(dt)
+}
+
+time_RoemerSolar <- function(OutObs,OutSB,SB=FALSE){
+####################################
+## Roemer delay (first order) and curvature delay (second order) in the solar system
+##
+## Input:
+##   OutObs - Output of time_Utc2tb
+##   OutSB - Output of astro_CalSB
+##
+## Output:
+##   Roemer - Roemer delay due to all effects (day)
+##   Roemer1 - First order Roemer delay (s)
+##   Roemer2 - Second order Roemer delay (s)
+##   Roemer3 - Third order Roemer delay (s)
+##   RoemerT2 - Roemer delay using TEMPO2 method (s)
+####################################
+    rSO <- OutObs$SO[,1:3]/au2km#au
+    rSB <- OutSB$SB[,1:3,drop=FALSE]
+    RSB <- sqrt(rowSums(rSB^2))
+    RSO <- sqrt(rowSums(rSO^2))
+    ROB <- sqrt(rowSums(OutSB$rOB^2))
+    Dt3 <- tt <- tt0 <- tt1 <- tt2 <- tt3  <- tt4 <- 0
+    RSOpara <- rowSums(rSO*OutSB$uST)
+###use uST as the reference unit vector
+    if(SB){
+        uR <- OutSB$uSB
+        RR <- RSB
+    }else{
+        uR <- OutSB$uST
+        RR <- OutSB$RST
+    }
+    rSOpara <- replicate(3,RSOpara)*uR
+    rSOperp <- rSO-rSOpara
+    Roemer2 <- 0.5*rowSums(rSOperp^2)/(RR*pc2au)*AULT#second
+    Roemer1 <- -rowSums(rSO*uR)*AULT
+    Rperp2 <- RSO^2-RSOpara^2
+#    Dt3 <- 0.5*AULT*RSOpara*Rperp2/ROB^2/pc2au^2#less than 10^-10 s for a given moment, but is cummulative and thus is important
+    OSpara <- -rowSums(rSO*uR)#au
+    epsilon <- (RSO/RR/pc2au)^2+2*OSpara/RR/pc2au
+    Roemer3 <- -1/16*epsilon^3*RSB*pc2au*AULT#second; third order
+    Roemer <- Roemer1+Roemer2+Roemer3
+    list(Roemer=Roemer,Roemer1=Roemer1,Roemer2=Roemer2,Roemer3=Roemer3,RoemerT2=list(all=tt,dt0=tt0,dt1=tt1,dt2=tt2,dt3=tt3,dt4=tt4))
 }
 
 time_VacuumDelay <- function(dRSB){
@@ -1097,12 +1177,12 @@ time_EinsteinTarget <- function(gamma,U){
     gamma*sin(U)
 }
 
-time_Ta2te <- function(OutBary,Par){
+time_Ta2te <- function(OutObs,Par,fit=FALSE,verbose=FALSE,OutTime0=NULL){
 ####################################
 ## Convert from arrival coordinate time at the telescope to the coordinate time of light emission from the surface of the target
 ##
 ## Input:
-##   OutBary - The output of time_Utc2tb
+##   OutObs - The output of time_Utc2tb
 ##   Par - Input parameters
 ##
 ## Output:
@@ -1158,20 +1238,20 @@ time_Ta2te <- function(OutBary,Par){
     tpos <- Par$tpos
 
 ###iteration to determine tS and tB
-    Ntry <- 10
+    Ntry <- 100
 #    if(!Par$binary)   Ntry <- 1
 
 ####initial guess of tS and tB
-    OS <- -cbind(OutBary$SO[,1:3]/au2km,OutBary$SO[,4:6]/auyr2kms)
-    ts <- time_TsTb1(tO=OutBary$JDtcb,OS,Par)
-    ts <- cbind(OutBary$JDtcb[,1],ts[,1])
-    tS <- tB <- time_ChangeBase(cbind(OutBary$JDtcb[,1],ts[,2]),1)
+    OS <- -cbind(OutObs$SO[,1:3]/au2km,OutObs$SO[,4:6]/auyr2kms)
+    Nepoch <- nrow(OS)
+    ts <- time_TsTb1(tO=OutObs$JDtcb,OS,Par)
+    ts <- cbind(OutObs$JDtcb[,1],ts[,1])
+    tS <- tB <- time_ChangeBase(cbind(OutObs$JDtcb[,1],ts[,2]),1)
 ###If not scaling, the full transformation from tSSB to tTSB (eqs. 43-48 in E06) will be adopted; However, since these transformations only change the scaling of various parameters, it is not detectable in exoplanet data. If post-Newtonian theores are tested using PEXO, this scaling factor could influence the result and thus should be included.
     tol <- 1e-12
-    Ndata <- nrow(OutBary$JDtcb)
-    tauE0 <- tB
+    Ndata <- nrow(OutObs$JDtcb)
+    tauE0 <- tB0 <- tB
     for(j in 1:Ntry){
-#        cat('j=',j,'\n')
         ##calculate SB given tB
         OutSB <- astro_CalSB(tB,Par)#pc, au/yr
         rOB <- OS[,1:3,drop=FALSE]/pc2au+OutSB$SB[,1:3,drop=FALSE]#pc
@@ -1190,25 +1270,27 @@ time_Ta2te <- function(OutBary,Par){
 #for solar system objects, use (ROT-RST)/c
             OutSB <- c(OutSB,list(ROT=ROT))
         }
-        if(Par$ObsType=='ground'){
-            OutEle <- astro_CalElevation(OutBary$zenith,OutBary$dzenith,uOT=uOT)#uOB is only used for iteration and more precise elevation angle is calculated using uOT later
-        }else{
-            OutEle <- list(elevation=NA,delevation=NA,ZenIn=NA)
-        }
+
+###for space telescope, elevation does not make sense
+        OutEle <- astro_CalElevation(OutObs$zenith,OutObs$dzenith,uOT=uOT,verbose=verbose)#uOB is only used for iteration and more precise elevation angle is calculated using uOT later
+
         if(Par$CompareT2){
-            OutEleT2 <- astro_CalElevation(OutBary$zenith,OutBary$dzenith,uOT=t(replicate(Par$Nepoch,Par$u)))#this is T2 method which ignores proper motion
+            OutEleT2 <- astro_CalElevation(OutObs$zenith,OutObs$dzenith,uOT=t(replicate(nrow(utc),Par$pqu[,3])),verbose=verbose)#this is T2 method which ignores proper motion
         }else{
             OutEleT2 <- list(elevation=NA,delevation=NA,ZenIn=NA)
         }
-        ##
         ##calculate tS given tO and SB
-        OutBjd <- time_Jd2bjd(OutBary,OutSB,OutEle,Par=Par,CompareT2=Par$CompareT2)
-        if(Par$CompareT2 & Par$ObsType=='ground'){
-            OutBjdT2 <- time_Jd2bjd(OutBary,OutSB,OutEleT2,Par=Par,CompareT2=FALSE)
+#        cat('head(OutEle)=',head(OutEle),'\n')
+
+        OutBjd <- time_Jd2bjd(OutObs,OutSB,OutEle,Par=Par,CompareT2=Par$CompareT2,fit=fit,OutTime0=OutTime0)
+
+        if(Par$CompareT2){
+            OutBjdT2 <- time_Jd2bjd(OutObs,OutSB,OutEleT2,Par=Par,CompareT2=FALSE,fit=fit,OutTime0=OutTime0)
         }else{
             OutBjdT2 <- NULL
         }
         tS <- BJDtcb <- OutBjd$BJDtcb
+
         ##calculate
         if(Par$SBscaling){
             dRSB <- OutSB$dRSB
@@ -1217,26 +1299,26 @@ time_Ta2te <- function(OutBary,Par){
             v2.c2 <- v2/Cauyr^2
             EinsteinIS <- 0.5*v2.c2*((tS[,1]-Par$tpos)+tS[,2]-VacuumIS/DAYSEC)*DAYSEC#second
 ###ref. E06 Eqn. 44-45
-            tB1 <-cbind(tS[,1],tS[,2]-(VacuumIS+EinsteinIS)/DAYSEC)
-            tB1-tB
-            if(all(abs(time_T2mT2(tB1,tB))<tol)) break()
-            tB <- tB1
+            tB <-cbind(tS[,1],tS[,2]-(VacuumIS+EinsteinIS)/DAYSEC)
+#            if(all(abs(time_T2mT2(tB1,tB))<tol)) break()
+#            tB <- tB1
         }else{
             tB <- tS
             VacuumIS <- EinsteinIS <- 0
         }
-
         BJDtdb <-OutBjd$BJDtdb
         RoemerSolar <- OutBjd$Roemer
         RoemerSB <- OutBjd$RoemerSB$Roemer
 #        cat('RoemerSolar-RoemerSB=',head(RoemerSolar-RoemerSB),'s\n')
         ShapiroSolar <- OutBjd$ShapiroSolar$dt.all
         ShapiroPlanet <- OutBjd$ShapiroSolar$dt.list
+#        tB <- time_ChangeBase(tB)
+        if(j==1) tauE <- tB
 
-        tB <- time_ChangeBase(tB)
-                                        #tB <- cbind(tS[,1],tB1)
-        if(Par$binary){
-            OutBT <- gen_CalBT(tB=tB,Par)
+        if(Par$binary & Par$Np>0){
+            OutBT <- gen_CalBT(tauE=tauE,Par)
+#            OutBT <- gen_CalBT(tauE=OutObs$JDutc,Par)
+#            OutBT <- gen_CalBT(tauE=tB,Par)
             BT <- OutBT$BT
             U <- OutBT$U
             vBT <- BT[,4:6,drop=FALSE]#auy/r
@@ -1244,11 +1326,11 @@ time_Ta2te <- function(OutBary,Par){
             RBT <-sqrt(rowSums(rBT^2))#au
             uBT <- rBT/RBT
         }else{
-            BT <- array(0,dim=c(Par$Nepoch,6))
-            vBT <- rBT <- array(0,dim=c(Par$Nepoch,3))
-            RBT <- rep(0,Par$Nepoch)
-            uBT <- array(0,dim=c(Par$Nepoch,3))
-            U <- NA
+            BT <- array(0,dim=c(Nepoch,6))
+            vBT <- rBT <- array(0,dim=c(Nepoch,3))
+            RBT <- rep(0,Nepoch)
+            uBT <- array(0,dim=c(Nepoch,3))
+            U <- rep(0,Nepoch)
             OutBT <- list(BT=BT,vBT=vBT,RBT=RBT,uBT=uBT,U=U)
         }
         rOT <- rOB+rBT[,1:3,drop=FALSE]/pc2au#pc
@@ -1262,45 +1344,77 @@ time_Ta2te <- function(OutBary,Par){
         RST <- sqrt(rowSums(rST^2))
         uST <- rST/RST
         ROB <-sqrt(rowSums(rOB^2))
-        dD <- (ROT-ROB)*pc2au#au
+        if(Par$near){
+            dD <- (ROT-ROB)*pc2au#au
+        }else{
+            dD <- (ROT-ROB)*pc2au#au; time_RoemerTarget() need to be implemented
+        }
+
         RoemerTarget <- dD*AULT#second
-        if(Par$binary){
+        m1 <- Par$mT
+        if(Par$binary & Par$Np>0){
             robust <- TRUE
+            EinsteinTarget <- ShapiroTarget <- AbeTarget <- rep(0,Nepoch)
             if(Par$BinaryModel=='kepler'){
-                tmp <- gen_mass2dd(m=Par$mTC,m2=Par$mC,x=Par$DDGR$x0,ecc=Par$DDGR$ecc,an=2*pi/Par$DDGR$pb,BinaryUnit=Par$BinaryUnit)
-                EinsteinTarget <- time_EinsteinTarget(tmp$gamma*DJY*DAYSEC,OutBT$U)#second
-                ShapiroTarget <- time_ShapiroTarget(Par$mC,e=Par$e,U=OutBT$U,sini=sin(Par$I),omega=Par$omegaT)#second
-                AbeTarget <- rep(0,Par$Nepoch)
+                for(k in 1:Par$Np){
+                    m2 <- Par[[paste0('mC',k)]]
+                    m <- m1+m2
+                    Pd <- Par[[paste0('P',k)]]
+                    Py <- Pd/DJY
+                    aR <- (m*Py^2)^(1/3)#au
+                    ar <- aR*m2/m
+                    e <- Par[[paste0('e',k)]]
+                    I <- Par[[paste0('I',k)]]
+                    x <- ar*sin(I)/Cauyr#yr
+                    Omega <- Par[[paste0('Omega',k)]]
+                    omega <- Par[[paste0('omegaT',k)]]
+                    Mo <- Par[[paste0('Mo',k)]]
+                    tmp <- gen_mass2dd(m=m1+m2,m2=m2,x=x,ecc=e,an=2*pi/Py,BinaryUnit=Par$BinaryUnit,si=sin(I),geometry=Par$geometry)
+                    EinsteinTarget <- EinsteinTarget+time_EinsteinTarget(tmp$gamma*DJY*DAYSEC,OutBT$U)#second
+                    ShapiroTarget <- ShapiroTarget+time_ShapiroTarget(m2,e=e,U=OutBT$U,sini=sin(I),omega=omega)#second
+###companion
+#                    tmp <- gen_mass2dd(m=m1+m2,m2=m1,x=x,ecc=e,an=2*pi/Py,BinaryUnit=Par$BinaryUnit)
+#                    EinsteinCompanion <- EinsteinCompanion+time_EinsteinTarget(tmp$gamma*DJY*DAYSEC,OutBT$U)#second
+#                    ShapiroCompanion <- ShapiroCompanion+time_ShapiroCompanion(m1,e=e,U=OutBT$U,sini=sin(I),omega=omega+pi)#second
+                }
             }else{
-                EinsteinTarget <- time_EinsteinTarget(OutBT$gamma*DJY*DAYSEC,OutBT$U)#second
-                ShapiroTarget <- OutBT$Ds#second
-                AbeTarget <-OutBT$Da#second
+                for(k in 1:Par$Np){
+                    EinsteinTarget <- EinsteinTarget+time_EinsteinTarget(OutBT$gamma*DJY*DAYSEC,OutBT$U)#second
+                    ShapiroTarget <- ShapiroTarget+OutBT$Ds#second
+                    AbeTarget <- AbeTarget+OutBT$Da#second
+                }
 #                RoemerEinsteinTarget <- OutBT$Dre
             }
         }else{
             AbeTarget <- ShapiroTarget <- RoemerTarget <- EinsteinTarget <- 0
+            AbeCompanion <- ShapiroCompanion <- RoemerCompanion <- EinsteinCompanion <- 0
         }
         TargetDelay <- RoemerTarget+EinsteinTarget+ShapiroTarget#total delay in the target system
         tauE <- cbind(tB[,1],tB[,2]-TargetDelay/DAYSEC)#light emission proper time (do not consider beaming); julian day
-        dtauE <- abs(time_T2mT2(tauE,tauE0))
-        if(all(dtauE<1e-9)) break()
-        tauE0 <- tauE
+	if(TRUE){
+###	if(FALSE){
+            dtauE <- abs(time_T2mT2(tauE,tauE0))
+            if(all(dtauE<1e-9)) break()
+            tauE0 <- tauE
+	}else{
+            dtB <- abs(time_T2mT2(tB,tB0))
+            if(all(dtB<1e-9)) break()
+            tB0 <- tB
+	}
     }
 
 ###derive more quantities for astrometry and RV modeling
-    if(Par$binary){
-        rBT <- BT[,1:3]#au/yr
-        rTC <- -rBT*Par$mTC/Par$mC#au
+    rBT <- BT[,1:3]#au/yr
+    rTC <- -rBT*(Par$mC1+Par$mT)/Par$mC1#au
+    vTC <- -vBT*(Par$mC1+Par$mT)/Par$mC1
+    if(Par$binary & Par$Np>0){
         rOC <- rOT+rTC/pc2au#pc
         uOC <- gen_CalUnit(rOC)
-        rTC <- -rBT*Par$mTC/Par$mC
-        vTC <- -vBT*Par$mTC/Par$mC
         vSC <- vST+vTC#au/yr
         VTC <- sqrt(rowSums(vTC^2))#au/yr
         RTC <- sqrt(rowSums(rTC^2))#au
         rSC <- rST+rTC/pc2au#pc
     }else{
-        rTC <- 0
         rOC <- rOT
         uOC <- uOT
         rSC <- rST
@@ -1308,7 +1422,7 @@ time_Ta2te <- function(OutBary,Par){
     }
 
 ###return
-    return(list(tauE=tauE,tB=tB,tS=tS,BJDtcb=BJDtcb,BJDtdb=BJDtdb,TargetDelay=TargetDelay,RoemerTarget=RoemerTarget,EinsteinTarget=EinsteinTarget,ShapiroTarget=ShapiroTarget,RoemerSolar=RoemerSolar,RoemerSB=RoemerSB,ShapiroSolar=ShapiroSolar,ShapiroPlanet=ShapiroPlanet,OL=OutBjd$ShapiroSolar$OL,Eph=OutBjd$ShapiroSolar$Eph,ShapiroTarget=ShapiroTarget,AbeTarget=AbeTarget,VacuumIS=VacuumIS,EinsteinIS=EinsteinIS,rOB=rOB,rBT=rBT,uOB=uOB,vOB=vOB,RBT=RBT,uBT=uBT,BT=BT,rOT=rOT,rST=rST,SB=OutSB$SB,uOT=uOT,vOT=vOT,uST=uST,vST=vST,uSB=OutSB$uSB,rSB=rSB,vSB=vSB,vBT=vBT,U=U,OutBT=OutBT,RoemerOrder=OutBjd$RoemerOrder,Ztropo=OutBjd$Ztropo,TropoDelay=OutBjd$TropoDelay,elevation=OutEle$elevation,delevation=OutEle$delevation,ZenIn=OutEle$ZenIn,uSB.T2=OutSB$uSB.T2,RoemerT2=OutBjd$RoemerT2,TropoDelayT2=OutBjdT2$TropoDelay,elevationT2=OutEleT2$elevation,delevationT2=OutEleT2$delevation,ZenInT2=OutEleT2$ZenIn,rTC=rTC,rOC=rOC,uOC=uOC,rSC=rSC,vSC=vSC))
+    return(list(tauE=tauE,tB=tB,tS=tS,BJDtcb=BJDtcb,BJDtdb=BJDtdb,TargetDelay=TargetDelay,RoemerTarget=RoemerTarget,EinsteinTarget=EinsteinTarget,ShapiroTarget=ShapiroTarget,RoemerSolar=RoemerSolar,RoemerSB=RoemerSB,ShapiroSolar=ShapiroSolar,ShapiroPlanet=ShapiroPlanet,OL=OutBjd$ShapiroSolar$OL,Eph=OutBjd$ShapiroSolar$Eph,ShapiroTarget=ShapiroTarget,AbeTarget=AbeTarget,VacuumIS=VacuumIS,EinsteinIS=EinsteinIS,rOB=rOB,rBT=rBT,uOB=uOB,vOB=vOB,RBT=RBT,uBT=uBT,BT=BT,rOT=rOT,rST=rST,SB=OutSB$SB,uOT=uOT,vOT=vOT,uST=uST,vST=vST,uSB=OutSB$uSB,rSB=rSB,vSB=vSB,vBT=vBT,U=U,OutBT=OutBT,RoemerOrder=OutBjd$RoemerOrder,Ztropo=OutBjd$Ztropo,TropoDelay=OutBjd$TropoDelay,elevation=OutEle$elevation,delevation=OutEle$delevation,ZenIn=OutEle$ZenIn,uSB.T2=OutSB$uSB.T2,RoemerT2=OutBjd$RoemerT2,TropoDelayT2=OutBjdT2$TropoDelay,elevationT2=OutEleT2$elevation,delevationT2=OutEleT2$delevation,ZenInT2=OutEleT2$ZenIn,rTC=rTC,rOC=rOC,uOC=uOC,rSC=rSC,vSC=vSC,ShapiroSolarList=OutBjd$ShapiroSolarList))
 }
 
 time_ToJD <- function(epoch){

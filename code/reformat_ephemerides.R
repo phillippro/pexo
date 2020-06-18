@@ -1,6 +1,6 @@
 de <- commandArgs(trailingOnly=TRUE)
 if(length(de)==0){
-    de <- '436t'
+    de <- '430t'
 }
 dir <- paste0('../data/de',de)
 fs <- list.files(dir,pattern=paste0('ascp.+',de))
@@ -11,7 +11,8 @@ header <- readLines(fh[indH])
 yy0 <- gsub(paste0('ascp|\\.',de),'',fs)
 yy <- as.numeric(yy0)
 dyr <- diff(yy)[1]
-ind1 <- which(yy>max(1950,min(yy)))[1]-1
+#ind1 <- which(yy>max(1950,min(yy)))[1]-1
+ind1 <- which(yy>max(1650,min(yy)))[1]-1
 ind2 <- which(yy>=min(max(yy),2050))[1]
 yrs <- yy[ind1:ind2]
 out <- c()

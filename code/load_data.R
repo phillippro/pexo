@@ -55,11 +55,18 @@ if(!file.exists(dirt)){
     dirt <- dirDE
 }
 fs <- list.files(dirt,pattern='DE.+dat',full.name=TRUE)
-f1 <- fs[1]
+ys <- c()
+for(j in 1:length(fs)){
+    yy  <- fs[j]
+    yy <- gsub('.+/','',yy)
+    yy <- unlist(strsplit(yy,'_'))
+    yy <- gsub('J','',yy)
+    ys <- c(ys,yy[2])
+}
+f1 <- fs[which.min(ys)]
 DEfile <- read.table(f1)
 fh <- list.files(dirt,pattern='header',full.name=TRUE)
 indH <- sort(fh,decreasing=TRUE,index.return=TRUE)$ix[1]
-cat('read header:',fh[indH],'\n')
 DEheader <- readLines(fh[indH])
 #DEheader <- readLines(paste0(dirt,'header.',Par$DE,'t'))
 ##for nutation calculation

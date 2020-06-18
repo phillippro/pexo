@@ -1,0 +1,6 @@
+source('../../code/general_function.R')
+source('../../code/constants.R')
+acb <- read.table('HD128621_ALMA.abs',header=TRUE)
+aca <- read.table('HD128620_ALMA.abs',header=TRUE)
+rel <- gen_Dir2off(acb[,c(2,4)]/180*pi,acb[,c(3,5)],aca[,c(2,4)]/180*pi,aca[,c(3,5)])
+write.table(cbind(acb[,1],rel),file='HD128621_ALMA.rel',quote=FALSE,row.names=FALSE,col.names=c('JD','dRA','edRA','dDE','edDE'))
