@@ -1380,6 +1380,7 @@ fit_PTAM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,KepIni,KepMin,
         if(Par$Np>0){
             Data <- tmp$res
         }
+        save(list=ls(all=TRUE),file='test.Robj')
 
 ###whether to stop DRAM according to BF criterion
         ll <-  max(mcopt[,'loglike'])

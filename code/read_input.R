@@ -38,21 +38,21 @@ if(FALSE){
 #opt$primary <- 'HD46375'
 #opt$primary <- 'GJ534'
 #opt$primary <- 'HD10790'
-opt$primary <- 'HD10700'
-#opt$Niter <- 1e4
+opt$primary <- 'HD16160'
+opt$Niter <- 1e4
 #opt$time <- '2447047 2458467 10'
 #opt$time <- '2447000 2462000 10'
-opt$time <- '2450000 2460000 10'
+#opt$time <- '2450000 2460000 10'
 #opt$time <- '2445000 2465000 10'
 #opt$time <- '2454597 2454633 1'
 #opt$time <- '2452850 2457498 1'
-opt$mode  <- 'emulate'
-#opt$mode  <- 'fit'
+#opt$mode  <- 'emulate'
+opt$mode  <- 'fit'
 #opt$component <- 'TAR'
-#opt$component <- 'TR'
-opt$ins <- 'APF'
+opt$component <- 'TR'
+#opt$ins <- 'APF'
 #opt$var <- 'JDutc BJDtdb RvST RvgT RvsT RvgsO'
-opt$var <- 'JDutc BJDtdb BJDtcb'
+#opt$var <- 'JDutc BJDtdb BJDtcb'
 }
 if(opt$mode=='emulate' & is.na(opt$ins)) stop('No input instrumentation or observatory for emulation!')
 instrument <- opt$ins
