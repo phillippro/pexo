@@ -1,2 +1,5 @@
 # ignore these duplicate files
 *~
+*/*~
+*/*/*~
+
