@@ -4,7 +4,8 @@ strs <- unique(Data[,c('star','instrument','type')])
 ss <- c()
 for(j in 1:nrow(strs)){
     if(strs[j,3]=='rv'){
-        ss <- c(ss,paste0('jitterRv.',strs[j,1],'.',strs[j,2],' 0 -1e6 1e6 U'))
+        ss <- c(ss,paste0('jitterRv.',strs[j,1],'.',strs[j,2],' 1 0 1e2 U'))
+#        ss <- c(ss,paste0('logjitterRv.',strs[j,1],'.',strs[j,2],' 0 -10 5 U'))
         ss <- c(ss,paste0('bRv.',strs[j,1],'.',strs[j,2],' 0 -1e6 1e6 U'))
     }else if(strs[j,3]=='rel' | strs[j,3]=='abs'){
         ss <- c(ss,paste0('logjitterAstro.',strs[j,1],'.',strs[j,2],' 0 -10 10 U'))
@@ -59,9 +60,9 @@ for(j in 1:nrow(strs)){
         ss <- c(ss,'height.APF 1.274')
     }
     if(strs[j,2]=='LICK'){
-        ss <- c(ss,'phi.APF 37.3425')
-        ss <- c(ss,'elong.APF -121.63825')
-        ss <- c(ss,'height.APF 1.274')
+        ss <- c(ss,'phi.LICK 37.3425')
+        ss <- c(ss,'elong.LICK -121.63825')
+        ss <- c(ss,'height.LICK 1.274')
     }
     if(grepl('HARPS',strs[j,2])){
         ss <- c(ss,paste0('phi.',strs[j,2],' -29.2584'))

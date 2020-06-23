@@ -57,4 +57,4 @@ if(!is.null(opt$var) & !is.null(opt$out) & opt$mode=='emulate'){
     source('fit_output.R')
 }
 
-cat('Total computation time:',(proc.time()-tt0)[3]/60,'min\n')
+cat('Total computation time:',round((proc.time()-tt0)[3]/60,3),'min\n')

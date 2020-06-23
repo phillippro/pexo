@@ -42,12 +42,12 @@ r = Simbad.query_objectids(star)
 g = [x for x in r if 'Gaia DR2' in str(x)]
 h = [x for x in r if 'HIP' in str(x)]
 
-print('h='+str(h))
 if len(h)==0:
     sys.exit("No Hipparcos source found to match the target!")
 
 h1 = h[0][0].split()[-1]
 hid = int(h1)
+print('HIP'+str(hid))
 
 if len(g)==0:
     query = "SELECT *  FROM gaiadr2.gaia_source WHERE CONTAINS(POINT('ICRS',gaiadr2.gaia_source.ra,gaiadr2.gaia_source.dec),CIRCLE('ICRS',"+str(ra)+","+str(dec)+","+"0.1))=1 AND gaiadr2.gaia_source.parallax/"+str(plx)+"<1.1 AND gaiadr2.gaia_source.parallax/"+str(plx)+">0.9;"

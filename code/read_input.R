@@ -38,8 +38,9 @@ if(FALSE){
 #opt$primary <- 'HD46375'
 #opt$primary <- 'GJ534'
 #opt$primary <- 'HD10790'
-opt$primary <- 'HD16160'
-opt$Niter <- 1e4
+opt$primary <- 'HD113449'
+opt$Niter <- 1e5
+opt$ncore <- 4
 #opt$time <- '2447047 2458467 10'
 #opt$time <- '2447000 2462000 10'
 #opt$time <- '2450000 2460000 10'
@@ -50,6 +51,7 @@ opt$Niter <- 1e4
 opt$mode  <- 'fit'
 #opt$component <- 'TAR'
 opt$component <- 'TR'
+opt$verbose <- TRUE
 #opt$ins <- 'APF'
 #opt$var <- 'JDutc BJDtdb RvST RvgT RvsT RvgsO'
 #opt$var <- 'JDutc BJDtdb BJDtcb'

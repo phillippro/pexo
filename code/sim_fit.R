@@ -1,7 +1,7 @@
 source('plot_function.R')
 if(!exists('sim')){
-ParNew <- update_par(Par,ParOpt)
-fit <- fit_LogLike(Data,OutObs,RateObs,ParOpt,ParNew,OutTime0=NULL)
+#ParNew <- update_par(Par,ParOpt)
+fit <- fit_LogLike(Data,OutObs,RateObs,ParOpt,Par,,OutTime0=OutTime0)
 model <- fit$model
 #llmax <- round(fit$llike)
 ###model prediction

@@ -98,11 +98,9 @@ fit_AstroTrend <- function(Data,ParFit,Par,star,type='abs'){
         }else{
             colum <- 2
         }
-        sets <- unique(Data[,'instrument'])
-        Nset <- length(sets)
-        for(j in 1:Nset){
-            instr <- sets[j]
-            index <- which(Data[,'instrument']==instr)
+        inss <- Par$index[[star]][[type]]$instruments
+        for(instr in inss){
+            index <- Par$index[[star]][[type]][[instr]]$ind2
             b <- 0
             if(type=='abs'){
                 n <- paste0('b',toupper(coord),'.',star,'.',instr)
@@ -172,11 +170,9 @@ fit_AstroRed <- function(OutTime,AstroHat,Data,ParFit,Par,star,type='abs'){
     AstroRed <- array(0,dim=c(nrow(Data),2))
     ind <- which(Data$type==type)
     if(length(ind)>0){
-        sets <- unique(Data[ind,'instrument'])
-        Nset <- length(sets)
-        for(j in 1:Nset){
-            instr <- sets[j]
-            index <- ind[Data[ind,'instrument']==instr]
+        inss <- Par$index[[star]][[type]]$instruments
+        for(instr in inss){
+            index <- Par$index[[star]][[type]][[instr]]$ind2
             x <- Data[index,2*k]
             q <- Par$ObsInfo[index[1],'q']
             p <- Par$ObsInfo[index[1],'p']
@@ -216,11 +212,9 @@ fit_AstroLike <- function(AstroHat,Data,ParFit,Par,star,type='abs'){
 ##   loglike - log likelihood
 ####################################
     loglike <- 0
-    sets <- unique(Data[,'instrument'])
-    Nset <- length(sets)
-    for(j in 1:Nset){
-        instr <- sets[j]
-        index <- which(Data[,'instrument']==instr)
+    inss <- Par$index[[star]][[type]]$instruments
+    for(instr in inss){
+        index <- Par$index[[star]][[type]][[instr]]$ind2
         astro <- Data[index,c(2,4)]
         eastro <- Data[index,c(3,5)]
         jitter <- 0
@@ -263,11 +257,9 @@ fit_RvTrend <- function(OutTime,Data,ParFit,Par,star){
         tt <- (OutTime$tauE[,1]-Par$T0)+OutTime$tauE[,2]
         RvTrend <- fit_PolyTrend(tt/DJY,0,ParFit[n])
     }
-    sets <- unique(Data[,'instrument'])
-    Nset <- length(sets)
-    for(j in 1:Nset){
-        instr <- sets[j]
-        index <- which(Data[,'instrument']==instr)
+    inss <- Par$index[[star]]$rv$instruments
+    for(instr in inss){
+        index <- Par$index[[star]]$rv[[instr]]$ind1
         b <- 0
         n <- paste0('bRv','.',star,'.',instr)
         if(any(names(ParFit)==n)) b <- ParFit[n]
@@ -291,11 +283,9 @@ fit_RvRef <- function(OutTime,Data,ParFit,Par,star){
 ##   RvRef - RV trend
 ####################################
     RvRef <- rep(0,nrow(Data))
-    sets <- unique(Data[,'instrument'])
-    Nset <- length(sets)
-    for(j in 1:Nset){
-        instr <- sets[j]
-        index <- which(Data[,'instrument']==instr)
+    inss <- Par$index[[star]]$rv$instruments
+    for(instr in inss){
+        index <- Par$index[[star]]$rv[[instr]]$ind1
         b <- 0
         n <- paste0('bRv','.',star,'.',instr)
         if(any(names(ParFit)==n)) b <- ParFit[n]
@@ -352,12 +342,10 @@ fit_RvRed <- function(OutTime,RvHat,Data,ParFit,Par,star){
 ## Output:
 ##   RvRed - RV red noise
 ####################################
-    sets <- unique(Data[,'instrument'])
-    Nset <- length(sets)
     RvRed <- rep(0,nrow(Data))
-    for(j in 1:Nset){
-        instr <- sets[j]
-        index <- which(Data[,'instrument']==instr)
+    inss <- Par$index[[star]]$rv$instruments
+    for(instr in inss){
+        index <- Par$index[[star]]$rv[[instr]]$ind1
         rv <- Data[,2]
         q <- Par$ObsInfo[index[1],'q']
         p <- Par$ObsInfo[index[1],'p']
@@ -384,11 +372,9 @@ fit_RvLike <- function(RvHat,Data,ParFit,star){
 ##   loglike - log likelihood
 ####################################
     loglike <- 0
-    sets <- unique(Data[,'instrument'])
-    Nset <- length(sets)
-    for(j in 1:Nset){
-        instr <- sets[j]
-        index <- which(Data[,'instrument']==instr)
+    inss <- Par$index[[star]]$rv$instruments
+    for(instr in inss){
+        index <- Par$index[[star]]$rv[[instr]]$ind1
         rv <- Data[index,2]
         erv <- Data[index,3]
         jitter <- 0
@@ -441,13 +427,11 @@ fit_ModelPredict <- function(Data,Par,ParOpt,Nsim=1e3){
     Sim <- c()
     Obs <- c()
     for(star in stars){
-        ind0 <- which(Data$star==star)
-        types <- unique(Data$type[ind0])
+        types <- Par$index[[star]]$types
         for(type in types){
-            ind1 <- which(Data$star==star & Data$type==type)
-            inss <- unique(Data[ind1,'instrument'])
+            inss <- Par$index[[star]][[type]]$instruments
             for(ins in inss){
-                ind <- which(Data$star==star & Data$type==type & Data$instrument==ins)
+                ind <- Par$index[[star]][[type]][[ins]]
                 tmin <- min(Data[ind,1])
                 tmax <- max(Data[ind,1])
 #                tsim <- seq(tmin,tmax,length.out=Nsim)
@@ -473,7 +457,7 @@ fit_ModelPredict <- function(Data,Par,ParOpt,Nsim=1e3){
 }
 
 #fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=TRUE){
-fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FALSE){
+fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FALSE,TimeUpdate=FALSE){
 ####################################
 ## Calculate log Likelihood function
 ##
@@ -492,6 +476,7 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
 ##   model - Full model
 ##   sigma - total residual RMS
 ####################################
+    t0 <- proc.time()
     if(length(RateObs)>0){
         OutObsNew <- update_OutObs(ParFit,OutObs,RateObs)
     }else{
@@ -499,78 +484,181 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
     }
     ParNew <- update_par(Par,ParFit)
 #    ParNew <- Par
-    t11 <- proc.time()
-    out <- update_CombineModel(Data,ParNew,OutObsNew,geometry=Par$geometry,OutTime0=OutTime0)
-    dur <- proc.time()-t11
+    out <- update_CombineModel(Data,ParNew,OutObsNew,geometry=Par$geometry,OutTime0=OutTime0,TimeUpdate=TimeUpdate)
     stars <- unique(Data$star)
     types <- unique(Data$type)
     LogLike <- 0
     ModelTrend <- ModelRed <- ModelKep <- model <- Data
-    for(star in stars){
+    for(star in Par$targets){
 ###RV model
-        index <- which(Data$star==star & Data$type=='rv')
-        if(length(index)>0){
+        types <- Par$index[[star]]$types
+        if(any(types=='rv')){
+            index <- Par$index[[star]]$rv$all
             RvKep <- out$OutRv[[star]]$rv
             ParNew$ObsInfo <- Par$ObsInfo[index,]
             ModelKep[index,2] <- RvKep
-            RvRef <- fit_RvRef(OutTime[[star]]$rv,Data[index,],ParFit,ParNew,star)
+#            RvRef <- fit_RvRef(OutTime[[star]]$rv,Data[index,],ParFit,ParNew,star)
+            RvRed <- RvRef <- rep(0,length(index))
+            inss <- Par$index[[star]]$rv$instruments
+            index <- Par$index[[star]]$rv$all
+            for(instr in inss){
+                ind0 <- Par$index[[star]]$rv[[instr]]$ind0
+                ind1 <- Par$index[[star]]$rv[[instr]]$ind1
+                b <- 0
+                n <- paste0('bRv','.',star,'.',instr)
+                if(any(names(ParFit)==n)) b <- ParFit[n]
+                RvRef[ind1] <- RvRef[ind1]+b*1e3
+            }
             ModelTrend[index,2] <- -RvRef
 #            RvHat <- RvKep+RvRef
             RvHat <- ((1+RvKep/CMPS)/(1+RvRef/CMPS)-1)*CMPS#1+Zmeas = (1+Zabs)/(1+Zref); Zabs is the absolute observed redshift while Zref is the absolute redshift of the reference spectrum.
-            RvRed <- fit_RvRed(OutTimes[[star]]$rv,RvHat,Data[index,],ParFit,ParNew)
+###calculate red noise component
+            for(instr in inss){
+                ind0 <- Par$index[[star]]$rv[[instr]]$ind0
+                ind1 <- Par$index[[star]]$rv[[instr]]$ind1
+                q <- Par$ObsInfo[ind0[1],'q']
+                p <- Par$ObsInfo[ind0[1],'p']
+                if(p>0 | q>0){
+                    tauE <- rowSums(OutTime[[star]]$rv$tauE)[ind1]
+                    rv.arma <- fit_ARMA(t=tauE,x=Data[ind0,2],xhat=RvHat[ind1],p=p,q=q,ParFit=ParFit,instr=instr,star=star,Dtype='rv')
+                    RvRed[ind1] <- rv.arma
+                }
+            }
+
             ModelRed[index,2] <- RvRed
             RvHat <- RvHat+RvRed
             model[index,1] <- rowSums(out$OutTime[[star]]$rv$tauE)
             model[index,2] <- RvHat
-#cat('names(ParFit)=',names(ParFit),'\n')
-#cat('ParFit=',ParFit,'\n')
-            llike <- fit_RvLike(RvHat,Data[index,],ParFit,star)
+###calculate loglikelihood
+            llike <- 0
+            for(instr in inss){
+                ind0 <- Par$index[[star]]$rv[[instr]]$ind0
+                ind1 <- Par$index[[star]]$rv[[instr]]$ind1
+                rv <- Data[ind0,2]
+                erv <- Data[ind0,3]
+                jitter <- 0
+                n <- paste0('logjitterRv','.',star,'.',instr)
+                n1 <- paste0('jitterRv','.',star,'.',instr)
+                if(any(names(ParFit)==n)){
+                    jitter <- exp(ParFit[n])
+                }else if(any(names(ParFit)==n1)){
+                    jitter <- ParFit[n1]
+                }
+                ll <- sum(dnorm(rv,mean=RvHat[ind1],sd=sqrt(erv^2+jitter^2),log=T))
+                llike <- llike+ll
+            }
+
             if(verbose) cat('star',star,';rv;sd(res)=',round(sd(RvHat-Data[index,2]),2),';llike=',llike,';b=',ParFit[grep('bRv',names(ParFit))],'km/s\n')
             LogLike <- LogLike+llike
         }
 
-###absolute astrometry model
-        index <- which(Data$type=='abs' & Data$star==star)
-        if(length(index)>0){
-            AstroKep <- out$OutAbs[[star]]$abs
-            ParNew$ObsInfo <- Par$ObsInfo[index,]
-            ModelKep[index,c(2,4)] <- AstroKep
-            AstroTrend <- fit_AstroTrend(Data[index,],ParFit,ParNew,star=star,type='abs')#rad
-            ModelTrend[index,c(2,4)] <- AstroTrend
-            AstroHat <- AstroKep+AstroTrend
-            AstroRed <- fit_AstroRed(OutTime[[star]]$abs,AstroHat,Data[index,],ParFit,ParNew,star=star,type='abs')#rad
-            ModelRed[index,c(2,4)] <- AstroRed
-            model[index,1] <- rowSums(out$OutTime[[star]]$abs$tauE)
-            AstroHat <- AstroHat+AstroRed
-            model[index,c(2,4)] <- AstroHat
-            llike <- fit_AstroLike(AstroHat,Data[index,],ParFit,ParNew,star=star,type='abs')
-            dastro <- AstroHat-Data[index,c(2,4)]
-            if(verbose) cat('star',star,';abs;sd=',round(sd(unlist(dastro))/DMAS2R,2),'mas; llike=',llike,'\n')
-            LogLike <- LogLike+llike
-        }
-    }
+###astrometry model
+        if(any(types=='abs'|types=='rel')){
+            index <- Par$index[[star]]$astro$all
+            ind.abs <- Par$index[[star]]$abs$ind2
+            ind.rel <- Par$index[[star]]$rel$ind2
+#            ind.abs <- Par$index[[star]]$abs
+#            ind.rel <- Par$index[[star]]$rel
+            AstroKep <- AstroRed <- AstroTrend <- array(0,dim=c(length(index),2))
 
-###relative astrometry model
-    for(star in stars){
-        index <- which(Data$type=='rel' & Data$star==star)
-        if(length(index)>0){
-            AstroKep <- out$OutRel[[star]]$rel
+###calculate AstroKep
+            if(length(ind.abs)>0) AstroKep[ind.abs,] <- out$OutAbs[[star]]$abs
+            if(length(ind.rel)>0) AstroKep[ind.rel,] <- out$OutRel[[star]]$rel
+
             ModelKep[index,c(2,4)] <- AstroKep
-            AstroTrend <- fit_AstroTrend(Data[index,],ParFit,ParNew,star,type='rel')
+
+###calculate AstroTrend
+            for(coord in c('ra','dec')){
+                if(coord=='ra'){
+                    colum <- 1
+                }else{
+                    colum <- 2
+                }
+                for(type in c('abs','rel')){
+                    inss <- Par$index[[star]][[type]]$instruments
+                    for(instr in inss){
+                        ind2 <- Par$index[[star]][[type]][[instr]]$ind2
+                        if(length(ind2)>0){
+                            b <- 0
+                            if(type=='abs'){
+                                nabs <- paste0('b',toupper(coord),'.',star,'.',instr)
+                                if(any(names(ParFit)==n)) b <- ParFit[n]*DMAS2R
+                            }else{
+                                nrel <- paste0('b',toupper(coord),'.rel.',instr)
+                                if(any(names(ParFit)==n)) b <- ParFit[n]
+                            }
+                            AstroTrend[ind2,] <- AstroTrend[ind2,]+b
+                        }
+                    }
+                }
+            }
             ModelTrend[index,c(2,4)] <- AstroTrend
             AstroHat <- AstroKep+AstroTrend
-            ParNew$ObsInfo <- Par$ObsInfo[index,]
-            AstroRed <- fit_AstroRed(OutTime[[star]]$rel,AstroHat,Data[index,],ParFit,ParNew,star,type='rel')
+
+###calculate red noise astrometry model component
+            for(type in c('abs','rel')){
+                inss <- Par$index[[star]][[type]]$instruments
+                if(length(inss)>0){
+                    for(instr in inss){
+                        ind0 <- Par$index[[star]][[type]][[instr]]$ind0
+                        ii <- Par$index[[star]][[type]][[instr]]$ind1
+                        if(length(ind0)>0){
+                            x <- Data[ind0,2*k]
+                            q <- Par$ObsInfo[ind0[1],'q']
+                            p <- Par$ObsInfo[ind0[1],'p']
+                            if(p>0 | q>0){
+                                tauE <- rowSums(OutTime[[star]][[type]]$tauE)[inds]
+                                res <- (x-AstroHat[ii,k])
+                                if(type=='abs'){
+###from rad to mas
+                                    res <- res/DMAS2R
+                                }
+                                astro.arma <- fit_ARMA(t=tauE,res=res,p=p,q=q,ParFit=ParFit,instr=instr,star=star,Dtype='astro')
+                                AstroRed[ii,k] <- astro.arma
+                                if(type=='abs') AstroRed[ii,k] <- AstroRed[ii,k]*DMAS2R
+                            }
+                        }
+                    }
+                }
+            }
+
+###calculate likelihood
             ModelRed[index,c(2,4)] <- AstroRed
+            if(length(ind.abs)>0) model[Par$index[[star]]$abs$all,1] <- rowSums(out$OutTime[[star]]$abs$tauE)
+            if(length(ind.rel)>0) model[Par$index[[star]]$rel$all,1] <- rowSums(out$OutTime[[star]]$rel$tauE)
             AstroHat <- AstroHat+AstroRed
-            model[index,1] <- rowSums(out$OutTime[[star]]$rel$tauE)
             model[index,c(2,4)] <- AstroHat
-            llike <- fit_AstroLike(AstroHat,Data[index,],ParFit,ParNew,star,type='rel')
-            dastro <- AstroHat-Data[index,c(2,4)]
-            if(verbose) cat('star',star,';rel;sd=',round(sd(unlist(dastro)),2),'llike=',llike,'\n')
+            llike <- 0
+            for(type in c('abs','rel')){
+                inss <- Par$index[[star]][[type]]$instruments
+                for(instr in inss){
+                    ind0 <- Par$index[[star]][[type]][[instr]]$ind0
+                    ind2 <- Par$index[[star]][[type]][[instr]]$ind2
+                    if(length(ind0)>0){
+                        astro <- Data[ind0,c(2,4)]
+                        eastro <- Data[ind0,c(3,5)]
+                        jitter <- 0
+                        n <- paste0('logjitterAstro','.',star,'.',instr)
+                        n1 <- paste0('jitterAstro','.',star,'.',instr)
+                        if(any(names(ParFit)==n)){
+                            jitter <- exp(ParFit[n])
+                        }else if(any(names(ParFit)==n1)){
+                            jitter <- ParFit[n1]
+                        }
+                        res <- astro-AstroHat[ind2,]
+                        if(type=='abs') res[,1] <- res[,1]*cos(AstroHat[ind2,2])
+                        dastro <- unlist(res)
+                        if(type=='abs') dastro <- dastro/DMAS2R
+                        ll <- sum(dnorm(dastro,mean=0,sd=unlist(sqrt(eastro^2+jitter^2)),log=T))
+                                        #        ll <- ll+sum(dnorm(dastro[,2],mean=0,sd=sqrt(eastro[ind,2]^2+jitter^2),log=T))
+                        llike <- llike+ll
+                    }
+                }
+            }
             LogLike <- LogLike+llike
         }
     }
+#    t1 <- fit_TimeCount(t0,'dur1')
     return(list(llike=LogLike,ModelTrend=ModelTrend,ModelKep=ModelKep,ModelRed=ModelRed,model=model))
 }
 
@@ -612,7 +700,7 @@ fit_LogPrior <- function(ParFit,ParMin,ParMax,Par){
     return(logprior)
 }
 
-fit_LogPost <- function(Data,OutObs,RateObs,ParFit,ParMin,ParMax,Par,tem=1,OutTime0=NULL){
+fit_LogPost <- function(Data,OutObs,RateObs,ParFit,ParMin,ParMax,Par,tem=1,OutTime0=NULL,TimeUpdate=FALSE){
 ####################################
 ## Calculate log posterior
 ##
@@ -628,15 +716,19 @@ fit_LogPost <- function(Data,OutObs,RateObs,ParFit,ParMin,ParMax,Par,tem=1,OutTi
 ##   logprior - log prior
 ##   logpost - log posterior
 ####################################
-    t1 <- proc.time()
-#    tmp <- fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0)
-    tmp <- try(fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0),TRUE)
-#    if(class(tmp)=='try-error') cat('ParFit=',paste(ParFit,collapse=','),'\n')
-    if(class(tmp)=='try-error') save(Data,OutObs,RateObs,ParFit,Par,OutTime0,file='test.Robj')
+    t0 <- proc.time()
+     tmp <- fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0,TimeUpdate=TimeUpdate)
+#    if(class(tmp)=='try-error') save(Data,OutObs,RateObs,ParFit,Par,OutTime0,file='test.Robj')
     loglike <- tmp$llike
     logprior <- fit_LogPrior(ParFit,ParMin,ParMax,Par)
     logpost <- loglike*tem+logprior
     return(list(loglike=loglike,logprior=logprior,logpost=logpost))
+}
+
+fit_TimeCount <- function(t,label='duration',ofac=1){
+    t1 <- proc.time()
+    cat(label,':',round((t1-t)[3]/ofac,6),'s\n')
+    return(t1)
 }
 
 fit_proposal <- function(ParOld, ParMin,ParMax,CovNew,PostSample,Sd,eps=1e-16,silent=TRUE){
@@ -645,7 +737,7 @@ fit_proposal <- function(ParOld, ParMin,ParMax,CovNew,PostSample,Sd,eps=1e-16,si
 ##
 ## Input:
 ##   ParOld - current or old parameter values
-##   CovAdapt - adaptive covariance
+##   CovAdawpt - adaptive covariance
 ##
 ## Output:
 ##   ParProp - proposed or new parameter values
@@ -683,6 +775,7 @@ fit_proposal <- function(ParOld, ParMin,ParMax,CovNew,PostSample,Sd,eps=1e-16,si
         if(class(ParProp)=='try-error') stop('Error: adatpive covariance is not positive definitive!\n')
         if(all(ParProp>ParMin & ParProp<ParMax)) break()
     }
+#    cat('k=',k,'\n')
     if(k==Ntt){
         ind <- which(ParProp<ParMin | ParProp>ParMax)
 	cat('problematic parameter:',names(ParProp)[ind],'\n')
@@ -775,6 +868,8 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
 ##   loglike - Log likelihood
 ####################################
     Niter <- Par$Niter
+    cat('Niter=',Niter,'\n')
+    t0 <- proc.time()
     Npar <- length(ParIni)
     CovIni  <- 1e-6*diag(Npar)
 #    CovIni  <- 1e-3*diag(Npar)
@@ -791,7 +886,6 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
     dt0 <- 0
     CovAdapt <- array(data=0,dim=c(Npar,Npar))
     Sd <- 2.4^2/Npar
-    t.start <- proc.time()
     n0 <- 2
     for(i in 1:Niter){
         if(i <= n0){
@@ -803,7 +897,11 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
 #	    cat('diag(CovAdapt1)=',diag(CovAdapt1),'\n')
         }
         proposal  <-  fit_proposal(chain[i,],ParMin,ParMax,CovAdapt,PostSample=chain[1:i,],Sd=Sd)
-        proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0)
+        if(i%%10==0){
+            proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0,TimeUpdate=TRUE)
+        }else{
+            proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0,TimeUpdate=FALSE)
+        }
         logpost.prop <- proprop$logpost
 	logprior.prop <- proprop$logprior
         loglike.prop <- proprop$loglike
@@ -857,10 +955,10 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
                 points(t,yfit,col='red')
                 plot(t,rv-yfit,xlab='t',ylab='O-C [m/s]')
                 dev.off()
-                t.start <- proc.time()
             }
         }
     }
+    t1 <- fit_TimeCount(t0,'duration')
     cbind(chain,logpost,loglike)
 }
 
@@ -935,20 +1033,15 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
 ####################################
     Niter0 <- Par$Niter
     Npar <- length(ParIni)
-    Niter1 <- 1e3
-    Par$Niter <- Niter1
+    Nbasic <- Par$Niter <- Niter1 <- 1e3
 ####check whether the lowest temperture is appropriate and redermine TemLow
     mcmc <- fit_multiChain(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=TemLow,verbose=verbose,OutTime0=OutTime0)
     ParIni <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
     acceptance <- fit_acceptance(mcmc)
-    cat('initial acceptance=',acceptance,'\n')
+    if(opt$verbose) cat('initial acceptance=',acceptance,'\n')
     beta <- 10
-#    beta <- 2
-    Nbasic <- Niter1
-    if(Niter0>=1e4) Nbasic <- 1e4
     if(acceptance<50){
         TemLow <- 1e-3*TemLow
-#	beta <- 2
     }
 
 #####Determine the optimal temperture
@@ -965,18 +1058,18 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
         }
         mcmc <- fit_multiChain(Data=Data,OutObs=OutObs,RateObs=RateObs,ParIni=ParIni,ParMin=ParMin,ParMax=ParMax,Par=Par,tem=tem,verbose=verbose,OutTime0=OutTime0)
         acceptance <-  (1-mean(duplicated(mcmc)))*100
-
         if((acceptance<AccUp & tem>1e-3) | tem==1) break()
         ParIni <- mcmc[which.max(mcmc[,'loglike']),1:length(ParIni)]
 	if(OffUpdate) ParIni <- fit_OptIni(Data,OutObs,RateObs,ParIni,Par)#optimize offsets
 
-#        if(Niter0<1e5){
+        if(opt$verbose){
+#        if(TRUE){
             cat('Adaptive tempering burning: tem=',format(tem,digit=3),'\n')
             cat('maximum likelihood=',max(mcmc[,'loglike']),'\n')
             cat('acceptance:',acceptance,'\n')
             cat('names(ParIni)=',names(ParIni),'\n')
             cat('ParIni=',ParIni,'\n\n')
-#        }
+        }
 
         ind <- which(ParIni<ParMin | ParIni>ParMax)
         if(length(ind)>0) cat('The following parameters out of boundary after using fit_OptIni:',names(ParIni)[ind],'\n')
@@ -1000,6 +1093,7 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
     mcmc <- fit_multiChain(Data=Data,OutObs=OutObs,RateObs=RateObs,ParIni=ParIni,ParMin=ParMin,ParMax=ParMax,Par=Par,tem=1,verbose=verbose,OutTime0=OutTime0)
     ParOpt <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
     LogLikeMax <- max(mcmc[,'loglike'])
+    save(list=ls(all=TRUE),file='test2.Robj')
     return(list(ParOpt=ParOpt,TemOpt=tem,LogLikeMax=LogLikeMax))
 }
 
@@ -1076,76 +1170,69 @@ fit_OptIni <- function(Data,OutObs,RateObs,ParIni,Par){
     ParIni0 <- ParIni
     tmp <- fit_LogLike(Data,OutObs=OutObs,RateObs,ParIni,Par1)
     model <- tmp$model
-#    cat('star:',star,';type:',tps,'\n')
     par.all <- parRAall <- parDECall <- list()
-    for(star in Par$stars){
-        ind1 <- which(Data[,'star']==star)
-        if(length(ind1)>0){
-            tps <- unique(Data[ind1,'type'])
-            for(tp in tps){
-                cat('star:',star,'type:',tp,'\n')
-                ind2 <- which(Data[,'star']==star & Data[,'type']==tp)
-                if(length(ind2)>0){
-                    inss <- unique(Data[ind2,'instrument'])
-                    for(ins in inss){
-                        ind3 <- which(Data[,'star']==star & Data[,'type']==tp & Data[,'instrument']==ins)
-                        if(length(ind3)>0){
-                            if(tp=='rv'){
-                                n <- paste0('bRv.',star,'.',ins)#reference RV; RVref=RVabs-RVmeas-RVabs*RVmeas/c
-                                if(any(names(ParIni)==n)){
-                                    ParIni[n] <- ParIni0[n]+mean(model[ind3,2]-Data[ind3,2]-Data[ind3,2]*model[ind3,2]/CMPS)/1e3
-                                }else if(any(names(ParIni)=='rvOff')){
-                                    ParIni['rvOff'] <- ParIni0['rvOff']+mean(model[ind3,2]-Data[ind3,2]-model[ind3,2]*Data[ind3,2]/CMPS)/1e3
-                                }
+    for(star in Par$targets){
+        types <- Par$index[[star]]$types
+        for(tp in types){
+            if(opt$verbose) cat('star:',star,'type:',tp,'\n')
+            inss <- Par$index[[star]][[tp]]$instruments
+            for(ins in inss){
+                ind0 <- Par$index[[star]][[tp]][[ins]]$ind0
+                if(length(ind0)>0){
+                    if(tp=='rv'){
+                        n <- paste0('bRv.',star,'.',ins)#reference RV; RVref=RVabs-RVmeas-RVabs*RVmeas/c
+                        if(any(names(ParIni)==n)){
+                            ParIni[n] <- ParIni0[n]+mean(model[ind0,2]-Data[ind0,2]-Data[ind0,2]*model[ind0,2]/CMPS)/1e3
+                        }else if(any(names(ParIni)=='rvOff')){
+                            ParIni['rvOff'] <- ParIni0['rvOff']+mean(model[ind0,2]-Data[ind0,2]-model[ind0,2]*Data[ind0,2]/CMPS)/1e3
+                        }
+                    }else{
+                        for(coord in c('RA','DEC')){
+                            if(coord=='RA') colum <- 2
+                            if(coord=='DEC') colum <- 4
+                            if(tp=='abs'){
+                                        #                                        n <- paste0('b',toupper(coord),'.',star,'.',ins)
+                                n <- paste0(tolower(coord),'Off')
                             }else{
-                                for(coord in c('RA','DEC')){
-                                    if(coord=='RA') colum <- 2
-                                    if(coord=='DEC') colum <- 4
-                                    if(tp=='abs'){
-#                                        n <- paste0('b',toupper(coord),'.',star,'.',ins)
-                                        n <- paste0(tolower(coord),'Off')
-                                    }else{
-                                        n <- paste0('b',toupper(coord),'.rel.',ins)
-                                    }
-                                    if(any(names(ParIni)==n)){
-                                        if(tp=='abs'){
-                                            res <- (Data[ind3,colum]-model[ind3,colum])/DMAS2R
-                                            dt <- (Data[ind3,1]-Par$epoch)/DJY#
-#                                            dt <- (Data[ind3,1]-median(Data[ind3,1]))/DJY#Par$epoch
-                                            tmp <- lm(res~dt)
-                                            cat(n,'=',tmp$coefficients[1],'\n')
-                                            par.all[[star]] <- max(min(Par$Max[n],tmp$coefficients[1]),Par$Min[n])
-                                            ParIni[n] <- ParIni0[n]+par.all[[star]]
-                                            n1 <- paste0('pm',tolower(coord),'Off')
-                                            if(any(names(ParIni)==n1)){
-                                                if(coord=='RA'){
-                                                    dra.dt <- tmp$coefficients[2]*median(cos(Data[ind3,4]))#This is the correct pm offset.
-                                                    cat('dpmra=',dra.dt,'\n')
-                                       ###  dra.dt <- tmp$coefficients[2]#This is a wrong version
-                                                    parRAall[[star]] <- max(min(Par$Max[n],dra.dt),Par$Min[n])
-                                                    ParIni[n1] <- ParIni0[n1]+parRAall[[star]]
-                                                }else{
-                                                    ddec.dt <- tmp$coefficients[2]
-                                                    cat('dpmdec=',ddec.dt,'\n')
-                                                    parDECall[[star]] <- max(min(Par$Max[n],ddec.dt),Par$Min[n])
-                                                    ParIni[n1] <- ParIni0[n1]+parDECall[[star]]
-                                                }
-                                            }
-###barycentric offsets
-                                            if(star==Par$stars[length(Par$stars)] & length(Par$stars)>1 & length(par.all)>1){
-                                                mC <- exp(Par$logmC1)
-                                                mT <- Par$mT
-                                                mCT <- mC+mT
-                                                ParIni[n] <- (par.all[[Par$star]]*mT+par.all[[Par$companion]]*mC)/mCT
-                                                if(any(names(ParIni)==n1)){
-                                                    if(coord=='RA') ParIni[n1] <- (parRAall[[Par$star]]*mT+parRAall[[Par$companion]]*mC)/mCT
-                                                    if(coord=='DEC') ParIni[n1] <- (parDECall[[Par$star]]*mT+parDECall[[Par$companion]]*mC)/mCT
-                                                }
-                                            }
+                                n <- paste0('b',toupper(coord),'.rel.',ins)
+                            }
+                            if(any(names(ParIni)==n)){
+                                if(tp=='abs'){
+                                    res <- (Data[ind0,colum]-model[ind0,colum])/DMAS2R
+                                    dt <- (Data[ind0,1]-Par$epoch)/DJY#
+                                        #                                            dt <- (Data[ind0,1]-median(Data[ind0,1]))/DJY#Par$epoch
+                                    tmp <- lm(res~dt)
+                                    if(opt$verbose) cat(n,'=',tmp$coefficients[1],'\n')
+                                    par.all[[star]] <- max(min(Par$Max[n],tmp$coefficients[1]),Par$Min[n])
+                                    ParIni[n] <- ParIni0[n]+par.all[[star]]
+                                    n1 <- paste0('pm',tolower(coord),'Off')
+                                    if(any(names(ParIni)==n1)){
+                                        if(coord=='RA'){
+                                            dra.dt <- tmp$coefficients[2]*median(cos(Data[ind0,4]))#This is the correct pm offset.
+                                            if(opt$verbose) cat('dpmra=',dra.dt,'\n')
+###  dra.dt <- tmp$coefficients[2]#This is a wrong version
+                                            parRAall[[star]] <- max(min(Par$Max[n],dra.dt),Par$Min[n])
+                                            ParIni[n1] <- ParIni0[n1]+parRAall[[star]]
                                         }else{
-                                            ParIni[n] <- mean(Data[ind3,colum]-model[ind3,colum])
+                                            ddec.dt <- tmp$coefficients[2]
+                                            if(opt$verbose) cat('dpmdec=',ddec.dt,'\n')
+                                            parDECall[[star]] <- max(min(Par$Max[n],ddec.dt),Par$Min[n])
+                                            ParIni[n1] <- ParIni0[n1]+parDECall[[star]]
                                         }
                                     }
+###barycentric offsets
+                                    if(star==Par$stars[length(Par$stars)] & length(Par$stars)>1 & length(par.all)>1){
+                                        mC <- exp(Par$logmC1)
+                                        mT <- Par$mT
+                                        mCT <- mC+mT
+                                        ParIni[n] <- (par.all[[Par$star]]*mT+par.all[[Par$companion]]*mC)/mCT
+                                        if(any(names(ParIni)==n1)){
+                                            if(coord=='RA') ParIni[n1] <- (parRAall[[Par$star]]*mT+parRAall[[Par$companion]]*mC)/mCT
+                                            if(coord=='DEC') ParIni[n1] <- (parDECall[[Par$star]]*mT+parDECall[[Par$companion]]*mC)/mCT
+                                        }
+                                    }
+                                }else{
+                                    ParIni[n] <- mean(Data[ind0,colum]-model[ind0,colum])
                                 }
                             }
                         }
@@ -1235,10 +1322,9 @@ fit_PTAM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,KepIni,KepMin,
                     ParMax <- fit_Add1Kep(ParOpt,KepMax,np-1,Par$KepName)
                 }
 
-                                        #            tmp <- try(fit_AM(Data,RateObs,ParIni,ParMin,ParMax,Par,verbose=verbose),TRUE)
                 tmp <- fit_AM(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,verbose=verbose,tem=1,OutTime0=OutTime0)
 ###burnin
-                if(class(tmp)!='try-error'){
+                if(class(tmp)[1]!='try-error'){
                     out <- tmp[-(1:floor(nrow(tmp)/2)),]
                     out
                 }
@@ -1279,6 +1365,7 @@ fit_PTAM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,KepIni,KepMin,
         if(Par$Np>0){
             Data <- tmp$res
         }
+#        save(list=ls(all=TRUE),file='test.Robj')
 
 ###whether to stop DRAM according to BF criterion
         ll <-  max(mcopt[,'loglike'])
@@ -1459,7 +1546,7 @@ fit_changeType <- function(df,coltype){
 ## Output:
 ##   df - new df
 ####################################
-    if(class(df)!='data.frame') df <- data.frame(df)
+    if(all(class(df)!='data.frame')) df <- data.frame(df)
     cn <- colnames(df)
     for(j in 1:length(coltype)){
         type <- coltype[j]

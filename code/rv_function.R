@@ -2,7 +2,7 @@
 ##This file includes functions for relativistic astrometry
 ################################################################################
 rv_GravTarget <- function(M,r,g=1){
-##n##################################
+####################################
 ## Calculate gravitational redshift
 ##
 ## Input:
