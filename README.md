@@ -30,7 +30,7 @@ The relevant paper was published by ApJS. If you use PEXO in your work, please c
 
 Binder is a free open-source tool that creates custom computing environments that can be shared and used by many remote users. 
 It's the easiest way to try the code without the hassle of installation.
-You can run PEXO in your browser by following the [binder link](https://mybinder.org/v2/gh/phillippro/pexo/binder).
+You can run PEXO in your browser by following the [binder link](https://mybinder.org/v2/gh/phillippro/pexo/binder). Note that it may take up to 10 minutes to set up the environment for PEXO depending on the server load.
 
 
 ## Local installation
@@ -56,4 +56,8 @@ conda env create -f environment.yml
 conda activate pexo
 ```
 
-4. PEXO is ready to run! Refer to the documentation and demos for guidance.
+4. PEXO is ready to run! Refer to the [documentation](http://rpubs.com/Fabo/pexo) and [demos](demos/Introduction.ipynb) for guidance.
+
+### Demos
+
+To run the demos you will need [JupyterLab](https://jupyter.org/install) installed and make it use PEXO conda environment by running `python -m ipykernel install --user --name=pexo`.
