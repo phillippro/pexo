@@ -2,8 +2,6 @@
 [![DOI](https://zenodo.org/badge/210655784.svg)](https://zenodo.org/badge/latestdoi/210655784)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/phillippro/pexo/binder) <sup>[What is Binder?](https://mybinder.readthedocs.io/en/latest/)</sup>
-
 Compared with previous models and packages, PEXO is general enough to account for binary motion and stellar reflex motions induced by planetary companions. PEXO is precise enough to treat various relativistic effects both in the Solar System and in the target system (Roemer, Shapiro, and Einstein delays).
 
 PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 μas, and radial velocity to a precision of 1 μm/s. There are [pdf](https://github.com/phillippro/pexo/blob/master/docs/manual.pdf) and [html](http://rpubs.com/Fabo/pexo) versions of the manual available for instructions of how to use PEXO. The fitting mode and a python wrapper are in development and expected to be released soon.
@@ -25,3 +23,37 @@ The relevant paper was published by ApJS. If you use PEXO in your work, please c
 }
 ```
 
+
+## Binder
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/phillippro/pexo/binder) <sup>[What is Binder?](https://mybinder.readthedocs.io/en/latest/)</sup>
+
+Binder is a free open-source tool that creates custom computing environments that can be shared and used by many remote users. 
+It's the easiest way to try the code without the hassle of installation.
+You can run PEXO in your browser by following the [binder link](https://mybinder.org/v2/gh/phillippro/pexo/binder).
+
+
+## Local installation
+
+You will need [`conda`](https://conda.io/projects/conda/en/latest/user-guide/install/index.html) to install the dependencies. This is the easiest way, but you can install the dependencies manually if you prefer, they are listed in [`environment.yml`](environment.yml).
+
+1. Clone this repository:
+
+```bash
+git clone https://github.com/phillippro/pexo.git
+```
+
+2. [Install](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#create-env-from-file) the `conda` environment from `environment.yml`. This step might take a few minutes.
+
+```bash
+cd pexo
+conda env create -f environment.yml
+```
+
+3. Activate the environment (named `pexo` by default). You will need to do this for any new terminal session.
+
+```bash
+conda activate pexo
+```
+
+4. PEXO is ready to run! Refer to the documentation and demos for guidance.
