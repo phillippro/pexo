@@ -4,7 +4,7 @@ if((Par$star=='TC' | Par$star=='TauCeti' | Par$star=='Tau Ceti' | Par$star=='tau
 }
 star <- Par$star
 jd.utc <- rowSums(utc)
-fname <- paste0(star,'_RV_',Par$BinaryModel,'_dt',gsub('\\.','',diff(jd.utc[1:2])),'day_Ntime',Par$Nepoch,'_',Par$RefType,'.pdf')
+fname <- paste0(star,'_RV_',Par$BinaryModel,'_Ntime',Par$Nepoch,'_',Par$RefType,'.pdf')
 dir.out <- '../results/'
 if(!file.exists(dir.out)) system(paste('mkdir',dir.out))
 fout <- paste0(dir.out,'paper_',fname)
@@ -21,29 +21,42 @@ tt3 <- time_Jd2yr(tS)
 #xlab <- expression((t[a]^{SSB}-t[pos])*' [yr]')
 xlab <- 'tS [yr]'
 type <- 'o'
-if(Par$binary){
-    plot(tt3,OutRv$RvgT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P1: General relativity in TS',type=type)
+np <- 0
+if(Par$binary & Par$Np>0){
+    np <- np+1
+    plot(tt3,OutRv$RvgT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': General relativity in TS'),type=type)
 }
-plot(tt3,OutRv$RvsT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P2: Special relativity in TS',type=type)
-if(Par$binary){
-plot(tt3,OutRv$RvBT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P3: Motion of T w.r.t. TSB',type=type)
-plot(tt3,OutRv$RvSB,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P4: Motion of TSB w.r.t. SSB',type=type)
-plot(tt3,OutRv$RvlT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P5: Lensing in TS',type=type)
+np <- np+1
+plot(tt3,OutRv$RvsT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Special relativity in TS'),type=type)
+if(Par$binary & Par$Np>0){
+    np <- np+1
+    plot(tt3,OutRv$RvBT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of T w.r.t. TSB'),type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvSB,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of TSB w.r.t. SSB'),type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvlT,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Lensing in TS'),type=type)
 }
-plot(tt3,OutRv$RvlO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P6: Lensing in SS',type=type)
-plot(tt3,OutRv$RvgsO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P7: Relativistic effects in SS',type=type)
-plot(tt3,OutRv$RvSG,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P8: Motion of geocenter w.r.t. SSB',type=type)
-plot(tt3,OutRv$RvGO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P9: Earth rotation',type=type)#col=tcol('grey',0.2)
-plot(tt3,OutRv$RvSO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P10: Motion of observer w.r.t. SSB',type=type)
+np <- np+1
+plot(tt3,OutRv$RvlO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Lensing in SS'),type=type)
+np <- np+1
+plot(tt3,OutRv$RvgsO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Relativistic effects in SS'),type=type)
+np <- np+1
+plot(tt3,OutRv$RvSG,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of geocenter w.r.t. SSB'),type=type)
+np <- np+1
+plot(tt3,OutRv$RvGO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Earth rotation'),type=type)#col=tcol('grey',0.2)
+np <- np+1
+plot(tt3,OutRv$RvSO,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Motion of observer w.r.t. SSB'),type=type)
 ind <- which(abs(OutTime$elevation*180/pi)>10)
 if(length(ind)>0){
-    plot(tt3[ind],OutRv$RvTropo[ind],xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P11: Troposphere refraction',type=type)
+    np <- np+1
+    plot(tt3[ind],OutRv$RvTropo[ind],xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': Troposphere refraction'),type=type)
 }
 
 #plot(tt3,OutRv$local,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P12: Total local effect',type=type)
-if(Par$binary){
+if(Par$binary & Par$Np>0){
 #    plot(tt3,OutRv$remote,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P13: Total remote effect',type=type)
-    plot(tt3,OutRv$RvTot,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main='P12: All effects',type=type)
+    np <- np+1
+    plot(tt3,OutRv$RvTot,xlab=xlab,ylab=expression(Delta*v[r]*' [m/s]'),main=paste0('P',np,': All effects'),type=type)
 }
 dev.off()
 

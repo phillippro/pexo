@@ -1,7 +1,11 @@
-vars <- unlist(strsplit(opt$var,split=' '))
+if(grepl(',',opt$var)){
+    vars <- unlist(strsplit(opt$var,split=','))
+}else{
+    vars <- unlist(strsplit(opt$var,split=' '))
+}
 vars <- vars[vars!='']
 
-OutAll <- c(OutBary,OutTime,JDutc=utc)
+OutAll <- c(OutObs,OutTime,JDutc=utc)
 if(grepl('A',Par$component)){
     OutAll <- c(OutAll,OutAstroT)
 }
@@ -20,13 +24,13 @@ OutAll <- c(OutAll,tmp)
 OutAll <- c(OutAll,OutAll$RoemerOrder)
 ###expand deflection angle list for solar system objects
 if(grepl('A',Par$component)){
-tmp <- OutAll$SolarDefList
-names(tmp) <- paste0('Def',names(tmp))
-OutAll <- c(OutAll,tmp)
+    tmp <- OutAll$SolarDefList
+    names(tmp) <- paste0('Def',names(tmp))
+    OutAll <- c(OutAll,tmp)
 ###expand deflection angle list for solar system objects
-tmp <- OutAll$SolarDefList
-names(tmp) <- paste0('Def',names(tmp))
-OutAll <- c(OutAll,tmp)
+    tmp <- OutAll$SolarDefList
+    names(tmp) <- paste0('Def',names(tmp))
+    OutAll <- c(OutAll,tmp)
 }
 ###expand the redshift list
 if(grepl('R',Par$component)){

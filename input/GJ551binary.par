@@ -1,0 +1,55 @@
+Niter 1e4
+Ncore 4
+Nmax 1
+name GJ551
+RefType.PFS none
+EopType 2006
+TaiType instant
+TtType BIPM
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+BinaryModel kepler
+phi.PFS -29.013983
+elong.PFS -70.692633
+height.PFS 2.40792
+phi.UVES -24.625407
+elong.UVES -70.403015
+height.UVES 2.648
+xtel.hip 0
+ytel.hip 0
+ztel.hip 0
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch  2448348.750
+mT 0.1221
+logmC -8 -20 20 U
+ra 217.44894751
+dec -62.68135207
+plx 772.33
+pmra -3775.64
+pmdec 768.16
+rv -22.204
+logP 7.5 -20 20 U
+e 0.41 0 1 U
+I  45 0 180 U
+omegaT 1.7 0 360 U
+Omega 90 0 360 U
+Mo 2455983 2430000 2460000 U
+raOff 0 0 1e4 N
+decOff 0 0 1e4 N
+pmraOff 0 0 1e4 N
+pmdecOff 0 0 1e4 N
+plxOff 0 0 1e4 N
+#rvOff 0 0 10 N
+jitterRv.GJ551.PFS 1 0 100 U
+jitterRv.GJ551.UVES 1 0 100 U
+bRv.GJ551.PFS 0 -100000 100000 U
+bRv.GJ551.UVES 0 -100000 100000 U
+

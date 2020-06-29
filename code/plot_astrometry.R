@@ -1,5 +1,5 @@
 dir <- '../results/'
-fname <- paste0(dir,star,'_df',df,'_tbase',tbase,'_dt',dt,'type',type,'.pdf')
+fname <- paste0(dir,star,'_df',df,'_tbase',tbase,'_type',type,'.pdf')
 cat('output pdf:\n',fname,'\n')
 pdf(fname,8,8)
 par(mfrow=c(2,2),mar=c(5,5,1,1))

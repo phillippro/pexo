@@ -19,12 +19,12 @@ gen_RvzItrs <- function(robs.itrs,EopPar,Nt,sp=NULL){
 ####################################
     if(is.null(sp)) sp <- rep(0,Nt)
 #    rpom <- sofa_Pom00(EopPar$xp,EopPar$yp,sp=rep(0,length(EopPar$xp)))#polar motion matrix
-    rpom <- sofa_Pom00(EopPar$xp,EopPar$yp,sp=sp)#polar motion matrix
+    rpom <- sofa_Pom00(EopPar[,'xp'],EopPar[,'yp'],sp=sp)#polar motion matrix
     north <- t(t(c(0,0,1)))#Vector to +ve pole
     pole.itrs <- t(sapply(1:length(EopPar$xp),function(k) rpom[,,k]%*%north))#Spin pole in ITRS
     eradot <- 2.0*pi*1.00273781191135448*(1.0+EopPar$dut1dot)/DAYSEC#rad/s
     omega.itrs <- pole.itrs*eradot#Angular velocity in ITRS (rad/s)
-    vobs.itrs <- t(sapply(1:Nt, function(k) cross(omega.itrs[k,],robs.itrs)))#km/s
+    vobs.itrs <- t(sapply(1:Nt, function(k) pracma::cross(omega.itrs[k,],robs.itrs[k,])))#km/s
     list(robs=robs.itrs,vobs=vobs.itrs,pole=pole.itrs,rpom=rpom)
 }
 
@@ -170,8 +170,35 @@ gen_CalLen <- function(x){
 ## Output:
 ##   Unit vector of x
 ####################################
-    sqrt(rowSums(x^2))
+#    sqrt(rowSums(x^2))
+    sqrt(x[,1]^2+x[,2]^2+x[,3]^2)
 }
+
+gen_Rt2ad <- function(rho,erho,theta,etheta){
+####################################
+## Calculate the length or magnitude of a given vector
+##
+## Input:
+##   rho  -  separation between two targets (mas)
+##   erho -  error in rho (mas)
+##   theta -  rotation angle meaured from North (deg)
+##   etheta -  error in theta (deg)
+##
+## Output:
+##   da - offset in alpha* or in ra*
+##   eda - error in da
+##   dd - offset in delta or in delta*
+##   edd - error in dd
+####################################
+    theta <- theta/180*pi#rad
+    etheta <- etheta/180*pi#rad
+    dd <- rho*cos(theta)#mas
+    da <- rho*sin(theta)#mas
+    edd <- sqrt((rho*sin(theta)*etheta)^2+(erho*cos(theta))^2)
+    eda <- sqrt((rho*cos(theta)*etheta)^2+(erho*sin(theta))^2)#i.e. ealpha*
+    cbind(da=da,eda=eda,dd=dd,edd=edd)
+}
+
 gen_CalOffset <- function(u1,u2,bref=NULL){
 ####################################
 ## Calculate the angular offset between two unit vectors
@@ -182,8 +209,8 @@ gen_CalOffset <- function(u1,u2,bref=NULL){
 ##   bref - the reference latitude; if null the mean of u1 and u2 delta would be used
 ##
 ## Output:
-##   dl - Longitude offset (rad)
-##   db - Latitude offset (rad)
+##   dl - Longitude offset (as)
+##   db - Latitude offset (as)
 ####################################
     lb1 <- gen_Xyz2lb(u1)
     lb2 <- gen_Xyz2lb(u2)
@@ -195,6 +222,48 @@ gen_CalOffset <- function(u1,u2,bref=NULL){
     db <- lb1[,2]-lb2[,2]
     cbind(dl=dl*pc2au,db=db*pc2au)#arcsec
 }
+
+gen_Dir2off <- function(rd1,erd1,rd2,erd2,dref=NULL){
+####################################
+## From two directions to their difference or offset
+##
+## Input:
+##   rd1 - ra, dec for target 1 (rad)
+##   rd2 -  ra, dec for target 2 (rad)
+##   erd1 - error of rd1 (mas); note: erd1[,1]=ealpha*
+##   erd2 -  error of rd2 (mas); note: erd2[,1]=ealpha*
+##   dref - the reference latitude; if null the mean of rd1 and rd2 delta would be used
+##
+## Output:
+##   da - alpha (mas)
+##   dd - delta (mas)
+##   eda - error in da (mas)
+##   edd - error in dd (mas)
+####################################
+    a1 <- rd1[,1]
+    d1 <- rd1[,2]
+    a2 <- rd2[,1]
+    d2 <- rd2[,2]
+    ea1 <- erd1[,1]
+    ed1 <- erd1[,2]
+    ea2 <- erd2[,1]
+    ed2 <- erd2[,2]
+
+    if(is.null(dref)){
+        dref <- (d1+d2)/2
+        cdref <- cos(dref)
+#        eda <- sqrt(cdref^2*(ea1^2+ea2^2)+(a1-a2)^2*(sin(d1+d2))^2*(ed1^2+ed2^2))#mas
+    }else{
+        cdref <- cos(dref)
+#        eda <- cdref*sqrt(ea1^2+ea2^2)#mas
+    }
+    eda <- sqrt(ea1^2+ea2^2)#mas
+    da <-((a1-a2)*cos(dref))/DMAS2R#mas
+    dd <- (d1-d2)/DMAS2R#mas
+    edd <- sqrt(ed1^2+ed2^2)#mas
+    cbind(da=da,eda=eda,dd=dd,edd=edd)#arcsec
+}
+
 gen_CalUnit <- function(x){
 ####################################
 ## Calculate the unit vector for a given vector
@@ -287,6 +356,11 @@ gen_CalEph <- function(tdb,body='Earth-Moon barycenter',DE=430){
 ## Output:
 ##   barycentric position and
 ####################################
+    index <- which(rowSums(tdb)<min(DEfile[,1]) | rowSums(tdb)>max(DEfile[,1]))
+    if(length(index)>0){
+        stop(length(index),'epochs are beyond the timespan of JPL ephemeris files and please get a ephemeris with longer timespan!\n')
+        Nt <- nrow(tdb)
+    }
     Nt <- nrow(tdb)
     quantities <- c('Mercury','Venus','Earth-Moon barycenter','Mars','Jupiter','Saturn','Uranus','Neptune','Pluto','Moon (geocentric)','Sun','Earth Nutations in longitude and obliquity (IAU 1980 model)','Lunar mantle libration','Lunar mantle angular velocity','TT-TDB (at geocenter)')
     ind.body <- which(quantities==body)
@@ -455,6 +529,7 @@ gen_refraction <- function(zenith,ZenIn,Par){
 ##   Ratm - Atmospheric refraction (rad)
 ##   ZenObs - Observed zenith direction
 ####################################
+    Nepoch <- length(ZenIn)
     Ntry <- 100
     tol <- 1/206265
     tol.rel <- 1e-5
@@ -473,7 +548,7 @@ gen_refraction <- function(zenith,ZenIn,Par){
                 zreal.deg <- ZenObs/180*pi
                 ind0 <- which(zreal.deg>=5 & zreal.deg<=85)
                 ind1 <- which(zreal.deg<5 | zreal.deg>85)
-                ref <- rep(NA,Par$Nepoch)
+                ref <- rep(NA,Nepoch)
                 if(length(ind0)>0){
                     if(Par$RefType=='refcoq'){
                         refab <- astro_refcoq(Par$tdk,Par$pmb,Par$rh,Par$wl)
@@ -516,7 +591,7 @@ gen_KeplerSolver <- function(m,e){
 ## Output:
 ##   E1 - Eccentric anomaly
 ####################################
-    tol = 1e-8
+    tol = 1e-10
     E0 <- m
     Ntt <- 1e2
     for(k in 1:Ntt){
@@ -531,19 +606,19 @@ gen_KeplerSolver <- function(m,e){
     return(E1)
 }
 
-gen_KeplerClassic <- function(tB,Par){
+gen_KeplerClassic <- function(tauE,Par){
 ####################################
 ## Solve the Kepler's Equation
 ##
 ## Input:
-##   tB - Coordinate time at the TSB
+##   tauE - proper emission time
 ##   Par - Input parameters
 ##
 ## Output:
 ##   state - the coordinates of the barycentric position and velocity of the target in the sky-plane frame defined by the [p q u] triad; (au; au/yr)
 ##   U - eccentricity anomaly
 ##   xo - x coordiante of the target in the orbit-plane frame (au)
-##   xy - y coordiante of the target in the orbit-plane frame (au)
+##   xo - y coordiante of the target in the orbit-plane frame (au)
 ##   A - One of the scaled Thiele Innes constants
 ##   B - One of the scaled Thiele Innes constants
 ##   F - One of the scaled Thiele Innes constants
@@ -552,21 +627,94 @@ gen_KeplerClassic <- function(tB,Par){
 ##   H - One of the scaled Thiele Innes constants
 ####################################
     m1 <- Par$mT
-    m <- Par$mTC
-    m2 <- Par$mC
-    mu <-m1*m2/m
-    Py <- Par$P#year
-    Pd <- Par$Pd#day
-    e <- Par$e
-    I <- Par$I
-    Omega <- Par$Omega
-    omega <- Par$omegaT
-    dt <- (tB[,1]-Par$Tp)+tB[,2]
-    M0 <- 2*pi*(dt%%Pd)/Pd#mean anomaly
+    Nepoch <- nrow(tauE)
+    X <- Y <- Z <- VX <- VY <- VZ <- rep(0,Nepoch)
+    Xs <- Ys <- Zs <- VXs <- VYs <- VZs <- rep(0,Nepoch)
+    if(FALSE){
+#    if(TRUE){
+        ind <- which.min(abs(Par$T0-Data[,1]))
+        dt <- (tauE[,1]-tauE[ind,1])+tauE[,2]
+    }else{
+###a fixed reference time is better although it is a UTC time, we can regard it as a fixed emission time for both component
+        dt <- (tauE[,1]-Par$T0)+tauE[,2]
+    }
+    for(k in 1:Par$Np){
+###        m2 <- exp(Par[[paste0('logmC',k)]])
+        m2 <- exp(Par[[paste0('logmC',k)]])
+        m <- m1+m2
+###        Pd <- exp(Par[[paste0('logP',k)]])
+        Pd <- Par[[paste0('P',k)]]
+        Py <- Pd/DJY
+        e <- Par[[paste0('e',k)]]
+        I <- Par[[paste0('I',k)]]
+        Omega <- Par[[paste0('Omega',k)]]
+        omega <- Par[[paste0('omegaT',k)]]
+        Mo <- Par[[paste0('Mo',k)]]
+###    dt <- (tauE[,1]-Par$Tp)+tauE[,2]
+        Ms <- (Mo+2*pi*(dt%%Pd)/Pd)%%(2*pi)#mean anomaly
+        n <- 2*pi/Py#1/yr
+        aR <- (m*Py^2)^(1/3)#au
+        ar <- aR*m2/m
+        E <- gen_KeplerSolver(Ms,e)%%(2*pi)
+####Keplerian motion in the orbital plane
+        x <- ar*(cos(E)-e)#au
+        y <- ar*(sqrt(1-e^2)*sin(E))
+        vx <- -ar*n*sin(E)/(1-e*cos(E))#au/yr
+        vy <- ar*n*sqrt(1-e^2)*cos(E)/(1-e*cos(E))
+###Thiele Innes constants; ref. Wright et al. 2009
+###Definition:(ex:North; ey:East; ez:target to observer)
+       #    ae <- gen_Xy2phi(cos(E)-e)/(1-e*cos(E),sqrt(1-e^2)*sin(E)/(1-e*cos(E)))
+        A <- cos(Omega)*cos(omega)-sin(Omega)*sin(omega)*cos(I)
+        B <- sin(Omega)*cos(omega)+cos(Omega)*sin(omega)*cos(I)
+        F <- -cos(Omega)*sin(omega)-sin(Omega)*cos(omega)*cos(I)
+        G <- -sin(Omega)*sin(omega)+cos(Omega)*cos(omega)*cos(I)
+        C <- sin(omega)*sin(I)#this is negative in Catanzarite 2010
+        H <- cos(omega)*sin(I)#this is negative in Catanzarite 2010
+####sky plane coordinates [pb, qb, ub]
+        X0 <- B*x+G*y
+        Y0 <- A*x+F*y
+        Z0 <- C*x+H*y#Z is from observer to target; opposite in Catanzarite 2010
+        VX0 <- B*vx+G*vy
+        VY0 <- A*vx+F*vy
+        VZ0 <- C*vx+H*vy
+        X <- X+X0
+        Y <- Y+Y0
+        Z <- Z+Z0
+        VX <- VX+VX0
+        VY <- VY+VY0
+        VZ <- VZ+VZ0
+        Xs <- cbind(Xs,X0)
+        Ys <- cbind(Ys,Y0)
+        Zs <- cbind(Zs,Z0)
+    }
+    list(state=cbind(X,Y,Z,VX,VY,VZ),Xs=Xs,Ys=Ys,Zs=Zs,VXs=VXs,VYs=VYs,VZs=VZs,U=E)
+}
+
+gen_HipOrbit <- function(t,epoch=1991.25){
+####################################
+## Solve the Kepler's Equation
+##
+## Input:
+##   ParHip - Orbital parameters of Hipparcos satellite
+##
+## Output:
+##    -
+####################################
+#time_Yr2jd(epoch)
+    t0 <- 1989+((9-1)*30+18)/365.25
+    dt <- time_Jd2yr(t)-epoch#yr
+    perigee <- 526*1e3#km
+    apogee <- 35900*1e3#km
+    P <- 640*60-20.4*dt#s
+    e <- 0.72#
+    I <- 6.8/180*pi#rad
+    Omega <- 105/180*pi#rad
+    omega <- 214/180*pi+0.37/180*pi*dt*365.25#rad
+    Ms <- (Mo+2*pi*(dt%%Pd)/Pd)%%(2*pi)#mean anomaly
     n <- 2*pi/Py#1/yr
     arr <- (m*Py^2)^{1/3}#au
     ar <- arr*m2/m
-    E <- gen_KeplerSolver(M0,e)%%(2*pi)
+    E <- gen_KeplerSolver(Ms,e)%%(2*pi)
 ####Keplerian motion in the orbital plane
     x <- ar*(cos(E)-e)#au
     y <- ar*(sqrt(1-e^2)*sin(E))
@@ -574,7 +722,7 @@ gen_KeplerClassic <- function(tB,Par){
     vy <- ar*n*sqrt(1-e^2)*cos(E)/(1-e*cos(E))
 ###Thiele Innes constants; ref. Wright et al. 2009
 ###Definition:(ex:North; ey:East; ez:target to observer)
-#    ae <- gen_Xy2phi(cos(E)-e)/(1-e*cos(E),sqrt(1-e^2)*sin(E)/(1-e*cos(E)))
+                                        #    ae <- gen_Xy2phi(cos(E)-e)/(1-e*cos(E),sqrt(1-e^2)*sin(E)/(1-e*cos(E)))
     A <- cos(Omega)*cos(omega)-sin(Omega)*sin(omega)*cos(I)
     B <- sin(Omega)*cos(omega)+cos(Omega)*sin(omega)*cos(I)
     F <- -cos(Omega)*sin(omega)-sin(Omega)*cos(omega)*cos(I)
@@ -582,47 +730,49 @@ gen_KeplerClassic <- function(tB,Par){
     C <- sin(omega)*sin(I)#this is negative in Catanzarite 2010
     H <- cos(omega)*sin(I)#this is negative in Catanzarite 2010
 ####sky plane coordinates [pb, qb, ub]
-    Y <- A*x+F*y
     X <- B*x+G*y
+    Y <- A*x+F*y
     Z <- C*x+H*y#Z is from observer to target; opposite in Catanzarite 2010
-    VY <- A*vx+F*vy
     VX <- B*vx+G*vy
-    VZ <- C*vx+H*vy
-    list(state=cbind(X,Y,Z,VX,VY,VZ),U=E,xo=x,yo=y,A=A,B=B,F=F,G=G,C=C,H=H)
+    VY <- A*vx+F*vy
+    VZ <- C*vx+H*vy#Z is from observer to target; opposite in Catanzarite 2010
+    list(state=cbind(X,Y,Z,VX,VY,VZ),Xs=Xs,Ys=Ys,Zs=Zs,VXs=VXs,VYs=VYs,VZs=VZs,U=E)
 }
 
-gen_CalBT <- function(tB,Par){
+gen_CalBT <- function(tauE,Par){
 ####################################
 ## Calculate the barycentric motion of the target
 ## i.e. the position and velocity vectors from TSB to the target
 ##
 ## Input:
-##   tB - Coordinate time at the TSB
+##   tauE - proper emission time
 ##   Par - Input parameters
 ##
 ## Output:
-##   BT - Positiona and velocity vectors from the SSB to the target
+##   BT - Positional and velocity vectors from the SSB to the target
 ##   out - Output from gen_KeplerClassic() or gen_DDmodel() or gen_DDGRmodel()
 ####################################
     if(Par$BinaryModel=='kepler'){
 ##classical Keplerian orbit
-        out <- gen_KeplerClassic(tB,Par)
+        out <- gen_KeplerClassic(tauE=tauE,Par)
         BT <- out$state
     }else if(Par$BinaryModel=='DD'){
-        out <- gen_DDmodel(tB=tB,Par)
+        out <- gen_DDmodel(tauE=tauE,Par)
         BT <- cbind(out$rvec,out$vvec)
     }else if(Par$BinaryModel=='DDGR'){
 ##Einstein theory-based Keplerian orbit
-        out <- gen_DDGRmodel(tB=tB,Par)#bbat!=te; change
+        out <- gen_DDGRmodel(tauE=tauE,Par)#bbat!=te; change
         BT <- cbind(out$rvec,out$vvec)
     }
+##consider photon center of two bodies
+    BT[,1:3] <- Par$eta*BT[,1:3]
 ##transform BT from sky-plane coordinates, [p,q,u] to ICRS coordinates
-    x <- BT[,1]%o%Par$p
-    y <- BT[,2]%o%Par$q
-    z <- BT[,3]%o%Par$u
-    vx <- BT[,4]%o%Par$p
-    vy <- BT[,5]%o%Par$q
-    vz <- BT[,6]%o%Par$u
+    x <- BT[,1]%o%Par$pqu[,1]
+    y <- BT[,2]%o%Par$pqu[,2]
+    z <- BT[,3]%o%Par$pqu[,3]
+    vx <- BT[,4]%o%Par$pqu[,1]
+    vy <- BT[,5]%o%Par$pqu[,2]
+    vz <- BT[,6]%o%Par$pqu[,3]
     rBT <- x+y+z
     vBT <- vx+vy+vz
 #    if(Par$Unit=='TDB') rBT <- rBT/IFTE.K
@@ -652,7 +802,7 @@ gen_GetPhase <- function(e,omega,type='primary'){
 ## Input:
 ##   e - eccentricity
 ##   omega - Argument of periastron
-##   type -
+##   type - the following types of phase could be used
 ##     primary - Primary transit
 ##     secondary - Secondary transit
 ##     periastron - Periastron
@@ -696,6 +846,21 @@ gen_CalTc <- function(Tp,P,e,omega){
     Tc
 }
 
+gen_Mo2tp <- function(Mo,T0,P){
+####################################
+## Convert the mean anomalty at the reference epoch to periapsis epoch
+##
+## Input:
+##   Mo - mean anomalty at the reference epoch
+##   T0 - the reference epoch
+##   P - orbital period
+##
+## Output:
+##   Tp - Periastron epoch
+####################################
+     T0-(Mo%%(2*pi))*P/(2*pi)
+}
+
 gen_Tc2tp <- function(e,omega,P,Tc,type='primary'){
 ####################################
 ## Convert the primarty transit epoch to the perastron epoch
@@ -713,14 +878,14 @@ gen_Tc2tp <- function(e,omega,P,Tc,type='primary'){
     Tc-gen_GetPhase(e,omega)*P
 }
 
-gen_DDmodel <- function(tB,Par){
+gen_DDmodel <- function(tauE,Par){
 ####################################
 ## Binary motion modeled by the DD binary model; ref: DD86
 ## In TEMPO2, natural units are used, i.e. c=g=1 which need to change into au, au/yr in PEXO.
 ##
 ## Input:
-##   tB - Coordinate time of light arrival time at the TSB
-##   Par -
+##   tauE - proper emission time
+##   Par -input parameters
 ##
 ## Output:
 ##   torb - Roemer delay due to the target barycentric motion
@@ -745,17 +910,17 @@ gen_DDmodel <- function(tB,Par){
 ##   xo - x coordiante of the target in the orbit-plane frame (au)
 ##   xy - y coordiante of the target in the orbit-plane frame (au)
 ####################################
-    Nt <-nrow(tB)
+    Nt <-nrow(tauE)
     dr = 0.0##WHAT SHOULD THESE BE SET TO?
     dth = 0.0
     si <- Par$DDGR$sini
-    am2 <- Par$mC
-    am<- Par$mTC
+    am2 <- Par$mC1
+    am<- Par$mT+Par$mC1
 
     if(Par$BinaryUnit=='natural'){
-        pb = Par$P*DJY*DAYSEC#s
+        pb = Par$P1*DJY*DAYSEC#s
     }else{
-        pb = Par$P#year
+        pb = Par$P1#year
     }
     an = 2.0*pi/pb#mean motion in unit of rad/second or rad/yr
     if(Par$BinaryUnit=='natural'){
@@ -765,7 +930,7 @@ gen_DDmodel <- function(tB,Par){
     }
     omdot <-Par$DDGR$omdot#
     k  <-  omdot/n#[omdot]=deg/yr
-    Omega <- Par$Omega
+    Omega <- Par$Omega1
 
     if(Par$BinaryUnit=='natural'){
         m <- am*SUNMASS#in unit of second because g=c=1
@@ -775,7 +940,7 @@ gen_DDmodel <- function(tB,Par){
         m2 <- am2
     }
     m1 <- m-m2
-    ct = tB
+    ct = tauE
 
     if(Par$BinaryUnit=='natural'){
         tt0  <-  ((ct[,1]-Par$Tp)+ct[,2])*DAYSEC#day to second
@@ -995,7 +1160,7 @@ gen_ComputeU <- function(phase,ecc){
     U
 }
 
-gen_DDGRmodel <- function(tB,Par){
+gen_DDGRmodel <- function(tauE,Par){
 ####################################
 ## Binary motion modeled by the DDGR binary model (or DD model assume GR); ref: DD86
 ## In TEMPO2, natural units are used, i.e. c=g=1 which need to change into au, au/yr in PEXO.
@@ -1006,7 +1171,7 @@ gen_DDGRmodel <- function(tB,Par){
 ## Pulsar proper time is TP = T + TORB
 ##
 ## Input:
-##   tB - Coordinate time of light arrival time at the TSB
+##   tauE - proper emission time
 ##   Par - Input parameters
 ##
 ## Output:
@@ -1049,264 +1214,281 @@ gen_DDGRmodel <- function(tB,Par){
 ##   yo - y coordiante of the target in the orbit-plane frame (au)
 ##   out - output from gen_mass2dd()
 ####################################
-    Nt <- nrow(tB)
-    ct <-  tB#binary barycentric time
-    if(Par$BinaryUnit=='natural'){
-        tt0  <-  ((ct[,1]-Par$Tp)+ct[,2])*DAYSEC#day to second
-    }else{
-        tt0  <-  ((ct[,1]-Par$Tp)+ct[,2])/DJY#day to year
-    }
-    f0 <- 1#pulsar frequency; set to 1 for exoplanet cases
+    X <- Y <- Z <- VX <- VY <- VZ <- 0
+    Xs <- Ys <- Zs <- VXs <- VYs <- VZs <- 0
+    for(k in 1:Par$Np){
+        Nt <- nrow(tauE)
+        ct <-  tauE#binary barycentric time
+        if(Par$BinaryUnit=='natural'){
+            tt0  <-  ((ct[,1]-Par$Tp)+ct[,2])*DAYSEC#day to second
+        }else{
+            tt0  <-  ((ct[,1]-Par$Tp)+ct[,2])/DJY#day to year
+        }
+        f0 <- 1#pulsar frequency; set to 1 for exoplanet cases
 
-    xomdot <- afac <- 0#extra variation
-    si <- Par$DD$sini
-    am2 <-Par$mC
-    am <-Par$mTC
-    am1 <-Par$mT
+        xomdot <- afac <- 0#extra variation
+        si <- Par$DD$sini
+        am2 <-Par$mC1
+        am <-Par$mT+Par$mC1
+        am1 <-Par$mT
 
-    if(Par$BinaryUnit=='natural'){
-        m <- am*SUNMASS#in unit of second because g=c=1
-        m2 = am2*SUNMASS
-    }else{
-        m <- am
-        m2 <- am2
-    }
-    m1 = m-m2
+        if(Par$BinaryUnit=='natural'){
+            m <- am*SUNMASS#in unit of second because g=c=1
+            m2 = am2*SUNMASS
+        }else{
+            m <- am
+            m2 <- am2
+        }
+        m1 = m-m2
 
-    if(Par$BinaryUnit=='natural'){
-        pb <-  Par$DDGR$pb*DAYSEC
-    }else{
-        pb <-  Par$DDGR$pb
-    }
-    an  <-  2.0*pi/pb
+        if(Par$BinaryUnit=='natural'){
+            pb <-  Par$DDGR$pb*DAYSEC
+        }else{
+            pb <-  Par$DDGR$pb
+        }
+        an  <-  2.0*pi/pb
 
 ####import parameters
-    xdot <- Par$DD$a1dot
-    omz  <-  Par$DDGR$omz
-    xdot  <- Par$DDGR$xdot
-    pbdot <-  Par$DDGR$pbdot
-    edot <- Par$DDGR$edot
-    xpbdot <- Par$DDGR$xpbdot
-    Omega <- Par$Omega
+        xdot <- Par$DD$a1dot
+        omz  <-  Par$DDGR$omz
+        xdot  <- Par$DDGR$xdot
+        pbdot <-  Par$DDGR$pbdot
+        edot <- Par$DDGR$edot
+        xpbdot <- Par$DDGR$xpbdot
+        Omega <- Par$Omega
 
-    x = Par$DDGR$x0+xdot*tt0#in unit of time
-    ar <- x*YC/si
-    ecc <- Par$DD$ecc+edot*tt0
+        x = Par$DDGR$x0+xdot*tt0#in unit of time
+        ar <- x*YC/si
+        ecc <- Par$DD$ecc+edot*tt0
 
-    out <- gen_mass2dd(m,m2,x,ecc,an)
-    arr <- out$arr
-    ar <- out$ar
-    si <- out$si
-    gamma <- out$gamma
-    pbdot <- out$pbdot
-    omdot <-out$omdot
-    k <- out$xk
+        out <- gen_mass2dd(m,m2,x,ecc,an,si=si,geometry=FALSE)
+        arr <- out$arr
+        ar <- out$ar
+        si <- out$si
+        gamma <- out$gamma
+        pbdot <- out$pbdot
+        omdot <-out$omdot
+        k <- out$xk
 
 ###DD Eqn. 36, 37
-    if(Par$BinaryUnit=='natural'){
-        dr  <-  (3.0*m1^2 + 6.0*m1*m2 + 2.0*m2^2)/(arr*m)
-        dth  <-  (3.5*m1^2 + 6*m1*m2 + 2*m2*m2)/(arr*m)
-    }else{
-        dr  <-  4*pi^2/Cauyr^2*(3.0*m1^2 + 6.0*m1*m2 + 2.0*m2^2)/(arr*m)
-        dth  <-  4*pi^2/Cauyr^2*(3.5*m1^2 + 6*m1*m2 + 2*m2*m2)/(arr*m)
-    }
-    er  <-  ecc*(1.0+dr)
-    eth  <-  ecc*(1.0+dth)
+        if(Par$BinaryUnit=='natural'){
+            dr  <-  (3.0*m1^2 + 6.0*m1*m2 + 2.0*m2^2)/(arr*m)
+            dth  <-  (3.5*m1^2 + 6*m1*m2 + 2*m2*m2)/(arr*m)
+        }else{
+            dr  <-  4*pi^2/Cauyr^2*(3.0*m1^2 + 6.0*m1*m2 + 2.0*m2^2)/(arr*m)
+            dth  <-  4*pi^2/Cauyr^2*(3.5*m1^2 + 6*m1*m2 + 2*m2*m2)/(arr*m)
+        }
+        er  <-  ecc*(1.0+dr)
+        eth  <-  ecc*(1.0+dth)
 
-    orbits  <- tt0/pb - 0.5*(pbdot+xpbdot)*(tt0/pb)^2
-    dpb <- (pbdot+xpbdot)*tt0
-    pb <- pb+dpb
-    dpb <- SJY*dpb
-    norbits  <- floor(orbits)
-    phase <- 2.0*pi*(orbits-norbits)#mean anomaly
-    #Compute eccentric anomaly u by iterating Kepler's equation.
-    U <- gen_ComputeU(phase,ecc)
+        orbits  <- tt0/pb - 0.5*(pbdot+xpbdot)*(tt0/pb)^2
+        dpb <- (pbdot+xpbdot)*tt0
+        pb <- pb+dpb
+        dpb <- SJY*dpb
+        norbits  <- floor(orbits)
+        phase <- 2.0*pi*(orbits-norbits)#mean anomaly
+                                        #Compute eccentric anomaly u by iterating Kepler's equation.
+        U <- gen_ComputeU(phase,ecc)
 
-    ##DD equations 17a, 29
-    ae  <-  2.0*atan(sqrt((1+ecc)/(1-ecc))*tan(0.5*U))
-    ae[ae<0] <- ae[ae<0]+2.0*pi
-    ae  <-  2.0*pi*orbits + ae-phase
-    omega <- omz + (k+xomdot/(an*rad2deg*365.25*86400.0))*ae
-    ##DD equations 46 through 52
-    su <- sin(U)
-    cu <- cos(U)
-    sw <- sin(omega)
-    cw <- cos(omega)
-    alpha <- x*sw#yr
-    beta <- x*sqrt(1-eth^2)*cw#yr
-    abdot <-x*(cos(omega[1])-sin(omega[1]))*k*an#assume e=0
-    bg <- beta+gamma
-    dre <- alpha*(cu-er) + bg*su#year
-#    dre.u0 <- alpha*(1-er)
-#    dre.upi2 <- alpha*(-er) + bg
-#    dre.upi <- alpha*(-1-er)
-    drep <- -alpha*su + bg*cu#year
-    drepp <- -alpha*cu - bg*su#year
-    onemecu <- 1.0-ecc*cu
-    anhat <- an/onemecu
+        ##DD equations 17a, 29
+        ae  <-  2.0*atan(sqrt((1+ecc)/(1-ecc))*tan(0.5*U))
+        ae[ae<0] <- ae[ae<0]+2.0*pi
+        ae  <-  2.0*pi*orbits + ae-phase
+        omega <- omz + (k+xomdot/(an*rad2deg*365.25*86400.0))*ae
+        ##DD equations 46 through 52
+        su <- sin(U)
+        cu <- cos(U)
+        sw <- sin(omega)
+        cw <- cos(omega)
+        alpha <- x*sw#yr
+        beta <- x*sqrt(1-eth^2)*cw#yr
+        abdot <-x*(cos(omega[1])-sin(omega[1]))*k*an#assume e=0
+        bg <- beta+gamma
+        dre <- alpha*(cu-er) + bg*su#year
+                                        #    dre.u0 <- alpha*(1-er)
+                                        #    dre.upi2 <- alpha*(-er) + bg
+                                        #    dre.upi <- alpha*(-1-er)
+        drep <- -alpha*su + bg*cu#year
+        drepp <- -alpha*cu - bg*su#year
+        onemecu <- 1.0-ecc*cu
+        anhat <- an/onemecu
 
 ###DD equations 26, 27, 57
 ###DD equations 26,27,57
-    cume=cu-ecc
-    sqr1me2=sqrt(1-ecc^2)
-    brace=onemecu-si*(sw*cume+sqr1me2*cw*su)
-    if(any(brace<=0))
-    {
-        cat("ERROR: In DDGR model, brace < 0\n")
-    }
-    dlogbr=log(brace)
-    if(Par$BinaryUnit=='natural'){
-        Ds <- -2*m2*dlogbr#s
-    }else{
-        r <-4*pi^2*m2/Cauyr^3
-        Ds <- -2*r*dlogbr#yr
-    }
+        cume=cu-ecc
+        sqr1me2=sqrt(1-ecc^2)
+        brace=onemecu-si*(sw*cume+sqr1me2*cw*su)
+        if(any(brace<=0))
+        {
+            cat("ERROR: In DDGR model, brace < 0\n")
+        }
+        dlogbr=log(brace)
+        if(Par$BinaryUnit=='natural'){
+            Ds <- -2*m2*dlogbr#s
+        }else{
+            r <-4*pi^2*m2/Cauyr^3
+            Ds <- -2*r*dlogbr#yr
+        }
 
-    ##These will be different if spin axis not aligned -- IS THIS AN ASSUMPTION OF THE MODEL?
-    a0aligned = an*ar/(2.0*pi*f0*si*sqr1me2)
-    a0 = afac*a0aligned
-    b0 = 0.0
-    if(Par$BinaryUnit=='natural'){
-        Da = a0*(sin(omega+ae)+ecc*sw) + b0*(cos(omega+ae) + ecc*cw)
-    }else{
-        Da <-a0/Cauyr*(sin(omega+ae)+ecc*sw) + b0/Cauyr*(cos(omega+ae) + ecc*cw)
-    }
+        ##These will be different if spin axis not aligned -- IS THIS AN ASSUMPTION OF THE MODEL?
+        a0aligned = an*ar/(2.0*pi*f0*si*sqr1me2)
+        a0 = afac*a0aligned
+        b0 = 0.0
+        if(Par$BinaryUnit=='natural'){
+            Da = a0*(sin(omega+ae)+ecc*sw) + b0*(cos(omega+ae) + ecc*cw)
+        }else{
+            Da <-a0/Cauyr*(sin(omega+ae)+ecc*sw) + b0/Cauyr*(cos(omega+ae) + ecc*cw)
+        }
 
-    ##Now compute d2bar, the orbital time correction in DD equation 42.
-    Dre1 <- -anhat*dre*drep
-    Dre2 <- anhat^2*dre*(drep^2 + 0.5*dre*drepp - 0.5*ecc*su*dre*drep/onemecu)
-    Dre <- dre+Dre1+Dre2
-#    Dre <- dre*(1-anhat*drep+(anhat^2)*(drep^2 + 0.5*dre*drepp - 0.5*ecc*su*dre*drep/onemecu))
+        ##Now compute d2bar, the orbital time correction in DD equation 42.
+        Dre1 <- -anhat*dre*drep
+        Dre2 <- anhat^2*dre*(drep^2 + 0.5*dre*drepp - 0.5*ecc*su*dre*drep/onemecu)
+        Dre <- dre+Dre1+Dre2
+                                        #    Dre <- dre*(1-anhat*drep+(anhat^2)*(drep^2 + 0.5*dre*drepp - 0.5*ecc*su*dre*drep/onemecu))
 
 ###change unit
-    Dre1 <- Dre1*DJY*DAYSEC
-    Dre2 <- Dre2*DJY*DAYSEC
-    Dre <- Dre*DJY*DAYSEC
-    Ds <- Ds*DJY*DAYSEC
-    Da <- Da*DJY*DAYSEC
+        Dre1 <- Dre1*DJY*DAYSEC
+        Dre2 <- Dre2*DJY*DAYSEC
+        Dre <- Dre*DJY*DAYSEC
+        Ds <- Ds*DJY*DAYSEC
+        Da <- Da*DJY*DAYSEC
 
 ###unit:day
-    d2bar <- Dre + Ds + Da
-    torb <- -d2bar#second
+        d2bar <- Dre + Ds + Da
+        torb <- -d2bar#second
 
-    ##Now get partial derivatives
-    if(Par$BinaryUnit=='natural'){
-        an0 <-  sqrt(m/arr^3)#1/s
-    }else{
-        an0 <- 2*pi*sqrt(m/arr^3)#1/yr
-    }
+        ##Now get partial derivatives
+        if(Par$BinaryUnit=='natural'){
+            an0 <-  sqrt(m/arr^3)#1/s
+        }else{
+            an0 <- 2*pi*sqrt(m/arr^3)#1/yr
+        }
 
-    csigma=x*(-sw*su+sqr1me2*cw*cu)/onemecu
-    ce=su*csigma-x*sw-ecc*x*cw*su/sqr1me2
-    cx=sw*cume+sqr1me2*cw*su
-    comega=x*(cw*cume-sqr1me2*sw*su)
-    cgamma=su
-    cm2=-2*dlogbr
-    csi=2*m2*(sw*cume+sqr1me2*cw*su)/brace
+        csigma=x*(-sw*su+sqr1me2*cw*cu)/onemecu
+        ce=su*csigma-x*sw-ecc*x*cw*su/sqr1me2
+        cx=sw*cume+sqr1me2*cw*su
+        comega=x*(cw*cume-sqr1me2*sw*su)
+        cgamma=su
+        cm2=-2*dlogbr
+        csi=2*m2*(sw*cume+sqr1me2*cw*su)/brace
 
-    fact1=(m/(2*arr)) ##((m-m2)*m2/m^2 - 9)
-    fact2=(3*m/(2*arr^4)) ##(1.0 + fact1)
-    fact3=(m/2*arr) ##(m2/m^2-2*(m-m2)*m2/m^3)
-    fact4=(1+fact1)*3*m/(2*arr^4*an0)
-    fact5=an0*fact1/arr
+        fact1=(m/(2*arr)) ##((m-m2)*m2/m^2 - 9)
+        fact2=(3*m/(2*arr^4)) ##(1.0 + fact1)
+        fact3=(m/2*arr) ##(m2/m^2-2*(m-m2)*m2/m^3)
+        fact4=(1+fact1)*3*m/(2*arr^4*an0)
+        fact5=an0*fact1/arr
 
-    denumm=(1+fact1)/(2*arr^3*an0) + an0*(fact1/m+fact3)
-    denomm=fact4+fact5
-    darrdm=denumm/denomm
-    dnum = an0*(m-2*m2)/(2*arr*m)
-    denom = an0*fact1/arr + fact2/an0
-    darrdm2 = dnum/denom
-    dgmdm2 = ((m+2*m2)/arr - (m2*(m+m2)*darrdm2/arr^2))*ecc/(an*m)
-    cdth=-ecc*ecc*x*cw*su/sqr1me2
-    dthdm2 = -dth*darrdm2/arr - (m+m2)/(arr*m)
-    dkdm = k/m - k*darrdm/arr
-    dsidm2 = -(m*x/(arr*m2))*(1.0/m2+darrdm2/arr)
-    ck = ae*comega
-    dkdm2 = -k*darrdm2/arr
-    cdr = -ecc*x*sw
-    ddrdm2 = -dr*darrdm2/arr - 2*m2/(arr*m)
-    dtdm2 = -2*dlogbr
-    csini = 2*m2*(sw*cume+sqr1me2*cw*su)/brace
-    dsidm=-(m*x/(arr*m2))*(-1.0/m+darrdm/arr)
-    dpbdm = pbdot/(m-m2) - pbdot/(3*m)
-    if(FALSE){
-        cpbdot = -csigma*an*tt0^2/(2*pb)
-        ddrdm = -dr/m - dr*darrdm/arr + 6/arr
-        dpbdm2 = pbdot/m2 - pbdot/(m-m2)
-        cm2 = dtdm2+cgamma*dgmdm2+csini*dsidm2+ck*dkdm2+cdr*ddrdm2+cdth*dthdm2+cpbdot*dpbdm2
-        fact6=1.0/(arr*m)
-        fact7=-(m+m2)/(arr*m^2)
-        fact8=-(m+m2)*darrdm/(arr^2*m)
-        dgamdm = (ecc*m2/an)*(fact6+fact7+fact8)
+        denumm=(1+fact1)/(2*arr^3*an0) + an0*(fact1/m+fact3)
+        denomm=fact4+fact5
+        darrdm=denumm/denomm
+        dnum = an0*(m-2*m2)/(2*arr*m)
+        denom = an0*fact1/arr + fact2/an0
+        darrdm2 = dnum/denom
+        dgmdm2 = ((m+2*m2)/arr - (m2*(m+m2)*darrdm2/arr^2))*ecc/(an*m)
+        cdth=-ecc*ecc*x*cw*su/sqr1me2
+        dthdm2 = -dth*darrdm2/arr - (m+m2)/(arr*m)
+        dkdm = k/m - k*darrdm/arr
+        dsidm2 = -(m*x/(arr*m2))*(1.0/m2+darrdm2/arr)
+        ck = ae*comega
+        dkdm2 = -k*darrdm2/arr
+        cdr = -ecc*x*sw
+        ddrdm2 = -dr*darrdm2/arr - 2*m2/(arr*m)
+        dtdm2 = -2*dlogbr
+        csini = 2*m2*(sw*cume+sqr1me2*cw*su)/brace
+        dsidm=-(m*x/(arr*m2))*(-1.0/m+darrdm/arr)
+        dpbdm = pbdot/(m-m2) - pbdot/(3*m)
+        if(FALSE){
+            cpbdot = -csigma*an*tt0^2/(2*pb)
+            ddrdm = -dr/m - dr*darrdm/arr + 6/arr
+            dpbdm2 = pbdot/m2 - pbdot/(m-m2)
+            cm2 = dtdm2+cgamma*dgmdm2+csini*dsidm2+ck*dkdm2+cdr*ddrdm2+cdth*dthdm2+cpbdot*dpbdm2
+            fact6=1.0/(arr*m)
+            fact7=-(m+m2)/(arr*m^2)
+            fact8=-(m+m2)*darrdm/(arr^2*m)
+            dgamdm = (ecc*m2/an)*(fact6+fact7+fact8)
 
-        dthdm=-dth/m - dth*darrdm/arr + (7*m-m2)/(arr*m)
+            dthdm=-dth/m - dth*darrdm/arr + (7*m-m2)/(arr*m)
 
-        cm = ck*dkdm+cgamma*dgamdm+cdr*ddrdm+cdth*dthdm+cpbdot*dpbdm+csini*dsidm
-        cpbdot <- 0.5*tt0*(-csigma*an*DAYSEC*tt0/(pb*DAYSEC))#?
-        cpb=-csigma*an*DAYSEC*tt0/(pb*DAYSEC)#?
-        ce=ce
-        om=comega
-        t0=-csigma*an*DAYSEC
-        pbdot=pbdot
-        xpbdot=pbdot
-        sini=csi
-        m2=cm2*Tsun
-        mtot=cm*Tsun
-        a1dot=cx*tt0
-    }
+            cm = ck*dkdm+cgamma*dgamdm+cdr*ddrdm+cdth*dthdm+cpbdot*dpbdm+csini*dsidm
+            cpbdot <- 0.5*tt0*(-csigma*an*DAYSEC*tt0/(pb*DAYSEC))#?
+            cpb=-csigma*an*DAYSEC*tt0/(pb*DAYSEC)#?
+            ce=ce
+            om=comega
+            t0=-csigma*an*DAYSEC
+            pbdot=pbdot
+            xpbdot=pbdot
+            sini=csi
+            m2=cm2*Tsun
+            mtot=cm*Tsun
+            a1dot=cx*tt0
+        }
 
 ###derive vectors
-##inclination
-    ci  <- cos(asin(si))
-    sini <- rep(si,Nt)
-    cosi  <- cos(asin(sini))
-    b <- ar*(1-er*cu)#
-    theta <- omega+ae
-    mu <-m1*m2/m
+        ##inclination
+        ci  <- cos(asin(si))
+        sini <- rep(si,Nt)
+        cosi  <- cos(asin(sini))
+        b <- ar*(1-er*cu)#
+        theta <- omega+ae
+        mu <-m1*m2/m
 ###DD85 B.1-9
-    if(Par$BinaryUnit=='natural'){
-        adot <- Par$DDGR$xdot/Par$DDGR$sini
-    }else{
-        adot <- Par$DDGR$xdot/Par$DDGR$sini*Cauyr
-    }
-    udot <-(an+edot*su)/(1-ecc*cu)
-    bdot <- v <- adot*(1-ecc*cu)-ar*edot*cu+ar*ecc*su*udot
-    theta.dot <- an*(1+ecc*cos(ae))^2/(1-ecc^2)^(3/2)
+        if(Par$BinaryUnit=='natural'){
+            adot <- Par$DDGR$xdot/Par$DDGR$sini
+        }else{
+            adot <- Par$DDGR$xdot/Par$DDGR$sini*Cauyr
+        }
+        udot <-(an+edot*su)/(1-ecc*cu)
+        bdot <- v <- adot*(1-ecc*cu)-ar*edot*cu+ar*ecc*su*udot
+        theta.dot <- an*(1+ecc*cos(ae))^2/(1-ecc^2)^(3/2)
 
-##rotation matrix
-    xo <- b*cos(theta)
-    yo <- b*sin(theta)
+        ##rotation matrix
+        xo <- b*cos(theta)
+        yo <- b*sin(theta)
 
-    vxo <- bdot*cos(theta)-b*sin(theta)*theta.dot
-    vyo <- bdot*sin(theta)+b*cos(theta)*theta.dot
+        vxo <- bdot*cos(theta)-b*sin(theta)*theta.dot
+        vyo <- bdot*sin(theta)+b*cos(theta)*theta.dot
 
-    A <- cos(Omega)
-    B <- sin(Omega)
-    F <- -sin(Omega)*ci
-    G <- cos(Omega)*ci
-    C <- 0#this is negative in Catanzarite 2010
-    H <- si#this is negative in Catanzarite 2010
+        A <- cos(Omega)
+        B <- sin(Omega)
+        F <- -sin(Omega)*ci
+        G <- cos(Omega)*ci
+        C <- 0#this is negative in Catanzarite 2010
+        H <- si#this is negative in Catanzarite 2010
 ####sky plane coordinates [pb, qb, ub]
-    Y <- A*xo+F*yo#ex is to the increasing direction of alpha
-    X <- B*xo+G*yo#ey is to the increasing direction of delta
-    Z <- C*xo+H*yo#ez is from observer to target; opposite in Catanzarite 2010
-    VY <- A*vxo+F*vyo
-    VX <- B*vxo+G*vyo
-    VZ <- C*vxo+H*vyo
-    rvec <- cbind(X,Y,Z)
-    vvec <- cbind(VX,VY,VZ)
+        Y0 <- A*xo+F*yo#ex is to the increasing direction of alpha
+        X0 <- B*xo+G*yo#ey is to the increasing direction of delta
+        Z0 <- C*xo+H*yo#ez is from observer to target; opposite in Catanzarite 2010
+        VY0 <- A*vxo+F*vyo
+        VX0 <- B*vxo+G*vyo
+        VZ0 <- C*vxo+H*vyo
+        X <- X+X0
+        Y <- Y+Y0
+        Z <- Z+Z0
+        VX <- VX+VX0
+        VY <- VY+VY0
+        VZ <- VZ+VZ0
+        Xs <- cbind(Xs,X0)
+        Ys <- cbind(Ys,Y0)
+        Zs <- cbind(Zs,Z0)
+        VXs <- cbind(VXs,VX0)
+        VYs <- cbind(VYs,VY0)
+        VZs <- cbind(VZs,VZ0)
+
+        rvec <- cbind(X,Y,Z)
+        vvec <- cbind(VX,VY,VZ)
 ###derive the primary transit time
-    tt <- rowSums(tB)
-    Pd <- Par$Pd
-    n <- (tt-Par$Tc)%/%Pd
-    dTc <- gen_CalTc((omega-omz)/(2*pi)*Pd,pb,ecc,Par$omega)
-    Tc <- cbind(n*Pd+Par$Tp,dTc)
-    f <- 0.5*pi-omega
-    Vc <- 2*pi*sqrt(Par$mC^2/Par$mTC/arr/(1-ecc^2))*sqrt(1+2*ecc*cos(f)+ecc^2)
-    c(list(torb=torb,xpbdot=xpbdot,sini=sini,m2=m2,ar=ar,rvec=rvec,vvec=vvec,U=U,Dre=Dre,Ds=Ds,Da=Da,pb=pb,dpb=dpb,omega=omega,alpha=alpha,abdot=abdot,beta=beta,gamma=gamma,dre=dre,drep=drep,drepp=drepp,anhat=anhat,Dre1=Dre1,Dre2=Dre2,x=x,xdot=xdot,dth=dth,sw=sw,cw=cw,ae=ae,er=er,eth=eth,dr=dr,dth=dth,an=an,ecc=ecc,Tc=Tc,Vc=Vc,bdot=bdot,theta.dot=theta.dot,xo=xo,yo=yo),out)
+        tt <- rowSums(tauE)
+        Pd <- Par$Pd
+        n <- (tt-Par$Tc)%/%Pd
+        dTc <- gen_CalTc((omega-omz)/(2*pi)*Pd,pb,ecc,Par$omega)
+        Tc <- cbind(n*Pd+Par$Tp,dTc)
+        f <- 0.5*pi-omega
+        Vc <- 2*pi*sqrt(Par$mC1^2/(Par$mC1+Par$mT)/arr/(1-ecc^2))*sqrt(1+2*ecc*cos(f)+ecc^2)
+    }
+    c(list(torb=torb,xpbdot=xpbdot,sini=sini,m2=m2,ar=ar,rvec=rvec,vvec=vvec,U=U,Dre=Dre,Ds=Ds,Da=Da,pb=pb,dpb=dpb,omega=omega,alpha=alpha,abdot=abdot,beta=beta,gamma=gamma,dre=dre,drep=drep,drepp=drepp,anhat=anhat,Dre1=Dre1,Dre2=Dre2,x=x,xdot=xdot,dth=dth,sw=sw,cw=cw,ae=ae,er=er,eth=eth,dr=dr,dth=dth,an=an,ecc=ecc,Tc=Tc,Vc=Vc,bdot=bdot,theta.dot=theta.dot,xo=xo,yo=yo,Xs=Xs,Ys=Ys,Zs=Zs,VXs=VXs,VYs=VYs,VZs=VZs),out)
 }
 
-gen_mass2dd <- function(m,m2,x,ecc,an,BinaryUnit='auyr'){
+gen_mass2dd <- function(m,m2,x,ecc,an,BinaryUnit='auyr',si=NULL,geometry=TRUE){
 ####################################
 ## Ref to DDGRmodel.C of tempo2:
 ## Given system masses m,m2 and keplerian parameters x,ecc,an, calculate the values
@@ -1334,10 +1516,19 @@ gen_mass2dd <- function(m,m2,x,ecc,an,BinaryUnit='auyr'){
 ####################################
     m1 <- m-m2
     if(m<0) cat('ERROR: problem with target system mass <0!\n')
-    arr <- gen_CalArr(m,m1,m2,an,BinaryUnit=Par$BinaryUnit)
+    if(!geometry){
+        arr <- gen_CalArr(m,m1,m2,an,BinaryUnit=Par$BinaryUnit)
+    }else{
+        if(Par$BinaryUnit=='natural'){
+            arr <- (m/an^2)^(1/3)#s or au
+        }else{
+            arr <- (m*(2*pi/an)^2)^(1/3)
+        }
+    }
     ar <- arr*m2/m#semi-major axis of m1
-    si <- x*YC/ar
-    if(any( si > 1.0 )){
+    if(is.null(si)) si <- x*Cauyr/ar
+    if(any( abs(si) > 1.0 )){
+        cat('range(sini)=',range(si),'\n')
         cat("SIN I > 1.0, setting to 1: should probably use DD model!\n")
         si[si>1]  <-  1.0
     }
@@ -1496,4 +1687,88 @@ gen_Cart2astro <- function(state){
     out <- cbind(ra,dec,1000/d,pm.ra,pm.dec,rv)
     colnames(out) <- c('ra','dec','parallax','pmra','pmdec','radial_velocity')
     return(out)
+}
+gen_ProcTime <- function(t0){
+####################################
+## Calculate processing time
+##
+## Input:
+##    t0 - start time
+##
+## Output:
+##    dur- duration in units of second
+####################################
+    dur <- as.numeric(proc.time()[3]-t0[3])
+    dt <- paste(floor(dur/3600),'h',floor((dur%%3600)/60),'m',dur%%60,'s',sep='')
+    cat('Time consumed: ',time.consumed,'\n')
+    dur
+}
+
+gen_GetObsInd <- function(target,ObsList){
+####################################
+## Get observatory index
+##
+## Input:
+##   target - target name
+##   ObsList - a list of Observatories with codes
+##
+## Output:
+##   ind - index of the input observatory in the ObsList
+####################################
+    ind <- grep(tolower(target),tolower(ObsList[,'Name']))
+    if(length(ind)>1){
+        Ns <- c()
+        for(k in ind){
+            s1 <- unlist(strsplit(as.character(ObsList[k,'Name']),split=''))
+            s1 <- tolower(s1[s1!=''])
+            s2 <- unlist(strsplit(target,split=''))
+            s2 <- tolower(s2[s2!=''])
+            Ns <- c(Ns,length(which(!is.na(match(s1,s2)))))
+        }
+        ind <- ind[which.max(Ns)]
+    }
+    return(ind)
+}
+
+gen_CombineModel <- function(utc,Data,Par,component='TAR',OutTime0=NULL){
+####################################
+## combine all models for different stars and data types
+##
+## Input:
+##   utc - utc time
+##   Data - Data frame
+##   Par - Input parameters
+##   component - modeling component
+##   OutTime0 - reference OutTime
+##
+## Output:
+##   Out - Model Output
+####################################
+    ParNew <- Par
+    types <- unique(Data$type)
+#    stars <- unique(Data$star)
+    stars <- Par$stars
+    OutObs <- OutTime <- OutAstro <- OutRv <- list()
+    for(star in stars){
+        if(star==Par$companion){
+            ParNew <- fit_ChangePar(Par)
+        }else{
+            ParNew <- Par
+        }
+        for(type in types){
+            ind <- which((Data$type==type & Data$star==star))
+            if(type=='rel') ind <- which(Data$type=='rel')
+            if(length(ind)>0){
+#                cat('star=',star,';type=',type,';length(ind)=',length(ind),'\n')
+                ParNew$ObsInfo <- Par$ObsInfo[ind,]
+                OutObs[[star]][[type]] <- time_Utc2tb(utc[ind,],ParNew)
+                if(grepl('T',component)) OutTime[[star]][[type]] <- time_Ta2te(OutObs[[star]][[type]],ParNew,fit=FALSE,OutTime0=OutTime0)
+                if(grepl('A',component)) OutAstro[[star]][[type]] <- astro_FullModel(OutObs[[star]][[type]],OutTime[[star]][[type]],ParNew,Mlens=ParNew$mC1,component='T')
+                if(grepl('R',component)) OutRv[[star]][[type]] <- rv_FullModel(OutObs[[star]][[type]],OutTime[[star]][[type]],ParNew)
+            }else{
+                OutObs[[star]][[type]] <- OutTime[[star]][[type]]  <- OutAstro[[star]][[type]] <- OutRv[[star]][[type]] <- NULL
+            }
+        }
+    }
+    list(OutObs=OutObs,OutTime=OutTime,OutAstro=OutAstro,OutRv=OutRv)
 }

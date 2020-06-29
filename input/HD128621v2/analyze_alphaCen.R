@@ -1,0 +1,7 @@
+aca <- read.table('HD128620_HARPS.dat')
+acb <- read.table('HD128621_HARPS.dat')
+pdf('alphaCenAB_HARPS.pdf',8,8)
+plot(aca[,1],aca[,2],xlab='MJD',ylab='RV',xlim=range(aca[,1],acb[,1]),ylim=range(aca[,2],acb[,2]))
+points(acb[,1],acb[,2],col='red')
+legend('top',legend=c('alpha Cen A', 'alpha Cen B'), col=c('black','red'),pch=1)
+dev.off()

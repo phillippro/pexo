@@ -1,0 +1,56 @@
+Niter 1e4
+Ncore 4
+Nmax 1
+primary HIP27321
+companion HIP27321b
+RefType.PFS none
+EopType 2006
+TaiType instant
+TtType BIPM
+RvType BCC
+unit TDB
+DE 430
+TtTdbMethod eph
+SBscaling FALSE
+PlanetShapiro FALSE
+CompareT2 FALSE
+g 1
+BinaryModel kepler
+phi.HARPS -29.2584
+elong.HARPS -70.7345
+height.HARPS 2.4
+xtel.hip 0
+ytel.hip 0
+ztel.hip 0
+xtel.combGravity 0
+ytel.combGravity 0 
+ztel.combGravity 0 
+#qRvT 2
+#pRvT 0
+#qRvC 2
+#pRvC 0
+epoch 2448348.750
+mT 1.75
+logmC -2.764621 -20 20 U
+eta 1 0 1 U
+ra 86.82118054
+dec -51.06671329
+plx 51.87
+pmra 4.65
+pmdec 81.96
+rv 20
+logP 8.97 -20 20 U
+e 0.1 0 1 U
+I 89  0 180 U
+omegaT 10 0 360 U
+Omega 10 0 360 U
+Mo 10 0 360 U
+raOff 0 0 1e4 N
+decOff 0 0 1e4 N
+pmraOff 0 0 1e4 N
+pmdecOff 0 0 1e4 N
+plxOff 0 0 1e4 N
+#rvOff 0 0 10 N
+bRv.HIP27321.HARPS 0 -100000 100000 U
+jitterRv.HIP27321.HARPS 1 0 100 U
+

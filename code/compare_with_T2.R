@@ -27,19 +27,19 @@ if(nrow(utc)==nrow(tempo2)){
     cat('output pdf:\n',fout1,'\n')
     pdf(fout1,16,16)
     par(mfrow=c(4,4))
-    dtt <- time_T2mMjd(OutBary$JDtt,tempo2[,'Ttt'])
+    dtt <- time_T2mMjd(OutObs$JDtt,tempo2[,'Ttt'])
     ylim <- c(-1e-5,1e-5)
 ###initial UTC input
     plot(jd.utc,time_T2mMjd(utc,tempo2$sat),xlab='JD[UTC]',ylab='dutc',type='l')
     abline(h=0,lty=2)
 ###UTC to TAI
-    plot(jd.utc,time_T2mMjd(OutBary$JDtai,tempo2$sat)-tempo2$clock0,xlab='JD[UTC]',ylab='d(tai-utc)',type='l')
+    plot(jd.utc,time_T2mMjd(OutObs$JDtai,tempo2$sat)-tempo2$clock0,xlab='JD[UTC]',ylab='d(tai-utc)',type='l')
     abline(h=0,lty=2)
 ###TAI to TT
-    plot(jd.utc,time_T2mT2(OutBary$JDtt,utc)-tempo2$tt,xlab='JD[UTC]',ylab='d(tt-utc)',type='l')
+    plot(jd.utc,time_T2mT2(OutObs$JDtt,utc)-tempo2$tt,xlab='JD[UTC]',ylab='d(tt-utc)',type='l')
     abline(h=0,lty=2)
 ###TT to TB
-    plot(jd.utc,time_T2mT2(OutBary$JDtdb,OutBary$JDtt)-(tempo2$tt2tb)/IFTE.K,xlab='JD[UTC]',ylab='d(tdb-tt)',type='l',main=paste('TtTdbMethod:',Par$TtTdbMethod))
+    plot(jd.utc,time_T2mT2(OutObs$JDtdb,OutObs$JDtt)-(tempo2$tt2tb)/IFTE.K,xlab='JD[UTC]',ylab='d(tdb-tt)',type='l',main=paste('TtTdbMethod:',Par$TtTdbMethod))
     abline(h=0,lty=2)
 ###Roemer delay; main difference
     plot(jd.utc,OutTime$RoemerSolar/IFTE.K+tempo2$roemer,xlab='JD[UTC]',ylab='Difference in Solar System Roemer delay',type='l',main='PEXO method')
@@ -78,7 +78,7 @@ if(nrow(utc)==nrow(tempo2)){
     bjd.tdb.t2.TEMPO <- cbind(utc[,1],utc[,2]+dt.t2.TEMPO/DAYSEC)
     bjd.tdb.t2.DE405 <- cbind(utc[,1],utc[,2]+dt.t2.DE405/DAYSEC)
     bjd.tdb.t2.IF99 <- cbind(utc[,1],utc[,2]+dt.t2.IF99/DAYSEC)
-    bjd.tdb.pexo1 <- cbind(OutBary$JDtdb[,1],OutBary$JDtdb[,2]-(OutTime$RoemerT2$all+OutTime$ShapiroSolar+OutTime$TropoDelay)/DAYSEC)#tempo-version
+    bjd.tdb.pexo1 <- cbind(OutObs$JDtdb[,1],OutObs$JDtdb[,2]-(OutTime$RoemerT2$all+OutTime$ShapiroSolar+OutTime$TropoDelay)/DAYSEC)#tempo-version
     bjd.tdb.pexo2 <- OutTime$BJDtdb#pexo-version
     dt.pexo1 <- time_T2mT2(bjd.tdb.pexo1,utc)
     dt.pexo2 <- time_T2mT2(OutTime$BJDtdb,utc)
