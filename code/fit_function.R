@@ -426,16 +426,16 @@ fit_ModelPredict <- function(Data,Par,ParOpt,Nsim=1e3){
     stars <- unique(Data$star)
     Sim <- c()
     Obs <- c()
+    tmin <- min(Data[,1])
+    tmax <- max(Data[,1])
+#    tsim <- sort(runif(Nsim,tmin,tmax))
+    tsim <- seq(tmin,tmax,length.out=Nsim)
     for(star in stars){
         types <- Par$index[[star]]$types
         for(type in types){
             inss <- Par$index[[star]][[type]]$instruments
             for(ins in inss){
-                ind <- Par$index[[star]][[type]][[ins]]
-                tmin <- min(Data[ind,1])
-                tmax <- max(Data[ind,1])
-#                tsim <- seq(tmin,tmax,length.out=Nsim)
-                tsim <- sort(runif(Nsim,tmin,tmax))
+                ind <- Par$index[[star]][[type]][[ins]]$ind0
                 Sim <- rbind(Sim,cbind(tsim,0,0,0,0,Data$star[ind[1]],Data$type[ind[1]],Data$instrument[ind[1]],Data$wavelength[ind[1]]))
                 Obs <- rbind(Obs,t(replicate(Nsim,unlist(Par$ObsInfo[ind[1],]))))
             }
@@ -446,14 +446,18 @@ fit_ModelPredict <- function(Data,Par,ParOpt,Nsim=1e3){
     colnames(Sim) <- colnames(Data)
     utc <- time_ChangeBase(cbind(Sim[,1],0))#simulated utc
     Par$Nepoch <- nrow(utc)
+###update index
+    Data <- Sim
+    source('indexing.R',local=TRUE)
+###update
     ParNew <- update_par(Par,ParOpt)
     tmp <- gen_CombineModel(utc,Sim,ParNew,component=Par$component)
     OutObs <- tmp$OutObs
     OutTime0 <- OutTime <- tmp$OutTime
     OutAstro <- tmp$OutAstro
     OutRv <- tmp$OutRv
-    fit <- fit_LogLike(Sim,OutObs,RateObs,ParOpt,Par,OutTime0=OutTime0)
-    list(sim=Sim,pred=fit$model)
+    fit <- fit_LogLike(Sim,OutObs,RateObs,ParOpt,Par,OutTime0=OutTime0,TimeUpdate=TRUE)
+    list(sim=Sim,pred=fit$model,fit=fit,OutObs=OutObs,OutTime=OutTime,OutAstro=OutAstro,OutRv=OutRv)
 }
 
 #fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=TRUE){

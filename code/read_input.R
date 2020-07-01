@@ -7,8 +7,6 @@ option_list  <-  list(
                 help="Length of MCMC [optional; default=%default]"),
     make_option(c("-P", "--Planet"), type="numeric", default=NA,
                 help=" [Planet number [optional; default=%default]"),
-    make_option(c("-O", "--orbit"), type="numeric", default=NULL,
-                help=" [Initial orbital parameters [optional; default=%default]"),
     make_option(c("-g", "--geometry"), type="logical", default=TRUE,
                 help=" [geometric orbit or relativistic orbit [optional; default=%default]"),
     make_option(c("-n", "--ncore"), type="numeric", default=4,
@@ -38,22 +36,23 @@ if(FALSE){
 #opt$primary <- 'HD46375'
 #opt$primary <- 'GJ534'
 #opt$primary <- 'HD10790'
-opt$primary <- 'HD113449'
-opt$Niter <- 1e5
+#opt$primary <- 'HD113449'
+opt$primary <- 'HD42581'
+#opt$Niter <- 1e3
 opt$ncore <- 4
 #opt$time <- '2447047 2458467 10'
 #opt$time <- '2447000 2462000 10'
 #opt$time <- '2450000 2460000 10'
 #opt$time <- '2445000 2465000 10'
-#opt$time <- '2454597 2454633 1'
+opt$time <- '2440000 2460000 10'
 #opt$time <- '2452850 2457498 1'
-#opt$mode  <- 'emulate'
-opt$mode  <- 'fit'
-#opt$component <- 'TAR'
-opt$component <- 'TR'
+opt$mode  <- 'emulate'
+#opt$mode  <- 'fit'
+opt$component <- 'TAR'
+#opt$component <- 'TR'
 opt$verbose <- TRUE
-#opt$ins <- 'APF'
-#opt$var <- 'JDutc BJDtdb RvST RvgT RvsT RvgsO'
+opt$ins <- 'APF'
+opt$var <- 'JDutc BJDtdb RvST RvgT RvsT'
 #opt$var <- 'JDutc BJDtdb BJDtcb'
 }
 if(opt$mode=='emulate' & is.na(opt$ins)) stop('No input instrumentation or observatory for emulation!')
@@ -72,7 +71,7 @@ if(is.na(opt$Planet)){
 
 orbit <- rep(NA,7)
 names(orbit) <- nn <- c('logmC','logP','e','I','omegaT','Omega','Tp')
-if(opt$Planet>0 & is.null(opt$orbit)){
+if(opt$Planet>0){
     cat('\nWithout input binary parameters and thus reading binary parameters from ',fpar,'!\n')
     ff <- read.table(fpar)
     for(i in 1:nrow(ff)){
@@ -88,8 +87,8 @@ if(opt$Planet>0 & is.null(opt$orbit)){
             opt[[n]] <- as.numeric(as.character(ff[i,2]))
         }
     }
-    opt$orbit <- orbit
 }
+opt$orbit <- orbit
 opt$par <- paste0('../input/basic.par')
 
 #    opt$out <- '../results/HD10700_PexoBary.txt'
