@@ -1,14 +1,12 @@
 source('plot_function.R')
-if(!exists('sim')){
-#ParNew <- update_par(Par,ParOpt)
+##ParNew <- update_par(Par,ParOpt)
 fit <- fit_LogLike(Data,OutObs,RateObs,ParOpt,Par,,OutTime0=OutTime0)
 model <- fit$model
-#llmax <- round(fit$llike)
-###model prediction
+llmax <- round(fit$llike)
+##model prediction
 tmp <- fit_ModelPredict(Data,Par,ParOpt)
 pred <- tmp$pred
 sim <- tmp$sim
-}
 
 ####plot
 fpdf <- paste0('../results/',star,'_Nmax',Par$Nmax,'_llmax',llmax,'_N',Par$Niter,'_einstein',Par$Einstein,'.pdf')
