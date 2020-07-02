@@ -3,9 +3,11 @@ option_list  <-  list(
                 help="PEXO mode: emulate or fit [optional; default=%default]", metavar="character"),
     make_option(c("-i", "--ins"), type="character", default=NA,
                 help="Instrument or observatory [mandatory for emulation mode; default=%default]", metavar="character"),
+    make_option(c("-O", "--orbit"), type="character", default=NULL,
+                help="File with mass and orbital parameters for the companion; default=%default]", metavar="character"),
     make_option(c("-N", "--Niter"), type="numeric", default=1e3,
                 help="Length of MCMC [optional; default=%default]"),
-    make_option(c("-P", "--Planet"), type="numeric", default=NA,
+    make_option(c("-P", "--Planet"), type="numeric", default=0,
                 help=" [Planet number [optional; default=%default]"),
     make_option(c("-g", "--geometry"), type="logical", default=TRUE,
                 help=" [geometric orbit or relativistic orbit [optional; default=%default]"),
@@ -13,7 +15,7 @@ option_list  <-  list(
                 help="Number of cores [optional; default=%default]"),
     make_option(c("-c", "--component"), type="character", default='TAR',
                 help="PEXO model component: timing (T), astrometry (A), radial velocity (R) and their combinations [optional; default=%default]", metavar="character"),
-    make_option(c("-t", "--time"), type="character", default='2450000 2460000 100',help='Timing file: epochs or times could be in 1-part or 2-part JD[UTC] format [mandatory if mode=emulate]'),
+    make_option(c("-t", "--time"), type="character", default=NULL,help='Timing file: epochs or times could be in 1-part or 2-part JD[UTC] format [mandatory if mode=emulate]'),
     make_option(c("-p", "--primary"), type="character", default='HD239960',help='primary star name [mandatory]'),
     make_option(c("-s", "--secondary"), type="character", default=NULL,help='secondary star name [optional]'),
     make_option(c("-M", "--mass"), type="numeric", default=1,
@@ -58,22 +60,26 @@ opt$var <- 'JDutc BJDtdb RvST RvgT RvsT'
 if(opt$mode=='emulate' & is.na(opt$ins)) stop('No input instrumentation or observatory for emulation!')
 instrument <- opt$ins
 
-if(is.null(opt$data))    opt$data <- paste0('../input/',opt$primary)
-fpar <- paste0('../input/',opt$primary,'.par')
+#####read parameter file
 opt$secondary <- NULL
-if(is.na(opt$Planet)){
-    if(!file.exists(fpar)){
-        opt$Planet <- 0
-    }else{
-        opt$Planet <- 1
-    }
+if(is.null(opt$data)) opt$data <- paste0('../input/',opt$primary)
+if(is.null(opt$orbit) & opt$Planet>0){
+   fnew <- paste0('../input/',opt$primary,'.par')
+   if(file.exists(fnew)){
+       opt$orbit <- fnew
+       cat('\nWithout input binary parameters from -o and thus read binary parameters from ',opt$orbit,'!\n')
+   }
 }
+if(!is.null(opt$orbit) & opt$Planet==0){
+###modify inconsistent parameter input
+    opt$Planet <- 1
+}
+if(opt$Planet>0 & is.null(opt$orbit)) stop('No parameter file is given for ',opt$Planet,' companion(s)!\n')
 
 orbit <- rep(NA,7)
 names(orbit) <- nn <- c('logmC','logP','e','I','omegaT','Omega','Tp')
 if(opt$Planet>0){
-    cat('\nWithout input binary parameters and thus reading binary parameters from ',fpar,'!\n')
-    ff <- read.table(fpar)
+    ff <- read.table(opt$orbit)
     for(i in 1:nrow(ff)){
         n <- as.character(ff[i,1])
         if(any(n==nn)){
@@ -91,7 +97,7 @@ if(opt$Planet>0){
 opt$orbit <- orbit
 opt$par <- paste0('../input/basic.par')
 
-#    opt$out <- '../results/HD10700_PexoBary.txt'
+##opt$out <- '../results/HD10700_PexoBary.txt'
 ###examples:
 #star <- 'GJ4332'
 ##Rscript pexo.R -m emulate -c TR -t ../input/GJ4332.tim -P ../input/norm.prior -p ../input/GJ4332pfs.par -v BJDtdb,ZB -o ../../dwarfs/bary/data/GJ4332_PexoBary.txt
