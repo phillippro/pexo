@@ -22,6 +22,11 @@ indp <- which.max(lp)
 cat('logPmax=',lp[indp],'\n')
 cat('logLmax=',ll[indl],'\n')
 ParOpt <- mc[indl,1:Npar]
+ParStat <- c()
+for(j in 1:Npar){
+    ParStat <- cbind(ParStat,data.distr(mc[,j],lp=lp,plotf=FALSE))
+}
+colnames(ParStat) <- colnames(mc)[1:Npar]
 
 ###update outputs
 OutObs <- update_OutObs(ParOpt,OutObs,RateObs)
