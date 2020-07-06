@@ -60,18 +60,19 @@ plot(OutAstro$OffRef[index,1],OutAstro$OffRef[index,2],xlab=xlab,ylab=ylab,main=
 plot(-OutAstro$OffAbe[index,1],OutAstro$OffAbe[index,2],xlab=xlab,ylab=ylab,main=expression('P2: Stellar aberration'),pch=20,cex=0.2)
 
 ##Binary motion
+####prepare markers
+yy <- time_Jd2yr(utc)
+##    ts <- seq(1980,2050,by=10)
+ts <- seq(1980,2040,by=5)
+if(grepl('HD209100',Par$star))    ts <- seq(1990,2030,by=2)
+ts <- ts[ts<max(yy)]
+inds <- sapply(ts, function(t) which.min(abs(yy-t)))
+
 if(Par$Np>0){
     delta <- gen_Xyz2lb(OutTime$uOT)[,2]
     lbBT <- gen_CalOffset(OutTime$uST,OutTime$uSB,bref=delta)
     lbBC <- gen_CalOffset(gen_CalUnit(rSC),OutTime$uSB,bref=delta)
     lbTC <- gen_CalOffset(gen_CalUnit(rSC),OutTime$uST,bref=delta)
-####prepare markers
-    yy <- time_Jd2yr(utc)
-#    ts <- seq(1980,2050,by=10)
-    ts <- seq(1980,2040,by=5)
-    if(grepl('HD209100',Par$star))    ts <- seq(1990,2030,by=2)
-    ts <- ts[ts<max(yy)]
-    inds <- sapply(ts, function(t) which.min(abs(yy-t)))
 ####plot binary orbit to be comparable with Fig. 1 in Pourbaix et al. 1999
                                         #x1 <- (-x*(m1+m2)/m2)
                                         #y1 <- (-y*(m1+m2)/m2)
@@ -82,12 +83,14 @@ if(Par$Np>0){
             xlim <- c(-30,15)
             ylim=c(15,-30)
         }else{
-            xlim <- 1.1*rev(range(x[index]))
-            ylim <- 1.1*range(y[index])
+            xlim <- 1.1*rev(range(x[index]),0)
+            ylim <- 1.1*range(y[index],0)
 #            xlim <- c(3,-3)
 #            ylim <- c(-3,3)
         }
         plot(x[index],y[index],xlab=xlab,ylab=ylab,main=expression('P3: Binary motion'),type='l',xlim=xlim,ylim=ylim)
+	ind <- floor(length(index)/10)
+        arrows(x[index[1]],y[index[1]],x[index[ind]],y[index[ind]],length=0.1,angle=30,code=2,col='red')
         points(x[inds],y[inds],pch='+',col='red')
         text(x[inds],y[inds],labels=ts,pos=c(3,rep(2,9),rep(4,3)),xpd=NA)
         points(0,0,pch='+')
@@ -103,12 +106,19 @@ if(Par$Np>0){
     }else{
         x <- -lbTC[,1]
         y <- -lbTC[,2]
-        xlim <- range(x[index])
-        ylim <- range(y[index])
+        if(star=='HD42581'){
+            rel <- read.table('/Users/ffeng/Documents/projects/dwarfs/data/combined/HD42581/HD42581_astrometry.rel',header=TRUE)
+            xlim <- range(x[index],0,rel[,'dra']/1e3)
+            ylim <- range(y[index],0,rel[,'ddec']/1e3)
+
+        }else{
+            xlim <- range(x[index],0)
+            ylim <- range(y[index],0)
+        }
         yy <- time_Jd2yr(OutTime$BJDtcb)
         trange <- range(yy)
-        ts <- unique(round(seq(round(trange[1],0),round(trange[2],0),length.out=30)))
-        ts <- c(ts,2018.37965)
+        ts <- unique(round(seq(round(trange[1],0),round(trange[2],0),length.out=20)))
+#        ts <- c(ts,2018.37965)
         inds <- sapply(ts, function(t) which.min(abs(yy-t)))
         if(Par$star=='S2' & FALSE){
 #            xlim <- c(-0.08,0.05)
@@ -116,44 +126,18 @@ if(Par$Np>0){
             xlim <- c(-0.2,0.2)
             ylim <- c(-0.2,0.2)
         }
-        plot(x[index],y[index],xlab=xlab,ylab=ylab,main=expression('P3: Binary motion'),pch='.',xlim=rev(xlim))
-        if(Par$star=='S2' & FALSE){
-            astro <- read.table('../data/S2_astrometry.dat')
-            if(TRUE){
-                x0 <- 0.99#mas
-                y0 <- -0.85#mas
-                vx0 <- -0.060#mas/yr
-                vy0 <- 0.221#mas/yr
-                dalpha0 <- -astro[,3]
-                ddelta0 <- astro[,4]
-                rho <- sqrt(dalpha0^2+ddelta0^2)
-                psi <- atan2(astro[,4],-astro[,3])
-                da <- -(x0+vx0*(astro[,2]+DJM0-Par$tpos)/DJY)*1e-3
-                dd <- (y0+vy0*(astro[,2]+DJM0-Par$tpos)/DJY)*1e-3
-                da <- 0
-                dd <- 0
-                dalpha <- dalpha0+da
-                ddelta <- ddelta0+dd
-            }
-            points(dalpha,ddelta,pch=20,cex=0.5,col='blue')
-            ind3 <- which.min(abs(astro[,2]+DJM0-Par$Tp))
-            points(dalpha[ind3],ddelta[ind3],pch=20,cex=0.5,col='green')
-            points(x[inds],y[inds],pch='+',col='red')
-            text(x[inds],y[inds],labels=ts,pos=c(3,rep(2,9),rep(4,3)))
-            points(0,0,pch='+')
-            ind1 <- which.min(abs(OutTime$OutBT$U-Par$Omega))
-            ind2 <- which.min(abs(OutTime$OutBT$U-(Par$Omega+pi)%%(2*pi)))
-            lines(x[c(ind1,ind2)],y[c(ind1,ind2)],lty=2)
-            plot(rho,psi)
-            rho.model <- sqrt(x^2+y^2)
-            psi.model <- atan2(y,x)
-            points(rho.model,psi.model,col='blue',pch='.')
-            tt <- time_Jd2yr(cbind(DJM0+astro[,2],0))
-            tmodel <- time_Jd2yr(OutTime$tB)
-            plot(tmodel,rho.model,xlab='tB',ylab='rho [as]')
-            points(tt,rho,col='blue',pch='.')
-            plot(tmodel,psi.model*180/pi,xlab='tB',ylab='psi [deg]')
-            points(tt,psi*180/pi,col='blue',pch='.')
+        plot(x[index],y[index],xlab=xlab,ylab=ylab,main=expression('P3: Binary motion'),pch='.',xlim=rev(xlim),ylim=ylim)
+	ind <- max(2,floor(length(index)/10))
+        arrows(x[index[ind-1]],y[index[ind-1]],x[index[ind]],y[index[ind]],length=0.1,angle=30,code=2,col='grey')
+        points(x[inds],y[inds],pch='+',col='red')
+        text(x[inds],y[inds],labels=ts,pos=c(3,rep(2,9),rep(4,3)),xpd=NA)
+        points(0,0,pch='+')
+        if(star=='HD42581'){
+            rel <- read.table('/Users/ffeng/Documents/projects/dwarfs/data/combined/HD42581/HD42581_astrometry.rel',header=TRUE)
+            jd.ref <- time_Cal2JD(cal=cbind(2019,11,10))
+            ii <- which.min(abs(rowSums(utc)-sum(jd.ref)))
+            arrows(0,0,x[ii],y[ii],length=0.1,angle=30,code=2,col='blue')
+            points(rel[,'dra']/1e3,rel[,'ddec']/1e3,col='red')
         }
     }
 }
@@ -190,7 +174,9 @@ if(Par$star=='alphaCenA'){
 }
 dev.off()
 
-if(exists('OutAstroC')){
+if(Par$binary){
+ParNew <- fit_ChangePar(Par)
+OutAstroC <- astro_FullModel(OutObs,OutTime,ParNew,Mlens=Par$mT,component='C')
 ####relative astrometry
 if(Par$Np>0){
 fout <- paste0(dir.out,'relative_',fname)

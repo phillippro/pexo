@@ -10,7 +10,7 @@ from astroquery.esasky import ESASky
 from astroquery.gaia import Gaia
 from astropy.coordinates import SkyCoord
 star = sys.argv[1]
-#star = 'GJ534'
+#star = 'HD128620'
 #tables = Gaia.load_tables(only_names=True)
 ##get data from simbad
 print('star: '+star)
@@ -60,8 +60,24 @@ else:
 job = Gaia.launch_job(query=query)
 out = job.get_results()
 N = np.shape(out)[0]
+if N==0: 
+    N = 1
+
 hh = Column(name='HIP', data=[hid]*N)
+#ra = Column(name='ra', data=[ra1]*N)
+#dec = Column(name='dec', data=[dec1]*N)
+#pmra = Column(name='pmra', data=[pmra]*N)
+#pmdec = Column(name='pmdec', data=[pmdec]*N)
+#plx = Column(name='parallax', data=[plx]*N)
+#rv = Column(name='rv', data=[rv]*N)
+#erv = Column(name='erv', data=[erv]*N)
+
 v = Column(name='RV', data=[rv]*N)
 ev = Column(name='eRV', data=[erv]*N)
-out.add_columns([hh,v,ev])
-ascii.write(out, 'gaia_hip.csv',format='csv',overwrite=True)
+if len(out)>0:
+    out.add_columns([hh,v,ev])
+    ascii.write(out, 'gaia_hip.csv',format='csv',overwrite=True)
+else:
+    out = np.array([hid,ra,dec,plx,pmra,pmdec,rv,erv]).transpose()
+    ascii.write(out, 'gaia_hip.csv',format='csv',overwrite=True,names=['HIP','ra','dec','parallax','pmra','pmdec','radial_velocity','radial_velocity_error'])
+
