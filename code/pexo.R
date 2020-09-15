@@ -30,6 +30,7 @@ source('timing_function.R')
 source('rv_function.R')
 source('update_function.R')
 source('fit_function.R')
+source('mcmc_func.R')
 
 tt0 <- proc.time()
 Tstart <- proc.time()
@@ -46,8 +47,16 @@ if(opt$mode=='fit'){
 }else{
     OutObs <- tmp$OutObs[[1]][[1]]
     OutTime0 <- OutTime <- tmp$OutTime[[1]][[1]]
-    OutAstro <- tmp$OutAstro[[1]][[1]]
-    OutRv <- tmp$OutRv[[1]][[1]]
+    if(grepl('A',Par$component)){
+        OutAstro <- tmp$OutAstro[[1]][[1]]
+    }else{
+        OutAstro <- tmp$OutAstro
+    }
+    if(grepl('R',Par$component)){
+        OutRv <- tmp$OutRv[[1]][[1]]
+    }else{
+        OutRv <- tmp$OutRv
+    }
 }
 
 cat('\n Plot and save results!\n')

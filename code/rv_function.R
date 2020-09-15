@@ -7,7 +7,7 @@ rv_GravTarget <- function(M,r,g=1){
 ##
 ## Input:
 ##   M - Lens mass (Msun)
-##   r - Distance from the light ray to the lens (au)
+##   r - Distance from the target to the companion (au)
 ##   g - gamma; g=1 for GR; g!=1 for other gravitational theories.
 ##
 ## Output:

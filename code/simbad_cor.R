@@ -1,10 +1,12 @@
 if(!exists('star')) star <- commandArgs(trailingOnly=TRUE)
+if(!exists('EpochGaia')) EpochGaia <- 2457206.375
+if(!exists('cname')) cname <- c('ra','dec','pmra','pmdec','parallax','radial_velocity')
 cmd <- paste('python cross_match_gaia_hip.py',star)
 py.path <- '/Users/ffeng/miniconda2/bin/python'
 if(file.exists(py.path)) cmd <- paste(py.path,'cross_match_gaia_hip.py',star)
 cat(cmd,'\n')
-system(cmd)
-fin <- 'gaia_hip.csv'
+try(system(cmd),TRUE)
+fin <- paste0(star,'_gaia_hip.csv')
 if(file.exists(fin)){
 ###Gaia data
     astro <- read.csv(fin,check.names=FALSE)[1,]
@@ -44,5 +46,10 @@ if(file.exists(fin)){
     system(paste('rm',fin))
     if(any(is.na(StarAstro))) stop(paste('No full astrometric information found for',star,'!'))
 }else{
-    stop(paste('cross_match_gaia_hip.py does not work for',star,'!'))
+    epoch <- EpochGaia
+    tab <- read.csv('../data/star_planet_info.csv')
+    ind <- which(tab[,'target']==star)
+    if(length(ind)==0)  stop(paste('cross_match_gaia_hip.py does not work for',star,'!'))
+    StarAstro <- tab[ind[1],c('ra','dec','pmra','pmdec','parallax','radial_velocity')]
+    cat(StarAstro,'\n')
 }

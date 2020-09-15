@@ -3,10 +3,9 @@ if(file.exists('mcmc_func.R')){
 }else{
     source('../code/mcmc_func.R')
 }
-#if(!exists('outf')) outf <- TRUE
-if(!exists('outf')) outf <- FALSE
-#ParNew <- update_par(Par,ParOpt)
-fit <- fit_LogLike(Data,OutObs,RateObs,ParOpt,Par,OutTime0=OutTime0,TimeUpdate=TRUE)
+if(!exists('outf')) outf <- TRUE
+#if(!exists('outf')) outf <- FALSE
+fit <- fit_LogLike(Data,OutObs,RateObs=RateObs,ParFit=ParOpt,Par=Par,OutTime0=OutTime0,TimeUpdate=TRUE)
 model <- fit$model
 llmax <- round(fit$llike)
 

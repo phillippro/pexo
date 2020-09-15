@@ -71,13 +71,14 @@ hh = Column(name='HIP', data=[hid]*N)
 #plx = Column(name='parallax', data=[plx]*N)
 #rv = Column(name='rv', data=[rv]*N)
 #erv = Column(name='erv', data=[erv]*N)
-
+fout = star+'_gaia_hip.csv'
+print(fout)
 v = Column(name='RV', data=[rv]*N)
 ev = Column(name='eRV', data=[erv]*N)
 if len(out)>0:
     out.add_columns([hh,v,ev])
-    ascii.write(out, 'gaia_hip.csv',format='csv',overwrite=True)
+    ascii.write(out, fout,format='csv',overwrite=True)
 else:
     out = np.array([hid,ra,dec,plx,pmra,pmdec,rv,erv]).transpose()
-    ascii.write(out, 'gaia_hip.csv',format='csv',overwrite=True,names=['HIP','ra','dec','parallax','pmra','pmdec','radial_velocity','radial_velocity_error'])
+    ascii.write(out, fout,format='csv',overwrite=True,names=['HIP','ra','dec','parallax','pmra','pmdec','radial_velocity','radial_velocity_error'])
 

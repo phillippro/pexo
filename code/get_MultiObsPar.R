@@ -185,6 +185,8 @@ for(k in 1:length(nn)){
         if(all(is.na(Par[[n]]))){
             if(!file.exists(Par[[n]])) stop('Error: ',n,' value is not valid!')
             Par[[n]] <- as.numeric(read.table(Par[[n]]))
+        }else{
+            Par[[n]] <- dval[k]
         }
     }else{
         Par[[n]] <- dval[k]

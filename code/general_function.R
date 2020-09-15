@@ -1750,7 +1750,7 @@ gen_CombineModel <- function(utc,Data,Par,component='TAR',OutTime0=NULL){
     stars <- Par$stars
     OutObs <- OutTime <- OutAstro <- OutRv <- list()
     for(star in stars){
-        if(star==Par$companion){
+        if(star==Par$secondary){
             ParNew <- fit_ChangePar(Par)
         }else{
             ParNew <- Par

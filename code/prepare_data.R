@@ -26,7 +26,7 @@ if(opt$mode=='emulate'){
         utc <- time_ChangeBase(utc,1)
     }
     Data <- cbind(rowSums(utc),NA,NA,NA,NA,Par$star,'rv',instrument,0.5)
-    Par$ins[[Par$star]]$rv <- opt$ins
+#    Par$ins[[Par$star]]$rv <- opt$instrument
 }else{
     Nt <- 0
     for(kk in 1:length(stars)){
@@ -41,7 +41,7 @@ if(opt$mode=='emulate'){
             cat(Ndelay,'.delay file found in ',fin,'\n')
             for(j in ind.delay){
                 ins <- gsub('.delay|.+_','',fs[j])
-#                if(any(ins==opt$ins)){
+#                if(any(ins==opt$instrument)){
                 if(TRUE){
                     inss <- c(inss,ins)
                     tab <- read.table(fs[j])
@@ -58,7 +58,7 @@ if(opt$mode=='emulate'){
         }else{
             if(opt$verbose) cat('No .delay file found in ',fin,'!\n')
         }
-        Par$ins[[star]]$delay <- inss
+#        Par$ins[[star]]$delay <- inss
 
         ind.rv <- grep('rv$',fs)
         Nrv <- length(ind.rv)
@@ -68,7 +68,7 @@ if(opt$mode=='emulate'){
             cat(Nrv,'.rv file found in ',fin,'!\n')
             for(j in ind.rv){
                 ins <- gsub('.rv|.+_','',fs[j])
-#                if(any(ins==opt$ins)){
+#                if(any(ins==opt$instrument)){
                 if(TRUE){
                     inss <- c(inss,ins)
                     tab <- read.table(fs[j])
@@ -86,7 +86,7 @@ if(opt$mode=='emulate'){
         }else{
             if(opt$verbose) cat('No .rv file found in ',fin,'!\n')
         }
-        Par$ins[[star]]$rv <- inss
+#        Par$ins[[star]]$rv <- inss
 
         ind.abs <- grep('abs$',fs)
         Nabs <- length(ind.abs)
@@ -96,7 +96,7 @@ if(opt$mode=='emulate'){
             cat(Nabs,'.abs file found in ',fin,'!\n')
             for(j in ind.abs){
                 ins <- gsub('.abs|.+_','',fs[j])
-#                if(any(ins==opt$ins)){
+#                if(any(ins==opt$instrument)){
                 if(TRUE){
                     inss <- c(inss,ins)
                     tab <- read.table(fs[j])
@@ -118,7 +118,7 @@ if(opt$mode=='emulate'){
         }else{
             if(opt$verbose) cat('No .abs file found in ',fin,'!\n')
         }
-        Par$ins[[star]]$abs <- inss
+#        Par$ins[[star]]$abs <- inss
 
         ind.rel <- grep('rel$',fs)
         Nrel <- length(ind.rel)
@@ -145,7 +145,7 @@ if(opt$mode=='emulate'){
         }else{
             if(opt$verbose) cat('No .rel file found in ',fin,'!\n')
         }
-        Par$ins[[star]]$rel <- inss
+#        Par$ins[[star]]$rel <- inss
 #        if(Nrv==0 & Nabs==0 & Nrel==0 & Ndelay==0) stop('No data file found in',fin,'\n')
     }
 }

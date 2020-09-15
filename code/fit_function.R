@@ -133,7 +133,7 @@ fit_AstroKep <- function(OutTime,Data,OutObsT,OutObsC,ParFit,Par,star,geometry=T
     ind <- which(Data$type=='abs')
     AstroKep <- array(0,dim=c(length(ind),2))
     if(length(ind)>0){
-        if(star==Par$companion){
+        if(star==Par$secondary){
             if(Par$geometry){
                 AstroKep[ind,] <- gen_Xyz2lb(OutTime$uOC[ind,])
             }else{
@@ -480,7 +480,6 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
 ##   model - Full model
 ##   sigma - total residual RMS
 ####################################
-    t0 <- proc.time()
     if(length(RateObs)>0){
         OutObsNew <- update_OutObs(ParFit,OutObs,RateObs)
     }else{
@@ -488,7 +487,10 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
     }
     ParNew <- update_par(Par,ParFit)
 #    ParNew <- Par
+    t0 <- proc.time()
     out <- update_CombineModel(Data,ParNew,OutObsNew,geometry=Par$geometry,OutTime0=OutTime0,TimeUpdate=TimeUpdate)
+
+#    cat('OutTime0$HD128620$rv$BJDtdb=',head(rowSums(OutTime0$HD128620$rv$BJDtdb)),'\n')
     stars <- unique(Data$star)
     types <- unique(Data$type)
     LogLike <- 0
@@ -499,6 +501,7 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
         if(any(types=='rv')){
             index <- Par$index[[star]]$rv$all
             RvKep <- out$OutRv[[star]]$rv
+#            cat(instr,';head(RvKep)=',head(RvKep),'\n')
             ParNew$ObsInfo <- Par$ObsInfo[index,]
             ModelKep[index,2] <- RvKep
 #            RvRef <- fit_RvRef(OutTime[[star]]$rv,Data[index,],ParFit,ParNew,star)
@@ -550,6 +553,7 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
                 }
                 ll <- sum(dnorm(rv,mean=RvHat[ind1],sd=sqrt(erv^2+jitter^2),log=T))
                 llike <- llike+ll
+#                cat(instr,';ll=',ll,'\n')
             }
 
             if(verbose) cat('star',star,';rv;sd(res)=',round(sd(RvHat-Data[index,2]),2),';llike=',llike,';b=',ParFit[grep('bRv',names(ParFit))],'km/s\n')
@@ -598,7 +602,6 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
             }
             ModelTrend[index,c(2,4)] <- AstroTrend
             AstroHat <- AstroKep+AstroTrend
-
 ###calculate red noise astrometry model component
             for(type in c('abs','rel')){
                 inss <- Par$index[[star]][[type]]$instruments
@@ -625,7 +628,7 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
                     }
                 }
             }
-
+#            t2 <- fit_TimeCount(t1,'dur2')
 ###calculate likelihood
             ModelRed[index,c(2,4)] <- AstroRed
             if(length(ind.abs)>0) model[Par$index[[star]]$abs$all,1] <- rowSums(out$OutTime[[star]]$abs$tauE)
@@ -659,11 +662,13 @@ fit_LogLike <- function(Data,OutObs,RateObs,ParFit,Par,OutTime0=NULL,verbose=FAL
                     }
                 }
             }
+#            t3 <- fit_TimeCount(t2,'dur3')
+
             LogLike <- LogLike+llike
         }
     }
-#    t1 <- fit_TimeCount(t0,'dur1')
-    return(list(llike=LogLike,ModelTrend=ModelTrend,ModelKep=ModelKep,ModelRed=ModelRed,model=model))
+#    t2 <- fit_TimeCount(t0,'dur2')
+    return(list(llike=LogLike,ModelTrend=ModelTrend,ModelKep=ModelKep,ModelRed=ModelRed,model=model,OutTime=out$OutTime))
 }
 
 fit_LogPrior <- function(ParFit,ParMin,ParMax,Par){
@@ -720,13 +725,13 @@ fit_LogPost <- function(Data,OutObs,RateObs,ParFit,ParMin,ParMax,Par,tem=1,OutTi
 ##   logprior - log prior
 ##   logpost - log posterior
 ####################################
-    t0 <- proc.time()
-     tmp <- fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0,TimeUpdate=TimeUpdate)
-#    if(class(tmp)=='try-error') save(Data,OutObs,RateObs,ParFit,Par,OutTime0,file='test.Robj')
+    tmp <- fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0,TimeUpdate=TimeUpdate)
+#    tmp <- fit_LogLike(Data,OutObs,RateObs,ParFit,Par,OutTime0=OutTime0,TimeUpdate=FALSE)
     loglike <- tmp$llike
     logprior <- fit_LogPrior(ParFit,ParMin,ParMax,Par)
     logpost <- loglike*tem+logprior
-    return(list(loglike=loglike,logprior=logprior,logpost=logpost))
+    return(list(loglike=loglike,logprior=logprior,logpost=logpost,OutTime=tmp$OutTime))
+#    return(list(loglike=loglike,logprior=logprior,logpost=logpost))
 }
 
 fit_TimeCount <- function(t,label='duration',ofac=1){
@@ -883,6 +888,8 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
     colnames(chain) <- names(ParIni)
     chain[1,]<- unlist(ParIni)
     mu1 <- chain[1,]
+#    OutTime <- OutTime0
+#    logpost.out  <- fit_LogPost(Data,OutObs,RateObs,chain[1,],ParMin,ParMax,Par,tem=tem,OutTime0=OutTime)
     logpost.out  <- fit_LogPost(Data,OutObs,RateObs,chain[1,],ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0)
     logpost[1] <- logpost.pre <- logpost.out$logpost
     loglike[1] <- loglike.pre <- logpost.out$loglike
@@ -901,11 +908,9 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
 #	    cat('diag(CovAdapt1)=',diag(CovAdapt1),'\n')
         }
         proposal  <-  fit_proposal(chain[i,],ParMin,ParMax,CovAdapt,PostSample=chain[1:i,],Sd=Sd)
-        if(i%%10==0){
-            proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0,TimeUpdate=TRUE)
-        }else{
-            proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0,TimeUpdate=FALSE)
-        }
+###only update the timing outputs or OutTime every 10 steps because the change is minor
+#        proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime,TimeUpdate=TRUE)
+        proprop <- fit_LogPost(Data,OutObs,RateObs,proposal,ParMin,ParMax,Par,tem=tem,OutTime0=OutTime0,TimeUpdate=TRUE)
         logpost.prop <- proprop$logpost
 	logprior.prop <- proprop$logprior
         loglike.prop <- proprop$loglike
@@ -925,11 +930,15 @@ fit_AM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=1, verbose=F
             logpost.pre <- logpost.prop
             loglike.pre <- loglike.prop
 	    logprior.pre <- logprior.prop
+#            if(i%%10==0) cat('accept!\n')
+###udpate OutTime
+#            OutTime <- proprop$OutTime
         }else{
             chain[i+1,]=chain[i,]
             logpost.pre <- logpost.cur
             loglike.pre <- loglike.cur
             logprior.pre <- logprior.cur
+#            if(i%%10==0) cat('reject!\n')
         }
 ##save values
         logpost[i+1] <- logprior.pre + loglike.pre
@@ -1039,15 +1048,15 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
     Nbasic <- Par$Niter <- Niter1 <- min(1e3,Niter0)
 ####check whether the lowest temperture is appropriate and redermine TemLow
     for(jj in 1:10){
-    mcmc <- fit_multiChain(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=TemLow,verbose=verbose,OutTime0=OutTime0)
-    ParIni <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
-    acceptance <- fit_acceptance(mcmc)
-    if(opt$verbose) cat('initial acceptance=',acceptance,'\n')
-    beta <- 10
-    if(acceptance<50){
-        TemLow <- 1e-3*TemLow
-    }
-    if(acceptance>20 | TemLow < 1e-16) break()
+        mcmc <- fit_multiChain(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,tem=TemLow,verbose=verbose,OutTime0=OutTime0)
+        ParIni <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
+        acceptance <- fit_acceptance(mcmc)
+        if(opt$verbose) cat('initial acceptance=',acceptance,'\n')
+        beta <- 10
+        if(acceptance<50){
+            TemLow <- 1e-3*TemLow
+        }
+        if(acceptance>20 | TemLow < 1e-16) break()
     }
 
 #####Determine the optimal temperture
@@ -1158,7 +1167,7 @@ fit_Add1Kep <- function(par,kep,np,kep.name){
     c(par,kep)
 }
 
-fit_OptIni <- function(Data,OutObs,RateObs,ParIni,Par){
+fit_OptIni <- function(Data,OutObs,RateObs,ParIni,Par,OutTime0=NULL){
 ####################################
 ## add one more set of Keplerian parameters to a parameter array
 ##
@@ -1174,7 +1183,7 @@ fit_OptIni <- function(Data,OutObs,RateObs,ParIni,Par){
 ####################################
     Par1 <- update_par(Par,ParIni)
     ParIni0 <- ParIni
-    tmp <- fit_LogLike(Data,OutObs=OutObs,RateObs,ParIni,Par1)
+    tmp <- fit_LogLike(Data,OutObs=OutObs,RateObs,ParIni,Par1,OutTime0=OutTime0)
     model <- tmp$model
     par.all <- parRAall <- parDECall <- list()
     for(star in Par$targets){
@@ -1231,10 +1240,10 @@ fit_OptIni <- function(Data,OutObs,RateObs,ParIni,Par){
                                         mC <- exp(Par$logmC1)
                                         mT <- Par$mT
                                         mCT <- mC+mT
-                                        ParIni[n] <- (par.all[[Par$star]]*mT+par.all[[Par$companion]]*mC)/mCT
+                                        ParIni[n] <- (par.all[[Par$star]]*mT+par.all[[Par$secondary]]*mC)/mCT
                                         if(any(names(ParIni)==n1)){
-                                            if(coord=='RA') ParIni[n1] <- (parRAall[[Par$star]]*mT+parRAall[[Par$companion]]*mC)/mCT
-                                            if(coord=='DEC') ParIni[n1] <- (parDECall[[Par$star]]*mT+parDECall[[Par$companion]]*mC)/mCT
+                                            if(coord=='RA') ParIni[n1] <- (parRAall[[Par$star]]*mT+parRAall[[Par$secondary]]*mC)/mCT
+                                            if(coord=='DEC') ParIni[n1] <- (parDECall[[Par$star]]*mT+parDECall[[Par$secondary]]*mC)/mCT
                                         }
                                     }
                                 }else{
@@ -1299,9 +1308,9 @@ fit_PTAM <- function(Data,OutObs,RateObs,ParIni,ParMin,ParMax,Par,KepIni,KepMin,
         }
         Par$Npar <- length(ParIni)
 ###whether or not to update initial parameters depends on whether updating increase the likelihood
-        l1 <- fit_LogLike(Data,OutObs,RateObs,ParIni,Par)$llike
-        ParIni2 <- fit_OptIni(Data,OutObs,RateObs,ParIni,Par)#optimize offsets
-        l2 <- fit_LogLike(Data,OutObs,RateObs,ParIni2,Par)$llike
+        l1 <- fit_LogLike(Data,OutObs,RateObs,ParIni,Par,OutTime0=OutTime0)$llike
+        ParIni2 <- fit_OptIni(Data,OutObs,RateObs,ParIni,Par,OutTime0=OutTime0)#optimize offsets
+        l2 <- fit_LogLike(Data,OutObs,RateObs,ParIni2,Par,OutTime0=OutTime0)$llike
         if(l2>l1) ParIni <- ParIni2
 
 ###hot chain

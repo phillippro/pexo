@@ -3,15 +3,17 @@ EpochGaia <- 2457206.375
 strs <- unique(Data[,c('star','instrument','type')])
 ss <- c()
 for(j in 1:nrow(strs)){
-    if(strs[j,3]=='rv'){
-#        ss <- c(ss,paste0('jitterRv.',strs[j,1],'.',strs[j,2],' 1 0 1e2 U'))
-        ss <- c(ss,paste0('logjitterRv.',strs[j,1],'.',strs[j,2],' 0 -10 5 U'))
-        ss <- c(ss,paste0('bRv.',strs[j,1],'.',strs[j,2],' 0 -1e6 1e6 U'))
-    }else if(strs[j,3]=='rel' | strs[j,3]=='abs'){
-        ss <- c(ss,paste0('logjitterAstro.',strs[j,1],'.',strs[j,2],' 0 -10 10 U'))
-#        ss <- c(ss,paste0('xtel.',strs[j,2],' 0'))
-#        ss <- c(ss,paste0('ytel.',strs[j,2],' 0'))
-#        ss <- c(ss,paste0('ztel.',strs[j,2],' 0'))
+    if(opt$mode=='fit'){
+        if(strs[j,3]=='rv'){
+                                        #        ss <- c(ss,paste0('jitterRv.',strs[j,1],'.',strs[j,2],' 1 0 1e2 U'))
+            ss <- c(ss,paste0('logjitterRv.',strs[j,1],'.',strs[j,2],' 0 -10 5 U'))
+            ss <- c(ss,paste0('bRv.',strs[j,1],'.',strs[j,2],' 0 -1e6 1e6 U'))
+        }else if(strs[j,3]=='rel' | strs[j,3]=='abs'){
+            ss <- c(ss,paste0('logjitterAstro.',strs[j,1],'.',strs[j,2],' 0 -10 10 U'))
+        }
+                                        #        ss <- c(ss,paste0('xtel.',strs[j,2],' 0'))
+                                        #        ss <- c(ss,paste0('ytel.',strs[j,2],' 0'))
+                                        #        ss <- c(ss,paste0('ztel.',strs[j,2],' 0'))
     }
 
     if(strs[j,2]=='AAT'){
@@ -99,8 +101,7 @@ if(Par$Nmax>0){
        ss <- c(ss,paste('Omega',opt$orbit['Omega'],'0 360 U'))
     }
     ss <- c(ss,paste('Tp',opt$orbit['Tp'],opt$orbit['Tp']-1e5,opt$orbit['Tp']+1e5,'U'))
-    ss <- c(ss,'BinaryModel kepler')
-}else{
-    ss <- c(ss,'BinaryModel none')
 }
 tmp <- c(tmp,ss)
+#cat('\nadded parameters!\n')
+#cat(paste(ss,collapse='\n'),'\n')

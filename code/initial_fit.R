@@ -17,8 +17,8 @@ source('mcmc_func.R')
     }
     Par$Npar <- length(ParIni)
 #}
-#if(TRUE){
-if(FALSE){
+if(TRUE){
+#if(FALSE){
     ParFit <- fit_OptIni(Data,OutObs,RateObs,ParIni,Par)#only optimize offsets
 }else{
     ParFit <- ParIni

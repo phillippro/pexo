@@ -15,7 +15,7 @@ tT <- Data[indT,1]
 rvT <- Data[indT,2]-Data[1,2]+rvTS[1]
 
 ##S simulate
-indC <- which(Data$type=='rv' & Data$star==Par$companion)
+indC <- which(Data$type=='rv' & Data$star==Par$secondary)
 tC <- Data[indC,1]
 rvC <- Data[indC,2]-Data[nrow(Data),2]+rvCS[length(rvCS)]
 

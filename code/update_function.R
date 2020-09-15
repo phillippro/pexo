@@ -263,7 +263,7 @@ update_CombineModel <- function(Data,Par,OutObs,geometry=TRUE,OutTime0=NULL,Time
     OutTime <- OutTime0
     OutAstro <- OutRel <- OutRv <- OutAbs <- list()
     for(star in stars){
-        if(star==Par$companion){
+        if(star==Par$secondary){
             ParNew <- fit_ChangePar(Par)
         }else{
             ParNew <- Par
@@ -275,12 +275,13 @@ update_CombineModel <- function(Data,Par,OutObs,geometry=TRUE,OutTime0=NULL,Time
                 ParNew$ObsInfo <- Par$ObsInfo[ind,]
                 if(TimeUpdate | is.null(OutTime0)){
                     if(!is.null(OutTime0) | length(OutTime0)>0){
+#                        cat('star=',star,'\n')
                         OutTime[[star]][[type]] <- time_Ta2te(OutObs[[star]][[type]],ParNew,fit=TRUE,OutTime0=OutTime0[[star]][[type]])
+
                     }else{
                         OutTime[[star]][[type]] <- time_Ta2te(OutObs[[star]][[type]],ParNew,fit=FALSE)
                     }
                 }
-#                    t1 <- proc.time()
                 if(type=='rv'){
                     if(Par$binary | Par$Np>0){
                         rvmodel <- rv_FullModel(OutObs[[star]][[type]],OutTime[[star]][[type]],ParNew)
@@ -332,9 +333,9 @@ update_CombineModel <- function(Data,Par,OutObs,geometry=TRUE,OutTime0=NULL,Time
 ###	     cat('star=',star,';type=',type,'\n')
                 if(star==Par$star){
                     astro1 <- OutAstro[[Par$star]][[type]]
-                    astro2 <- OutAstro[[Par$companion]][[type]]
+                    astro2 <- OutAstro[[Par$secondary]][[type]]
                 }else{
-                    astro1 <- OutAstro[[Par$companion]][[type]]
+                    astro1 <- OutAstro[[Par$secondary]][[type]]
                     astro2 <- OutAstro[[Par$star]][[type]]
                 }
                 astro <- astro1-astro2

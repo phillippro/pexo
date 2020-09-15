@@ -12,7 +12,7 @@ modelB <- tmp$model
 for(n in names(ParFitA)) ParA[[n]] <- ParFitA[n]
 ParA$stars <- rev(Par$stars)
 ParA$star <- Par$stars[2]
-ParA$companion <- Par$stars[1]
+ParA$secondary <- Par$stars[1]
 ParA$mT <- Par$mC1
 ParFitA['mC1'] <- ParA$mC1 <- Par$mT
 ParFitA['omegaT1'] <- ParA$omegaT1 <- (Par$omegaT1-pi)%%(2*pi)

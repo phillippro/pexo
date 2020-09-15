@@ -13,6 +13,7 @@ PlanetShapiro FALSE
 CompareT2 FALSE
 g 1
 ellipsoid WGS84
+BinaryModel kepler
 #ObsCode 304
 raOff 0 -1000000 1000000 U
 decOff 0 -1000000 1000000 U

@@ -110,6 +110,7 @@ G <- 6.674e-11
 g <- 4*pi^2
 ##pc to au
 pc2au <- 206264.8062470963551564734
+pc2km <- pc2au*au2km
 ##pc to m
 PCM <- 3.08568025e16
 ##pc to km
