@@ -4,7 +4,7 @@
 
 Compared with previous models and packages, PEXO is general enough to account for binary motion and stellar reflex motions induced by planetary companions. PEXO is precise enough to treat various relativistic effects both in the Solar System and in the target system (Roemer, Shapiro, and Einstein delays).
 
-PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 μas, and radial velocity to a precision of 1 μm/s. There are [pdf](https://github.com/phillippro/pexo/blob/master/docs/manual.pdf) and [html](http://rpubs.com/Fabo/pexo) versions of the manual available for instructions of how to use PEXO. The fitting mode and a python wrapper are in development and expected to be released soon.
+PEXO is able to model timing to a precision of 1 ns, astrometry to a precision of 1 μas, and radial velocity to a precision of 1 μm/s. There are [pdf](https://github.com/phillippro/pexo/blob/master/docs/manual.pdf) and [html](http://rpubs.com/Fabo/pexo2) versions of the manual available for instructions of how to use PEXO. The fitting mode and a python wrapper are in development and expected to be released soon.
 
 The relevant paper was published by ApJS. If you use PEXO in your work, please cite the paper:
 ```
@@ -56,7 +56,7 @@ conda env create -f environment.yml
 conda activate pexo
 ```
 
-4. PEXO is ready to run! Refer to the [documentation](http://rpubs.com/Fabo/pexo) and [demos](demos/Introduction.ipynb) for guidance.
+4. PEXO is ready to run! Refer to the [documentation](http://rpubs.com/Fabo/pexo2) and [demos](demos/Introduction.ipynb) for guidance.
 
 ### Demos
 

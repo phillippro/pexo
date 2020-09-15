@@ -2,11 +2,14 @@
 title: "PEXO v2.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
-output: 
-  html_document:
-#    theme: united
-    number_sections: yes
-    toc: yes
+output:
+  pdf_document:
+    toc: true
+    toc_depth: 2
+    number_sections: true
+  #html_document:
+    #
+    #toc: yes
 ---
 
 ```{r setup, include = FALSE}
@@ -431,7 +434,7 @@ RV data: HD10700_xxx.rv
 Absolute astrometry data: HD10700_xxx.abs
 Relative astrometry data: HD10700_xxx.rel
 ```
-For timing data, there are at least two columns: JD[UTC], delay [s], (delay error [s]). For RV data, there are three columns: JD[UTC], RV [m/s], RV error [m/s]. Note that the time and RV in RV data should not be barycentrically corrected. For absolute and relative astrometry data, there are at least five columns: JD[UTC], ra [deg], ra error [mas], dec [deg], dec error [mas], (lambda [μm]). Lambda is the wavelength of an ground-based astrometric measurement. If not given, PEXO will assumes 0.55 μm wavelength which will be used to determine the amount of atmospheric refraction. 
+For timing data, there are at least two columns: JD[UTC], delay [s], (delay error [s]). For RV data, there are three columns: JD[UTC], RV [m/s], RV error [m/s]. Note that the time and RV in RV data should not be barycentrically corrected. For absolute and relative astrometry data, there are at least five columns: JD[UTC], ra [deg], ra error [mas], dec [deg], dec error [mas], (lambda [$\mu$m]). Lambda is the wavelength of an ground-based astrometric measurement. If not given, PEXO will assumes 0.55 $\mu$m wavelength which will be used to determine the amount of atmospheric refraction. 
 
 Tau ceti or HD10700 is taken as an example to explain how to use the PEXO fitting mode. For example, the following commandline
 ```
