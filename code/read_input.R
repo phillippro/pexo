@@ -44,8 +44,8 @@ if(FALSE){
 #opt$primary <- 'HD16160'
 #opt$primary <- 'HD128620'
 #opt$primary <- 'HD33793'
-opt$primary <- 'HD128620'
-opt$Niter <- 1e3
+opt$primary <- 'HD239960'
+opt$Niter <- 1e2
 opt$ncore <- 4
 opt$Companion <- 1
 #opt$parfile <- '../input/GJ551.par'
@@ -55,13 +55,13 @@ opt$Companion <- 1
 #opt$time <- '2445000 2465000 10'
 #opt$time <- '2440000 2460000 10'
 opt$time <- '2452850 2457498 1'
-opt$mode  <- 'emulate'
-#opt$mode  <- 'fit'
-opt$component <- 'TR'
+#opt$mode  <- 'emulate'
+opt$mode  <- 'fit'
+#opt$component <- 'TR'
 #opt$component <- 'TAR'
 #opt$verbose <- TRUE
 #opt$instrument <- 'ESO'
-opt$instrument <- 'APF'
+#opt$instrument <- 'APF'
 #opt$var <- 'JDutc BJDtdb RvST RvgT RvsT'
 #opt$var <- 'JDutc BJDtdb BJDtcb'
 }
@@ -102,6 +102,8 @@ if(opt$Companion>0 & is.null(opt$orbit)) stop('No parameter file is given for ',
 
 opt$par <- paste0('../input/basic.par')
 
+dir.out <- gsub('\\/.+','/',opt$out)
+if(!dir.exists('dir.out')) stop(paste0("'",dir.out,"' directory does not exist!"))
 ##opt$out <- '../results/HD10700_PexoBary.txt'
 ###examples:
 #star <- 'GJ4332'

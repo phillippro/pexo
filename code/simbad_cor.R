@@ -35,14 +35,16 @@ if(file.exists(fin)){
         StarAstro <- c(ra,dec,pmra,pmdec,plx,rv)
     }
     names(StarAstro) <- cname
-    cat('star=',star,'\n')
+    if(TRUE){
+    cat('\n Astrometry information for',star,'\n')
     cat('ra=',StarAstro['ra'],'\n')
     cat('dec=',StarAstro['dec'],'\n')
     cat('plx=',StarAstro['parallax'],'\n')
     cat('pmra=',StarAstro['pmra'],'\n')
     cat('pmdec=',StarAstro['pmdec'],'\n')
     cat('rv=',StarAstro['radial_velocity'],'\n')
-    cat('epoch=',epoch,'\n')
+    cat('epoch=',epoch,'\n\n')
+    }
     system(paste('rm',fin))
     if(any(is.na(StarAstro))) stop(paste('No full astrometric information found for',star,'!'))
 }else{

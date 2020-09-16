@@ -1,8 +1,9 @@
 Npar <- ncol(mc)-2
-ff <- paste0(fname,'_mcmc.pdf')
-cat(ff,'\n')
-pdf(ff,16,16)
-par(mfrow=c(4,4))
+###add onto previous plots rather than generating additional pdfs
+#ff <- paste0(fname,'_mcmc.pdf')
+#cat(ff,'\n')
+#pdf(ff,16,16)
+#par(mfrow=c(4,4))
 cn <- colnames(mc)[1:Npar]
 if(Par$Niter>=1e5){
     inds <- sort(sample(1:nrow(mc),1e4))
@@ -17,4 +18,4 @@ for(j in 1:Npar){
 }
 ###pair plot
 pairs(mc[inds,1:Npar])
-dev.off()
+#dev.off()

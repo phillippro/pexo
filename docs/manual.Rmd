@@ -3,7 +3,8 @@ title: "PEXO v2.0"
 author: "Fabo Feng & Maksym Lisogorskyi"
 date: "`r format(Sys.time(), '%d %B, %Y')`"
 output:
-  pdf_document:
+  #pdf_document:
+  html_document:
     toc: true
     toc_depth: 2
     number_sections: true
@@ -185,7 +186,7 @@ omegaT |degree|52.006|argument of periastron
 Omega |degree|205.064|longitude of ascending node
 Tp |JD or MJD|2435328.96|periastron epoch
 
-In the above table, from `name`  to `observatory` are non-fitable parameters which are mainly used for solar system ephemeris and the modeling of Earth rotation. The other parameters are fitable although we have not implemented the fitting part of PEXO. `epoch` is the time when the position and astrometry of the target sysstem is measured. It is `tpos` defined in the PEXO paper. 
+In the above table, `epoch` is the time when the position and astrometry of the target sysstem is measured. It is `tpos` defined in the PEXO paper. 
 
 ## Observatory data
 
@@ -194,9 +195,9 @@ For space-based observatory, the atmospheric refraction and delay are zero and w
 
 For space-based observatory, "code/GetSpaceObsEph.py" will be used to find the telescope's ephemerides. So you need to install python as well as python packages `sys`, `astropy`, `numpy`, and `astroquery`. 
 
-## Output 
+## PEXO output 
 
-### Output variables 
+### Emulate mode
 A diagram for propagation of the light ray from the target star to the observer is shown below to aid the understanding of the ouptut quantities. 
 <center>
 ![](light_ray.jpg)
@@ -436,29 +437,36 @@ Relative astrometry data: HD10700_xxx.rel
 ```
 For timing data, there are at least two columns: JD[UTC], delay [s], (delay error [s]). For RV data, there are three columns: JD[UTC], RV [m/s], RV error [m/s]. Note that the time and RV in RV data should not be barycentrically corrected. For absolute and relative astrometry data, there are at least five columns: JD[UTC], ra [deg], ra error [mas], dec [deg], dec error [mas], (lambda [$\mu$m]). Lambda is the wavelength of an ground-based astrometric measurement. If not given, PEXO will assumes 0.55 $\mu$m wavelength which will be used to determine the amount of atmospheric refraction. 
 
-Tau ceti or HD10700 is taken as an example to explain how to use the PEXO fitting mode. For example, the following commandline
+Proxima Cen or GJ551 is taken as an example to explain how to use the PEXO fitting mode. For example, the following commandline
 ```
-Rscript pexo.R -m fit -p HD10700 -N 100 -n 4
+Rscript pexo.R -m fit -p GJ551 -N 100
+```
+or you can specify the output Robj name, e.g.
+```
+Rscript pexo.R -m fit -p GJ551 -N 100 -o 'test.Robj'
 ```
 will launch 4 MCMC and each has a length of 100. The pexo outputs (exclude the variation of barycentrically corrected RV files) are explained as follows:
 
 file name | meaning
 ----------------------------------------------------------- | -------------------------------------------------
-../results/HD10700_pexo.dat  | Barycentrically corrected time (emission time and is equivalent to BJDtcb for single stars) and RV (in m/s). 
-../results/HD10700_TR_Nmax0_llmax-30200_N100_einsteinTRUE.pdf | summary plots for the model prediction (red) and data (black) as well as residuals 
-../results/HD10700_comb.rv | barycentrically corrected combined RV
-../results/HD10700_APF.rv | barycentrically corrected RV for APF
-../results/HD10700_HARPSpost.rv | barycentrically corrected RV for HARPSpost
-../results/HD10700_HARPSpre.rv | barycentrically corrected RV for HARPSpre
-../results/HD10700_KECK.rv  | barycentrically corrected RV for KECK
-../results/HD10700_PFS.rv | barycentrically corrected RV for PFS
-../results/HD10700_TR_Nmax0_llmax-30200_N100_einsteinTRUE_mcmc.pdf | mcmc trace plot etc.
-../results/HD10700_TR_Nmax0_llmax-30200_N100_einsteinTRUE.Robj | all variables saved as a R object (xxx.Robj).  
+ ../results/GJ551_barycorrected.rv | Barycentrically corrected combined RV
+ ../results/GJ551_0companion_llmax-2810322_N100_einsteinTRUE.pdf | Summary plots for the model prediction (red) and data (black) as well as residuals and mcmc trace plots etc.
+../results/GJ551_0companion_llmax-2810322_N100_einsteinTRUE_fancy.pdf | Fancy  plots for PEXO-simulated optimal fit to raw data as well as small panels showing residuals 
+../results/GJ551_0companion_llmax-2810322_N100_einsteinTRUE.Robj | All outputs of PEXO are saved as an R object (xxx.Robj). The path of this file can be defined by the -o input parameter. 
+
+In the Robj file, the MCMC related variables are explained as follows. 
+
+variable name | meaning
+-------------- | -------------------------------------------------
+Data | A data frame saving all input data, first column: UTC time; second column: RV[m/s], or delay [second], or RA [deg], or dRA [mas]; third column: error of the second column; fourth column: NA for RV and delay data and DEC[deg] or dDEC[mas] for absolute and relative astrometry respectively; fifth column: error of fourth column; sixth column: star name; seventh column: data type; eighth column: instrument; ninth column: wavelength[$\mu$m] for astrometry data
+model | Model prediction at the raw data epochs, the columns have the same meanings.
+pred | Model prediction at simulated epochs (typically with higher cadence and with constant time steps sampling over the whole data timespan), the columns have the same meanings. 
+ParStat | Statistics of parameters infered from MCMC posterior samples. Columns are model parameters and rows are the statistics for them, including xopt: optimal value at the maximum a posteriori, x1per: 1% quantile; x99per: 99% quantile; x10per: 10% quantile; x90per: 90% quantile; xminus.1sig: xopt-1sigma; xplus.1sig: xopt+1sigma; and other statistics are easy to understand. The parameters of `raOff [mas]`, `decOff [mas]`, `pmraOff [mas/yr]`, `pmdecOff [mas/yr]`, `plxOff [mas]` are offsets added to the initial astrometry of the barycenter of the target system. The parameters of `logjitterRv.star.instrument` and `bRv.star.instrument` are log jitter and intercept for a given instrument and star. For binary or star-companion system, the orbital parameters are also given with the number of companions added to the end of each parameter name. In specific, `logmC1` is the log mass of the first companion in units of solar mass; `logP1` is the log orbital period in units of day; `e1` is eccentricity; `I1` is inclination in radiant; `omegaT1` is the primary star argument of periastron in radiant; `Omega1` is the longitude of ascending node in units of radiant; `Mo1` is the mean anomaly in units of radiant. 
 
 ## Fitting for stars with companions
-To fit a binary model to the data, you can run the following commandline (e.g., alpha Cen A and B)
+To fit a binary model to the data, you can run the following commandline (e.g., Kruger 60 or HD239960)
 ```
-Rscript pexo.R -m fit -p HD128620 -N 100 -C 1
+Rscript pexo.R -m fit -p HD239960 -N 100 -C 1
 ```
 Then you will get similar output as for the case of single stars. 
 

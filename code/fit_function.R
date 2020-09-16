@@ -1108,7 +1108,7 @@ fit_HotChain <- function(Data,OutObs,ParIni,ParMin,ParMax,Par,AccUp=20, TemLow=1
     mcmc <- fit_multiChain(Data=Data,OutObs=OutObs,RateObs=RateObs,ParIni=ParIni,ParMin=ParMin,ParMax=ParMax,Par=Par,tem=1,verbose=verbose,OutTime0=OutTime0)
     ParOpt <- mcmc[which.max(mcmc[,'loglike']),1:Npar]
     LogLikeMax <- max(mcmc[,'loglike'])
-    save(list=ls(all=TRUE),file='test2.Robj')
+#    save(list=ls(all=TRUE),file='test2.Robj')
     return(list(ParOpt=ParOpt,TemOpt=tem,LogLikeMax=LogLikeMax))
 }
 

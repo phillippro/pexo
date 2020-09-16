@@ -13,17 +13,17 @@ star = sys.argv[1]
 #star = 'HD128620'
 #tables = Gaia.load_tables(only_names=True)
 ##get data from simbad
-print('star: '+star)
+#print('star: '+star)
 #check all votable simbad fields: Simbad.list_votable_fields()
 Simbad.add_votable_fields('pm', 'plx','rv_value','rvz_error','flux(V)', 'flux_error(V)')
 result_table = Simbad.query_object(star)
 ra0 = [float(x) for x in result_table['RA'][0].split()]
 ra1 = (ra0[0]+ra0[1]/60+ra0[2]/3600)*360/24#deg                                 
-print('ra1=%f3'%ra1)
+#print('ra1=%f3'%ra1)
 
 dec0 = [float(x) for x in result_table['DEC'][0].split()]
 dec1 = dec0[0]+dec0[1]/60+dec0[2]/3600#deg                                                                            
-print('dec1=%f3'%dec1)
+#print('dec1=%f3'%dec1)
 
 pmra = result_table['PMRA'][0]
 pmdec = result_table['PMDEC'][0]
@@ -47,7 +47,7 @@ if len(h)==0:
 
 h1 = h[0][0].split()[-1]
 hid = int(h1)
-print('HIP'+str(hid))
+#print('HIP'+str(hid))
 
 if len(g)==0:
     query = "SELECT *  FROM gaiadr2.gaia_source WHERE CONTAINS(POINT('ICRS',gaiadr2.gaia_source.ra,gaiadr2.gaia_source.dec),CIRCLE('ICRS',"+str(ra)+","+str(dec)+","+"0.1))=1 AND gaiadr2.gaia_source.parallax/"+str(plx)+"<1.1 AND gaiadr2.gaia_source.parallax/"+str(plx)+">0.9;"
@@ -72,7 +72,7 @@ hh = Column(name='HIP', data=[hid]*N)
 #rv = Column(name='rv', data=[rv]*N)
 #erv = Column(name='erv', data=[erv]*N)
 fout = star+'_gaia_hip.csv'
-print(fout)
+#print(fout)
 v = Column(name='RV', data=[rv]*N)
 ev = Column(name='eRV', data=[erv]*N)
 if len(out)>0:

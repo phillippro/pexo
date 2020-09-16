@@ -8,12 +8,15 @@ if(!exists('outf')) outf <- TRUE
 fit <- fit_LogLike(Data,OutObs,RateObs=RateObs,ParFit=ParOpt,Par=Par,OutTime0=OutTime0,TimeUpdate=TRUE)
 model <- fit$model
 llmax <- round(fit$llike)
+##model prediction
+tmp <- fit_ModelPredict(Data,Par,ParOpt)
+pred <- tmp$pred
 
 dir.out <- '../results/'
+if(!dir.exists(dir.out)) system(paste('mkdir',dir.out))
 ####plot
-fname <- paste0(dir.out,star,'_',opt$component,'_Nmax',Par$Nmax,'_llmax',llmax,'_N',Par$Niter,'_einstein',Par$Einstein)
+fname <- paste0(dir.out,opt$primary,'_',opt$Companion,'companion_llmax',llmax,'_N',Par$Niter,'_einstein',Par$Einstein)
 fpdf <- paste0(fname,'.pdf')
-cat(fpdf,'\n')
 pdf(fpdf,16,16)
 par(mfrow=c(4,4))
 for(star in Par$stars){
@@ -22,54 +25,32 @@ for(star in Par$stars){
         tauE <- model[index,1]
         rv <- Data[index,2]-model[index,2]#residual
         erv <- Data[index,3]
+        ins <- Data[index,'instrument']
 	ind <- sort(tauE,index.return=TRUE)$ix
         if(outf){
-            out <- cbind(tauE,rv,erv)[ind,]
-            fout <- paste0(dir.out,star,'_comb.rv')
-            cat(fout,'\n')
-            write.table(out,file=fout,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
+            out <- data.frame(tauE,rv,erv,ins)[ind,]
+            fout <- paste0(dir.out,star,'_barycorrected.rv')
+            cat('Barycentrically corrected RV file:\n',fout,'\n\n')
+            write.table(out,file=fout,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV','Instrument'))
             if(star=='HD128620'){
                 ind <- which((out[,2]-mean(out[,2]))<3*sd(out[,2]) & out[,2]> -15)
             }else{
                 ind <- which((out[,2]-mean(out[,2]))<3*sd(out[,2]))
             }
-            fcons <- gsub('comb','cons',fout)
-            cat(fcons,'\n')
-            write.table(out[ind,],file=fcons,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
-            out2 <- wtb(out[,1],out[,2],out[,3],dt=15/24/60)
-            fout2 <- gsub('.rv','Bin.rv',fout)
-            cat(fout2,'\n')
-            write.table(out2,file=fout2,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
         }
 ###save residual RVs
         inss <- unique(Data$instrument[index])
         for(instr in inss){
             ind <- index[Data[index,'instrument']==instr]
-            plot(Data[ind,1],Data[ind,2],xlab='jd',ylab='rv',main=paste('rv for',instr,star),xlim=range(model[ind,1],Data[ind,1]),ylim=range(model[ind,2],Data[ind,2]))
-                                        #                points(model[ind,1],model[ind,2],col='red')
+            plot(Data[ind,1],Data[ind,2],xlab='jd',ylab='RV',main=paste('RV for',instr,star),xlim=range(model[ind,1],Data[ind,1]),ylim=range(model[ind,2],Data[ind,2]))
             points(Data[ind,1],model[ind,2],col='red')
-            plot(Data[ind,1],Data[ind,2]-model[ind,2],xlab='jd',ylab='rv',main=paste('rv residual for',instr,star,';sd(res)=',round(sd(Data[ind,2]-model[ind,2]),3)))
+            plot(Data[ind,1],Data[ind,2]-model[ind,2],xlab='JD',ylab='RV [m/s]',main=paste('rv residual for',instr,star,';sd(res)=',round(sd(Data[ind,2]-model[ind,2]),3)))
             tauE <- model[ind,1]
             rv <- Data[ind,2]-model[ind,2]#residual
             erv <- Data[ind,3]
-            if(outf){
-                out <- cbind(tauE,rv,erv)
-                                        #            fout <- paste0('../../dwarfs/bary/data/',star,'_',instr,'.rv')
-                fout <- paste0(dir.out,star,'_',instr,'.rv')
-                cat(fout,'\n')
-                write.table(out,file=fout,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
-            }
+            out <- cbind(tauE,rv,erv)
             ind <- which((out[,2]-median(out[,2]))<5*sd(out[,2]))
             out1 <- out[ind,]
-            if(outf){
-                fout1 <- gsub('.rv','cons.rv',fout)
-                cat(fout1,'\n')
-                write.table(out1,file=fout1,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
-                out2 <- wtb(out1[,1],out1[,2],out1[,3],dt=15/24/60)
-                fout2 <- gsub('.rv','bin.rv',fout)
-                cat(fout2,'\n')
-                write.table(out2,file=fout2,quote=FALSE,row.names=FALSE,col.names=c('tauE','RV','eRV'))
-            }
         }
     }
 
@@ -90,20 +71,12 @@ for(star in Par$stars){
                 tauE <- model[index,1]
                 out <- cbind(tauE,dra,Data[index,3],ddec,Data[index,5])
                 fout <- paste0(dir.out,star,'_',instr,'.abs')
-                cat(fout,'\n')
+                cat(fout,'\n\n')
                 write.table(out,file=fout,quote=FALSE,row.names=FALSE,col.names=c('tauE','dra','era','ddec','edec'))
-                fout1 <- paste0(dir.out,star,'_',instr,'_dRA.abs')
-                cat(fout1,'\n')
-                write.table(out[,1:3],file=fout1,quote=FALSE,row.names=FALSE,col.names=c('tauE','dra','era'))
-                fout2 <- paste0(dir.out,star,'_',instr,'_dDEC.abs')
-                cat(fout2,'\n')
-                write.table(out[,c(1,4:5)],file=fout2,quote=FALSE,row.names=FALSE,col.names=c('tauE','ddec','edec'))
             }
         }
     }
 }
-####trace and posterior plots
-if(any(Par$types=='rv')) source('mcmc_analysis.R')
 
 inds <- which(Data$type=='rel')
 if(length(inds)>0 & outf){
@@ -118,25 +91,26 @@ if(length(inds)>0 & outf){
         tauE <- model[index,1]
         out <- cbind(tauE,dra,Data[index,3],ddec,Data[index,5])
         fout <- paste0(dir.out,star,'_',instr,'.rel')
-        cat(fout,'\n')
+        cat(fout,'\n\n')
         write.table(out,file=fout,quote=FALSE,row.names=FALSE,col.names=c('tauE','dra','era','ddec','edec'))
-        fout1 <- paste0(dir.out,star,'_',instr,'_dRA.rel')
-        cat(fout1,'\n')
-        write.table(out[,1:3],file=fout1,quote=FALSE,row.names=FALSE,col.names=c('tauE','dra','era'))
-        fout2 <- paste0(dir.out,star,'_',instr,'_dDEC.rel')
-        cat(fout2,'\n')
-        write.table(out[,c(1,4:5)],file=fout2,quote=FALSE,row.names=FALSE,col.names=c('tauE','ddec','edec'))
     }
 }
+
+####trace and posterior plots
+if(any(Par$types=='rv')) source('mcmc_analysis.R')
+cat('Summary plots:\n',fpdf,'\n\n')
 dev.off()
+
+####more fancy plots
+source('sim_fit.R')
 
 ###save all outputs as R objects
 fobj <- paste0(fname,'.Robj')
 if(grepl('Robj',opt$out)){
     fobj <- opt$out
 }
-cat('\nOutput Robj file:\n')
-cat(fobj,'\n')
+cat('R object with all variables:\n')
+cat(fobj,'\n\n')
 save(list=ls(all=TRUE),file=fobj)
 
 # Save to CSV

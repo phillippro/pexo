@@ -31,6 +31,7 @@ source('rv_function.R')
 source('update_function.R')
 source('fit_function.R')
 source('mcmc_func.R')
+source('plot_function.R')
 
 tt0 <- proc.time()
 Tstart <- proc.time()

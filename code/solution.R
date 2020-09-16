@@ -37,7 +37,7 @@ OutAstro <- tmp$OutAstro
 OutRv <- tmp$OutRv
 
 ###output residuals
-source('get_residual.R')
+#source('get_residual.R')
 
 ###add fit results as output variables
 #OutRv$RvRes <- RvRes

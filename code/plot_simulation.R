@@ -34,5 +34,5 @@ plot(jd,rvCB,xlab='JD',ylab='uOC',type='l')
 rvTR <- rvT-rvTD[indT]
 rvCR <- rvC-rvCD[indC]
 plot(tT,rvTR,xlab='t',ylab='RVres',main=paste0('T;RMS=',round(sd(rvTR),2)))
-plot(tC,rvCR,xlab='t',ylab='RVres',main=paste0('C;RMS=',round(sd(rvCR),2)))
+if(length(rvCR)>0) plot(tC,rvCR,xlab='t',ylab='RVres',main=paste0('C;RMS=',round(sd(rvCR),2)))
 dev.off()
