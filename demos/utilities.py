@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import matplotlib
 import numpy as np
+import os
+from subprocess import Popen, PIPE, call, check_output
 
 
 class PDF(object):
@@ -118,3 +120,21 @@ class Plot(object):
         self._update_legend()
 
         return self
+
+
+class FitResult(object):
+    def __init__(self, path):
+        self.path = path
+        self.robj_to_txt()
+
+
+    def robj_to_txt(self, target=None):
+        if target is None:
+            target = self.path.replace(".Robj", ".txt")
+    
+        with open(os.devnull, "w") as FNULL:
+            rc = call(f"Rscript robj_to_txt.R {self.path} {target}", stdout=FNULL, stderr=FNULL)
+
+        if rc != 0:
+            errormessage = f"Underlying <robj_to_txt.R> returned a non-zero exit status {rc}."
+            raise ChildProcessError(errormessage)
