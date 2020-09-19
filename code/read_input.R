@@ -102,10 +102,9 @@ if(opt$Companion>0 & is.null(opt$orbit)) stop('No parameter file is given for ',
 
 opt$par <- paste0('../input/basic.par')
 
-if(grepl('\\/',opt$out)){
-   dir.out <- gsub('\\/.+','/',opt$out)
-   if(!dir.exists('dir.out')) stop(paste0("'",dir.out,"' directory does not exist!"))
-}
+# Check if the output directory exists
+if(!dir.exists(dirname(opt$out))) stop(paste0("'", opt$out, "' directory does not exist!"))
+
 ##opt$out <- '../results/HD10700_PexoBary.txt'
 ###examples:
 #star <- 'GJ4332'
