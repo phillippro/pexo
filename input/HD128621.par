@@ -2,7 +2,8 @@ secondary HD128620
 mass 0.9373
 logmC -0.06475
 logP 10.281
-e 79.32
-omegaT 52
+e 0.5179
+I 79.32
+omegaT 232
 Omega 205
 Tp 2435328.96
