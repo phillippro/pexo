@@ -30,7 +30,7 @@ The relevant paper was published by ApJS. If you use PEXO in your work, please c
 
 Binder is a free open-source tool that creates custom computing environments that can be shared and used by many remote users. 
 It's the easiest way to try the code without the hassle of installation.
-You can run PEXO in your browser by following the [binder link](https://mybinder.org/v2/gh/phillippro/pexo/binder?filepath=demos%2FIntroduction.ipynb). Note that it may take up to 10 minutes to set up the environment for PEXO depending on the server load.
+You can run PEXO in your browser by following the [binder link](https://mybinder.org/v2/gh/phillippro/pexo/HEAD?filepath=demos%2FIntroduction.ipynb). Note that it may take up to 10 minutes to set up the environment for PEXO depending on the server load.
 
 
 ## Local installation
