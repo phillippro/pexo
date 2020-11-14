@@ -2,12 +2,12 @@
 import os
 from subprocess import Popen, PIPE, call, check_output
 
+import matplotlib.pyplot as plt
+import matplotlib
+
 from numpy import genfromtxt, array
 from rpy2.robjects import r
 from rpy2.rinterface import NARealType
-
-import matplotlib.pyplot as plt
-import matplotlib
 
 
 class Struct(object):
@@ -45,7 +45,7 @@ class Struct(object):
     @property
     def dictionary(self):
         return self.__dict__
-    
+
 
 class PDF(object):
     def __init__(self, path, size=(200,200)):
@@ -165,7 +165,7 @@ class Plot(object):
             self.axis.legend(handles, labels, ncol=5, loc="upper left", bbox_to_anchor=(0.0, 1.08), frameon=False)
 
 
-    def add_plot(self, xcol, ycol, colour=None, yxdiff=False, legend="", xlabel="", ylabel="", factors=(1, 1), line="none", marker=None):
+    def add_plot(self, xcol, ycol, colour=None, yxdiff=False, legend="", xlabel="", ylabel="", factors=None, line="none", marker=None):
         x = self._get_column(xcol)
         y = self._get_column(ycol)
 
@@ -264,4 +264,3 @@ class FitOutput(object):
         table = [_fix_nones_list(x) for x in r_obj]
 
         return Struct(dict(zip(colnames, table)))
-
