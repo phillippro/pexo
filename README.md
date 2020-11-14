@@ -26,7 +26,7 @@ The relevant paper was published by ApJS. If you use PEXO in your work, please c
 
 ## Binder
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/phillippro/pexo/binder?filepath=demos%2FIntroduction.ipynb) <sup>[What is Binder?](https://mybinder.readthedocs.io/en/latest/)</sup>
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/phillippro/pexo/HEAD?filepath=demos%2FIntroduction.ipynb) <sup>[What is Binder?](https://mybinder.readthedocs.io/en/latest/)</sup>
 
 Binder is a free open-source tool that creates custom computing environments that can be shared and used by many remote users. 
 It's the easiest way to try the code without the hassle of installation.
